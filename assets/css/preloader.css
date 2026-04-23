@@ -1,0 +1,58 @@
+/* ============================================================
+   BUUR Digital — preloader.css
+   ============================================================ */
+
+#buur-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+
+#buur-preloader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body.is-loading { overflow: hidden; }
+
+.preloader-logo {
+  font-family: var(--font-mono, monospace);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+.preloader-logo .logo-buur    { color: #ea5b13; }
+.preloader-logo .logo-digital { color: #f5f4f0; opacity: 0.85; font-size: 1.4rem; }
+
+.preloader-bar {
+  width: 220px;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.preloader-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ea5b13, #243a85);
+  border-radius: 2px;
+  transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.preloader-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #666;
+  min-height: 1em;
+  transition: opacity 0.2s ease;
+}

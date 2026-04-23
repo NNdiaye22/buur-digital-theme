@@ -11,7 +11,7 @@
             <div class="lion-wrap" id="lion-wrap">
                 <div class="lion-halo" aria-hidden="true"></div>
                 <img
-                    src="<?php echo esc_url( BUUR_URI . '/assets/images/lion-royal.jpg' ); ?>"
+                    src="<?php echo esc_url( BUUR_URI . '/assets/images/lion-royal.png' ); ?>"
                     alt="Lion royal — BUUR Digital"
                     class="lion-img"
                     loading="lazy"

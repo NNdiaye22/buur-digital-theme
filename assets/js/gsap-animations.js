@@ -12,23 +12,7 @@
   if (window.SplitText) gsap.registerPlugin(SplitText);
 
   /* ======================================================
-     UTILITAIRES
-     ====================================================== */
-  function reveal(elements, opts = {}) {
-    const defaults = { opacity: 0, y: 40, duration: 0.9, ease: 'power3.out', stagger: 0.12 };
-    gsap.from(elements, {
-      ...defaults, ...opts,
-      scrollTrigger: {
-        trigger: elements[0] || elements,
-        start:   'top 85%',
-        once:    true,
-        ...(opts.scrollTrigger || {}),
-      },
-    });
-  }
-
-  /* ======================================================
-     1. HERO — titre + tagline + CTA
+     1. HERO — titre + tagline + CTA (au load, pas au scroll)
      ====================================================== */
   const heroTitle   = document.querySelector('.hero-title');
   const heroTagline = document.querySelector('.hero-tagline');
@@ -53,7 +37,7 @@
   }
 
   /* ======================================================
-     2. PROBLÈME — lignes révélées une par une
+     2. PROBLÈME — lignes révélées une par une au scroll
      ====================================================== */
   document.querySelectorAll('.probleme-line').forEach((line, i) => {
     gsap.fromTo(line,
@@ -62,18 +46,18 @@
         opacity: 1, y: 0,
         duration: 0.9,
         ease: 'power3.out',
+        delay: i * 0.15,
         scrollTrigger: {
           trigger: line,
           start:   'top 80%',
           once:    true,
         },
-        delay: i * 0.15,
       }
     );
   });
 
   /* ======================================================
-     3. SERVICES — cards en cascade
+     3. SERVICES — cards en cascade au scroll
      ====================================================== */
   const serviceCards = document.querySelectorAll('.service-card');
   if (serviceCards.length) {
@@ -94,7 +78,7 @@
   }
 
   /* ======================================================
-     4. STATS — compteurs animés + apparition
+     4. STATS — compteurs animés au scroll
      ====================================================== */
   const statItems = document.querySelectorAll('.stat-item');
   if (statItems.length) {
@@ -121,21 +105,22 @@
       const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
       if (!num) return;
       const suffix = raw.replace(/[0-9.,\s]/g, '');
-      gsap.fromTo({ val: 0 }, { val: num, duration: 1.8, ease: 'power2.out' }, {
+      const obj = { val: 0 };
+      gsap.to(obj, {
         val: num,
-        onUpdate: function() {
-          el.textContent = Math.round(this.targets()[0].val)
-            .toLocaleString('fr-FR') + suffix;
-        }
+        duration: 1.8,
+        ease: 'power2.out',
+        onUpdate: function () {
+          el.textContent = Math.round(obj.val).toLocaleString('fr-FR') + suffix;
+        },
       });
     });
   }
 
   /* ======================================================
-     5. POURQUOI — lion + texte
+     5. POURQUOI — lion + contenu au scroll
      ====================================================== */
-  const lionWrap   = document.getElementById('lion-wrap');
-  const lionCaption = document.getElementById('lion-caption');
+  const lionWrap        = document.getElementById('lion-wrap');
   const pourquoiContent = document.querySelector('.pourquoi-content');
 
   if (lionWrap) {
@@ -146,15 +131,6 @@
         duration: 1.1,
         ease: 'back.out(1.4)',
         scrollTrigger: { trigger: lionWrap, start: 'top 80%', once: true },
-      }
-    );
-  }
-  if (lionCaption) {
-    gsap.fromTo(lionCaption,
-      { opacity: 0, y: 10 },
-      {
-        opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4,
-        scrollTrigger: { trigger: lionCaption, start: 'top 85%', once: true },
       }
     );
   }
@@ -178,7 +154,7 @@
   }
 
   /* ======================================================
-     6. TÉMOIGNAGES — cards en cascade
+     6. TÉMOIGNAGES — cards en cascade au scroll
      ====================================================== */
   const temoignageCards = document.querySelectorAll('.temoignage-card');
   if (temoignageCards.length) {
@@ -199,7 +175,7 @@
   }
 
   /* ======================================================
-     7. CTA FINAL — titre + sous-titre + boutons
+     7. CTA FINAL — fromTo pour garantir l'état initial
      ====================================================== */
   const ctaTitle   = document.getElementById('cta-title');
   const ctaSub     = document.querySelector('.cta-sub');
@@ -207,12 +183,12 @@
 
   if (ctaTitle) {
     const tlCta = gsap.timeline({
-      scrollTrigger: { trigger: '.cta-section', start: 'top 75%', once: true }
+      scrollTrigger: { trigger: '.cta-section', start: 'top 75%', once: true },
     });
     tlCta
-      .to(ctaTitle,   { opacity: 1, y: 0, duration: 1,   ease: 'power3.out' })
-      .to(ctaSub,     { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
-      .to(ctaButtons, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
+      .fromTo(ctaTitle,   { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1,   ease: 'power3.out' })
+      .fromTo(ctaSub,     { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+      .fromTo(ctaButtons, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4');
   }
 
   /* ======================================================
@@ -220,10 +196,10 @@
      ====================================================== */
   document.querySelectorAll('.hero-video, .cta-video').forEach(video => {
     ScrollTrigger.create({
-      trigger:   video.closest('section'),
-      start:     'top bottom',
-      end:       'bottom top',
-      scrub:     true,
+      trigger:  video.closest('section'),
+      start:    'top bottom',
+      end:      'bottom top',
+      scrub:    true,
       onUpdate: self => {
         gsap.set(video, { y: self.progress * 60 });
       },

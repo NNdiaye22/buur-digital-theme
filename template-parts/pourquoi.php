@@ -20,7 +20,6 @@
                 >
                 <div class="lion-particles" aria-hidden="true"></div>
             </div>
-            <p class="lion-caption" id="lion-caption" aria-label="BUUR signifie Roi en wolof">BUUR&nbsp;=&nbsp;ROI</p>
         </div>
 
         <div class="pourquoi-content">

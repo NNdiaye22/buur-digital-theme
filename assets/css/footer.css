@@ -1,0 +1,88 @@
+/* ============================================================
+   BUUR Digital — footer.css
+   ============================================================ */
+
+.buur-footer {
+  background: #030307;
+  border-top: 2px solid var(--orange);
+  padding: var(--space-16) var(--container-pad) var(--space-8);
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-16);
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-bottom: var(--space-12);
+  border-bottom: 1px solid var(--border);
+}
+
+.footer-logo {
+  display: inline-flex;
+  margin-bottom: var(--space-4);
+}
+.footer-tagline {
+  font-size: var(--size-sm);
+  color: var(--grey-400);
+  margin-bottom: var(--space-2);
+  line-height: 1.5;
+}
+.footer-wolof {
+  font-family: var(--font-mono);
+  font-size: var(--size-xs);
+  color: var(--grey-600);
+  letter-spacing: 0.08em;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+}
+.footer-col h4 {
+  font-size: var(--size-sm);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: var(--space-4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+.footer-col ul { display: flex; flex-direction: column; gap: var(--space-3); }
+.footer-col a {
+  font-size: var(--size-sm);
+  color: var(--grey-600);
+  transition: color var(--transition-fast);
+}
+.footer-col a:hover { color: var(--orange); }
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-top: var(--space-6);
+  max-width: var(--container-max);
+  margin-inline: auto;
+}
+.footer-bottom p {
+  font-size: var(--size-xs);
+  color: var(--grey-800);
+}
+.footer-bottom a {
+  font-size: var(--size-xs);
+  color: var(--grey-600);
+  transition: color var(--transition-fast);
+}
+.footer-bottom a:hover { color: var(--orange); }
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr; }
+  .footer-links { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .footer-links { grid-template-columns: 1fr; }
+}

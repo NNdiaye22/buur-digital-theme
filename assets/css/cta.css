@@ -1,0 +1,89 @@
+/* ============================================================
+   BUUR Digital — cta.css
+   ============================================================ */
+
+.cta-section {
+  position: relative;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #04040a;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--orange));
+}
+
+/* ---- Fond vidéo ---- */
+.cta-video-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.cta-video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+}
+.cta-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 70% at 50% 50%,
+    rgba(4,4,10,0.3) 0%,
+    rgba(4,4,10,0.75) 60%,
+    rgba(4,4,10,0.95) 100%
+  );
+}
+
+/* ---- Contenu ---- */
+.cta-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: var(--space-24) var(--container-pad);
+  max-width: 720px;
+}
+
+.cta-title {
+  font-size: clamp(var(--size-3xl), 5vw, var(--size-6xl));
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  margin-bottom: var(--space-6);
+  opacity: 0;
+  transform: translateY(30px);
+}
+.cta-title em {
+  font-style: normal;
+  color: var(--orange);
+}
+
+.cta-sub {
+  font-size: var(--size-lg);
+  color: var(--grey-400);
+  margin-bottom: var(--space-10);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.cta-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@media (max-width: 520px) {
+  .cta-buttons { flex-direction: column; align-items: stretch; }
+  .cta-buttons .btn-primary, .cta-buttons .btn-outline { justify-content: center; }
+}

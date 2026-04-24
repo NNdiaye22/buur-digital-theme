@@ -1,5 +1,6 @@
 /* ============================================================
-   BUUR Digital — hero.css
+   BUUR Digital — hero.css v2
+   Hero flush avec les frames : pas de margin-bottom
    ============================================================ */
 
 .hero-section {
@@ -12,6 +13,9 @@
   justify-content: center;
   overflow: hidden;
   background: #050508;
+  /* Aucun espace en bas — les frames commencent immédiatement */
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 /* ---- Fond vidéo ---- */
@@ -35,6 +39,17 @@
     rgba(5,5,8,0.7) 60%,
     rgba(5,5,8,0.95) 100%
   );
+}
+
+/* Fondu bas du hero vers les frames */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 25vh;
+  background: linear-gradient(to bottom, transparent, #000);
+  z-index: 3;
+  pointer-events: none;
 }
 
 /* ---- Canvas Three.js ---- */
@@ -80,7 +95,7 @@
 }
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.6); }
+  50%       { opacity: 0.4; transform: scale(0.6); }
 }
 
 .hero-title {
@@ -108,7 +123,7 @@
   justify-content: center;
   gap: var(--space-4);
   flex-wrap: wrap;
-  margin-bottom: var(--space-16);
+  margin-bottom: var(--space-12);
   opacity: 0;
   transform: translateY(20px);
 }
@@ -143,9 +158,7 @@
   text-transform: uppercase;
   color: var(--grey-600);
 }
-@keyframes fade-scroll {
-  to { opacity: 1; }
-}
+@keyframes fade-scroll { to { opacity: 1; } }
 
 /* ---- Responsive ---- */
 @media (max-width: 600px) {

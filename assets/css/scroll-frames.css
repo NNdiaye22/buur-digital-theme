@@ -1,25 +1,27 @@
 /* ============================================================
-   BUUR Digital — scroll-frames.css
-   UX premium : transitions cinématiques, continuité visuelle
+   BUUR Digital — scroll-frames.css v3
+   Continuité visuelle totale : pas de gap, transitions invisibles
    ============================================================ */
 
-/* ── Wrapper global ── */
 .scroll-frames-wrapper {
   position: relative;
   width: 100%;
-  background: var(--black);
+  /* Colle immédiatement après le hero */
+  margin-top: 0;
+  padding-top: 0;
+  background: #000;
 }
 
-/* ── Section épinglée ── */
 .scroll-frame-section {
   position: relative;
   width: 100%;
   height: 100vh;
   overflow: hidden;
   background: #000;
-  /* Pas de margin entre sections pour continuité visuelle */
   margin: 0;
   padding: 0;
+  /* Les sections sont empilées exactement — le pin les superpose */
+  display: block;
 }
 
 .scroll-frame-inner {
@@ -28,43 +30,16 @@
   height: 100%;
 }
 
-/* ── Canvas plein écran ── */
+/* Canvas plein écran cover */
 .scroll-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
-  /* object-fit simulé via JS drawImage */
 }
 
-/* ── Gradient de transition entre sections ──
-   Fondu bas léger pour fusionner avec la section suivante
-   sans coupure visible */
-.scroll-frame-section::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 18vh;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.85) 100%
-  );
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-
-/* Fondu bas activé seulement en fin de section */
-.scroll-frame-section.is-ending::after {
-  opacity: 1;
-}
-
-/* ── Overlay principal ── */
+/* Overlay : gradient gauche + bas pour le texte */
 .scroll-frame-overlay {
   position: absolute;
   inset: 0;
@@ -73,30 +48,30 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  /* Gradient latéral gauche pour le texte */
   background:
     linear-gradient(
-      to right,
-      rgba(0,0,0,0.72) 0%,
-      rgba(0,0,0,0.30) 55%,
+      105deg,
+      rgba(0,0,0,0.75) 0%,
+      rgba(0,0,0,0.35) 50%,
       transparent 100%
     ),
     linear-gradient(
       to top,
-      rgba(0,0,0,0.60) 0%,
-      transparent 50%
+      rgba(0,0,0,0.65) 0%,
+      transparent 45%
     );
 }
 
-/* ── Contenu textuel ── */
+/* Contenu texte */
 .scroll-frame-content {
-  padding: 0 var(--container-pad) clamp(3rem, 8vh, 5rem);
-  max-width: 680px;
-  transform: translateY(24px);
+  padding: 0 var(--container-pad, 2rem) clamp(2.5rem, 7vh, 5rem);
+  max-width: 640px;
   opacity: 0;
+  transform: translateY(28px);
   transition:
-    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.8s cubic-bezier(0.22,1,0.36,1),
+    transform 0.8s cubic-bezier(0.22,1,0.36,1);
+  will-change: opacity, transform;
 }
 
 .scroll-frame-section.is-active .scroll-frame-content {
@@ -104,93 +79,103 @@
   transform: translateY(0);
 }
 
-/* ── Numéro de chapitre ── */
+/* Chapitre */
 .scroll-frame-chapter {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
-  font-family: var(--font-mono);
-  font-size: var(--size-xs);
+  margin-bottom: 0.9rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--orange);
+  color: var(--orange, #ea5b13);
   opacity: 0;
-  transform: translateX(-16px);
+  transform: translateX(-20px);
   transition:
-    opacity 0.6s ease 0.1s,
-    transform 0.6s ease 0.1s;
+    opacity 0.6s ease 0.12s,
+    transform 0.6s ease 0.12s;
 }
-
 .scroll-frame-chapter::before {
   content: '';
   display: block;
-  width: 32px;
+  width: 28px;
   height: 1.5px;
-  background: var(--orange);
+  background: var(--orange, #ea5b13);
   flex-shrink: 0;
 }
-
 .scroll-frame-section.is-active .scroll-frame-chapter {
   opacity: 1;
   transform: translateX(0);
 }
 
-/* ── Titre ── */
+/* Titre */
 .scroll-frame-title {
-  font-family: var(--font-sans);
-  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(2rem, 5vw, 4rem);
   font-weight: 800;
-  line-height: 1.05;
+  line-height: 1.06;
   letter-spacing: -0.03em;
-  color: var(--white);
-  margin-bottom: 1rem;
+  color: var(--white, #f5f4f0);
+  margin-bottom: 0.9rem;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(22px);
   transition:
-    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.18s,
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
+    opacity 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s,
+    transform 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s;
 }
-
+.scroll-frame-title em {
+  font-style: normal;
+  color: var(--orange, #ea5b13);
+}
 .scroll-frame-section.is-active .scroll-frame-title {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ── Sous-titre ── */
+/* Sous-titre */
 .scroll-frame-sub {
-  font-family: var(--font-sans);
-  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
   font-weight: 400;
-  line-height: 1.65;
-  color: rgba(245,244,240,0.78);
-  max-width: 480px;
+  line-height: 1.7;
+  color: rgba(245,244,240,0.75);
+  max-width: 440px;
   opacity: 0;
   transform: translateY(16px);
   transition:
-    opacity 0.75s ease 0.32s,
-    transform 0.75s ease 0.32s;
+    opacity 0.8s ease 0.35s,
+    transform 0.8s ease 0.35s;
 }
-
 .scroll-frame-section.is-active .scroll-frame-sub {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ── Accent ligne couleur ── */
-.scroll-frame-title em {
-  font-style: normal;
-  color: var(--orange);
+/* Fondu bas en fin de section — fondu vers la suivante */
+.scroll-frame-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 20vh;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.9));
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.scroll-frame-section.is-ending::after {
+  opacity: 1;
 }
 
-/* ── Indicateur de progression vertical ── */
+/* Progress dots */
 .scroll-frames-progress {
   position: fixed;
-  right: clamp(1rem, 3vw, 2rem);
+  right: clamp(1rem, 2.5vw, 1.75rem);
   top: 50%;
   transform: translateY(-50%);
-  z-index: 100;
+  z-index: 200;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -198,65 +183,48 @@
   transition: opacity 0.4s ease;
   pointer-events: none;
 }
-
-.scroll-frames-progress.is-visible {
-  opacity: 1;
-}
+.scroll-frames-progress.is-visible { opacity: 1; }
 
 .progress-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.22);
+  border: none;
+  padding: 0;
+  cursor: pointer;
   transition: background 0.3s ease, transform 0.3s ease;
 }
-
 .progress-dot.is-active {
-  background: var(--orange);
-  transform: scale(1.5);
+  background: var(--orange, #ea5b13);
+  transform: scale(1.6);
 }
 
-/* ── Barre de chargement ── */
+/* Loader */
 .seq-loader-wrap {
   position: absolute;
-  bottom: 0;
-  left: 0;
+  bottom: 0; left: 0;
   width: 100%;
   height: 2px;
-  background: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.08);
   z-index: 10;
 }
-
 .seq-loader {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--orange), var(--blue));
+  background: linear-gradient(90deg, var(--orange, #ea5b13), var(--blue, #243a85));
   transition: width 0.15s linear;
 }
 
-/* ── Mobile ── */
+/* Mobile */
 @media (max-width: 768px) {
   .scroll-frame-overlay {
     background:
-      linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(0,0,0,0.80) 60%,
-        rgba(0,0,0,0.92) 100%
-      );
-    justify-content: flex-end;
+      linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0.95) 100%);
   }
-
   .scroll-frame-content {
     max-width: 100%;
-    padding: 0 1.25rem clamp(2rem, 6vh, 3rem);
+    padding: 0 1.25rem clamp(2rem,6vh,3.5rem);
   }
-
-  .scroll-frame-title {
-    font-size: clamp(1.8rem, 7vw, 2.8rem);
-  }
-
-  .scroll-frames-progress {
-    display: none;
-  }
+  .scroll-frames-progress { display: none; }
 }

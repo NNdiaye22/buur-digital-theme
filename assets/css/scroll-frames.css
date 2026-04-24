@@ -1,16 +1,25 @@
-/* BUUR Digital — scroll-frames.css */
+/* ============================================================
+   BUUR Digital — scroll-frames.css
+   UX premium : transitions cinématiques, continuité visuelle
+   ============================================================ */
 
+/* ── Wrapper global ── */
 .scroll-frames-wrapper {
   position: relative;
   width: 100%;
+  background: var(--black);
 }
 
+/* ── Section épinglée ── */
 .scroll-frame-section {
   position: relative;
   width: 100%;
   height: 100vh;
   overflow: hidden;
   background: #000;
+  /* Pas de margin entre sections pour continuité visuelle */
+  margin: 0;
+  padding: 0;
 }
 
 .scroll-frame-inner {
@@ -19,89 +28,235 @@
   height: 100%;
 }
 
+/* ── Canvas plein écran ── */
 .scroll-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
+  /* object-fit simulé via JS drawImage */
 }
 
-/* Overlay texte centré */
+/* ── Gradient de transition entre sections ──
+   Fondu bas léger pour fusionner avec la section suivante
+   sans coupure visible */
+.scroll-frame-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 18vh;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.85) 100%
+  );
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* Fondu bas activé seulement en fin de section */
+.scroll-frame-section.is-ending::after {
+  opacity: 1;
+}
+
+/* ── Overlay principal ── */
 .scroll-frame-overlay {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 2;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.10) 0%,
-    rgba(0,0,0,0.45) 60%,
-    rgba(0,0,0,0.70) 100%
-  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* Gradient latéral gauche pour le texte */
+  background:
+    linear-gradient(
+      to right,
+      rgba(0,0,0,0.72) 0%,
+      rgba(0,0,0,0.30) 55%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(0,0,0,0.60) 0%,
+      transparent 50%
+    );
 }
 
+/* ── Contenu textuel ── */
 .scroll-frame-content {
-  text-align: center;
-  padding: 0 2rem;
-  max-width: 760px;
-}
-
-.scroll-frame-title {
-  font-family: var(--font-heading, 'Montserrat', sans-serif);
-  font-size: clamp(2rem, 5vw, 4rem);
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.02em;
-  margin-bottom: 1rem;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+  padding: 0 var(--container-pad) clamp(3rem, 8vh, 5rem);
+  max-width: 680px;
+  transform: translateY(24px);
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.scroll-frame-sub {
-  font-family: var(--font-body, 'Inter', sans-serif);
-  font-size: clamp(1rem, 2vw, 1.35rem);
-  color: rgba(255,255,255,0.88);
-  line-height: 1.6;
+.scroll-frame-section.is-active .scroll-frame-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Numéro de chapitre ── */
+.scroll-frame-chapter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--size-xs);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--orange);
+  opacity: 0;
+  transform: translateX(-16px);
+  transition:
+    opacity 0.6s ease 0.1s,
+    transform 0.6s ease 0.1s;
+}
+
+.scroll-frame-chapter::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1.5px;
+  background: var(--orange);
+  flex-shrink: 0;
+}
+
+.scroll-frame-section.is-active .scroll-frame-chapter {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Titre ── */
+.scroll-frame-title {
+  font-family: var(--font-sans);
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  margin-bottom: 1rem;
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s;
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.18s,
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
 }
 
-/* Actif quand la section est épinglée */
-.scroll-frame-section.is-active .scroll-frame-title,
+.scroll-frame-section.is-active .scroll-frame-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Sous-titre ── */
+.scroll-frame-sub {
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.65;
+  color: rgba(245,244,240,0.78);
+  max-width: 480px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.75s ease 0.32s,
+    transform 0.75s ease 0.32s;
+}
+
 .scroll-frame-section.is-active .scroll-frame-sub {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Barre de chargement */
+/* ── Accent ligne couleur ── */
+.scroll-frame-title em {
+  font-style: normal;
+  color: var(--orange);
+}
+
+/* ── Indicateur de progression vertical ── */
+.scroll-frames-progress {
+  position: fixed;
+  right: clamp(1rem, 3vw, 2rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.scroll-frames-progress.is-visible {
+  opacity: 1;
+}
+
+.progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.progress-dot.is-active {
+  background: var(--orange);
+  transform: scale(1.5);
+}
+
+/* ── Barre de chargement ── */
 .seq-loader-wrap {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 3px;
-  background: rgba(255,255,255,0.15);
+  height: 2px;
+  background: rgba(255,255,255,0.10);
   z-index: 10;
 }
 
 .seq-loader {
   height: 100%;
   width: 0%;
-  background: var(--color-accent, #D4AF37);
-  transition: width 0.2s linear;
+  background: linear-gradient(90deg, var(--orange), var(--blue));
+  transition: width 0.15s linear;
 }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 768px) {
+  .scroll-frame-overlay {
+    background:
+      linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0,0,0,0.80) 60%,
+        rgba(0,0,0,0.92) 100%
+      );
+    justify-content: flex-end;
+  }
+
   .scroll-frame-content {
-    padding: 0 1.25rem;
+    max-width: 100%;
+    padding: 0 1.25rem clamp(2rem, 6vh, 3rem);
+  }
+
+  .scroll-frame-title {
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
+  }
+
+  .scroll-frames-progress {
+    display: none;
   }
 }

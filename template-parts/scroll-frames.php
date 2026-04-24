@@ -1,35 +1,53 @@
 <?php
 /**
- * BUUR Digital — scroll-frames.php
- * 7 sections scroll-frame (canvas animé par scroll GSAP)
+ * BUUR Digital — scroll-frames.php v2
+ * 7 sections cinématiques avec canvas + overlay premium
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 $sequences = [
-  [ 'id' => 'v1', 'frames' => 192, 'title' => 'Stratégie Digitale',    'sub' => 'Une vision claire pour votre présence en ligne.' ],
-  [ 'id' => 'v2', 'frames' => 144, 'title' => 'Design Premium',        'sub' => 'Des interfaces qui captivent et convertissent.' ],
-  [ 'id' => 'v3', 'frames' => 192, 'title' => 'Développement Sur-Mesure', 'sub' => 'Du code propre, rapide et évolutif.' ],
-  [ 'id' => 'v4', 'frames' => 144, 'title' => 'SEO & Performance',     'sub' => 'Visible sur Google, rapide sur tous les devices.' ],
-  [ 'id' => 'v5', 'frames' => 144, 'title' => 'E-Commerce',            'sub' => 'Vendez plus avec une boutique pensée pour convertir.' ],
-  [ 'id' => 'v6', 'frames' => 144, 'title' => 'Maintenance & Support', 'sub' => 'Toujours disponibles pour faire grandir votre site.' ],
-  [ 'id' => 'v7', 'frames' => 193, 'title' => 'Résultats Mesurables',  'sub' => 'Chaque action, chaque chiffre, optimisé pour vous.' ],
+  [ 'id' => 'v1', 'frames' => 192, 'chapter' => '01', 'title' => 'Stratégie <span style="color:var(--orange)">Digitale</span>',    'sub' => 'Une vision claire pour dominer votre marché en ligne.' ],
+  [ 'id' => 'v2', 'frames' => 144, 'chapter' => '02', 'title' => 'Design <span style="color:var(--orange)">Premium</span>',        'sub' => 'Des interfaces qui captivent, engagent et convertissent.' ],
+  [ 'id' => 'v3', 'frames' => 192, 'chapter' => '03', 'title' => 'Code <span style="color:var(--orange)">Sur-Mesure</span>',       'sub' => 'Rapide, propre, évolutif — construit pour durer.' ],
+  [ 'id' => 'v4', 'frames' => 144, 'chapter' => '04', 'title' => 'SEO & <span style="color:var(--orange)">Performance</span>',     'sub' => 'Premier sur Google. Rapide sur tous les écrans.' ],
+  [ 'id' => 'v5', 'frames' => 144, 'chapter' => '05', 'title' => 'E-<span style="color:var(--orange)">Commerce</span>',            'sub' => 'Votre boutique pensée pour vendre, 24h/24.' ],
+  [ 'id' => 'v6', 'frames' => 144, 'chapter' => '06', 'title' => 'Support <span style="color:var(--orange)">Dédié</span>',         'sub' => 'Une équipe disponible pour faire grandir votre projet.' ],
+  [ 'id' => 'v7', 'frames' => 193, 'chapter' => '07', 'title' => 'Résultats <span style="color:var(--orange)">Mesurables</span>',  'sub' => 'Chaque action optimisée. Chaque chiffre suivi.' ],
 ];
 ?>
 
 <div class="scroll-frames-wrapper">
-<?php foreach ( $sequences as $seq ) : ?>
-  <section class="scroll-section-<?= esc_attr( $seq['id'] ) ?> scroll-frame-section" data-frames="<?= esc_attr( $seq['frames'] ) ?>" data-seq="<?= esc_attr( $seq['id'] ) ?>">
+<?php foreach ( $sequences as $i => $seq ) : ?>
+  <section
+    class="scroll-section-<?= esc_attr( $seq['id'] ) ?> scroll-frame-section"
+    id="scroll-<?= esc_attr( $seq['id'] ) ?>"
+    data-frames="<?= esc_attr( $seq['frames'] ) ?>"
+    data-seq="<?= esc_attr( $seq['id'] ) ?>"
+    aria-label="<?= esc_attr( 'Chapitre ' . $seq['chapter'] ) ?>"
+  >
     <div class="scroll-frame-inner">
-      <canvas id="scroll-seq-<?= esc_attr( $seq['id'] ) ?>" class="scroll-canvas" aria-hidden="true"></canvas>
-      <div class="scroll-frame-overlay">
+
+      <!-- Canvas animation -->
+      <canvas
+        id="scroll-seq-<?= esc_attr( $seq['id'] ) ?>"
+        class="scroll-canvas"
+        aria-hidden="true"
+      ></canvas>
+
+      <!-- Overlay texte -->
+      <div class="scroll-frame-overlay" aria-hidden="true">
         <div class="scroll-frame-content">
-          <h2 class="scroll-frame-title"><?= esc_html( $seq['title'] ) ?></h2>
+          <div class="scroll-frame-chapter"><?= esc_html( $seq['chapter'] ) ?></div>
+          <h2 class="scroll-frame-title"><?= $seq['title'] ?></h2>
           <p class="scroll-frame-sub"><?= esc_html( $seq['sub'] ) ?></p>
         </div>
       </div>
+
+      <!-- Barre de chargement -->
       <div class="seq-loader-wrap" aria-hidden="true">
         <div class="seq-loader"></div>
       </div>
+
     </div>
   </section>
 <?php endforeach; ?>

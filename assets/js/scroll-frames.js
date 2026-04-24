@@ -1,6 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v5.3
- * Fix vide noir : pinSpacing:true + onLeave snapshot du dernier frame
+ * BUUR Digital — scroll-frames.js v5.1 restore
+ * pinSpacing:true — stable
  */
 (function () {
   'use strict';
@@ -38,7 +38,6 @@
     { frameIn: offsets[6], frameOut: TOTAL - 1,      chapter: '07', title: 'Résultats <em>Mesurables</em>',  sub: 'Chaque action optimisée. Chaque chiffre suivi.' },
   ];
 
-  /* ── DOM ── */
   var wrapper     = document.querySelector('.scroll-frames-wrapper');
   var canvas      = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
@@ -52,18 +51,13 @@
   var progressNav = document.getElementById('sf-progress');
   var dotEls      = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
-  /* ── Canvas resize ── */
   function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
   }
   resize();
-  window.addEventListener('resize', function () {
-    resize();
-    if (allImages.length) drawFrame(currentFrame);
-  });
+  window.addEventListener('resize', function () { resize(); if (allImages.length) drawFrame(currentFrame); });
 
-  /* ── Chargement ── */
   var allImages   = [];
   var totalLoaded = 0;
 
@@ -94,7 +88,6 @@
     });
   }
 
-  /* ── Dessin ── */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -115,34 +108,6 @@
     drawCover(allImages[Math.min(Math.round(f), TOTAL - 1)]);
   }
 
-  /* ── Snapshot : copie le dernier frame dans un <img> de fond
-     pour qu’il reste visible pendant le pinSpacing (espace blanc) ── */
-  function injectSnapshot() {
-    var existing = document.getElementById('sf-snapshot');
-    if (existing) return;
-    var snap = new Image();
-    canvas.toBlob(function (blob) {
-      snap.src = URL.createObjectURL(blob);
-      snap.id  = 'sf-snapshot';
-      snap.style.cssText = [
-        'position:absolute',
-        'inset:0',
-        'width:100%',
-        'height:100%',
-        'object-fit:cover',
-        'z-index:0',
-        'pointer-events:none',
-      ].join(';');
-      wrapper.appendChild(snap);
-    });
-  }
-
-  function removeSnapshot() {
-    var snap = document.getElementById('sf-snapshot');
-    if (snap) snap.remove();
-  }
-
-  /* ── Textes ── */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -181,7 +146,6 @@
     hideChapter(function () { showChapter(next); });
   }
 
-  /* ── ScrollTrigger ── */
   function initScroll() {
     if (loaderWrap) {
       gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
@@ -226,24 +190,10 @@
         pin:           true,
         pinSpacing:    true,
         anticipatePin: 1,
-        onLeave: function () {
-          /* Le canvas est réinitialisé quand GSAP le dépine —
-             on injecte un snapshot du dernier frame comme fond fixe */
-          drawFrame(TOTAL - 1);
-          injectSnapshot();
-          if (progressNav) progressNav.classList.remove('is-visible');
-        },
-        onEnterBack: function () {
-          removeSnapshot();
-          if (progressNav) progressNav.classList.add('is-visible');
-        },
-        onLeaveBack: function () {
-          if (progressNav) progressNav.classList.remove('is-visible');
-        },
-        onEnter: function () {
-          removeSnapshot();
-          if (progressNav) progressNav.classList.add('is-visible');
-        },
+        onLeave:     function () { if (progressNav) progressNav.classList.remove('is-visible'); },
+        onLeaveBack: function () { if (progressNav) progressNav.classList.remove('is-visible'); },
+        onEnter:     function () { if (progressNav) progressNav.classList.add('is-visible'); },
+        onEnterBack: function () { if (progressNav) progressNav.classList.add('is-visible'); },
       },
     });
   }

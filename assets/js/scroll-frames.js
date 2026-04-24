@@ -1,7 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v6.0
- * Sticky CSS natif — pas de GSAP pin
- * Le wrapper a la hauteur totale, le canvas sticky reste visible sans jamais se vider.
+ * BUUR Digital — scroll-frames.js v6.1
+ * Fix wrapperTop : offsetTop absolu au lieu de getBoundingClientRect
  */
 (function () {
   'use strict';
@@ -22,9 +21,7 @@
     { id: 'v7', count: 193 },
   ];
 
-  var TOTAL = SEQUENCES.reduce(function (a, s) { return a + s.count; }, 0);
-
-  /* Hauteur totale du wrapper = frames * px, injectée en CSS var */
+  var TOTAL        = SEQUENCES.reduce(function (a, s) { return a + s.count; }, 0);
   var TOTAL_HEIGHT = TOTAL * PX_PER_FRAME;
 
   var offsets = [];
@@ -46,7 +43,6 @@
 
   /* DOM */
   var wrapper         = document.getElementById('scroll-frames');
-  var sticky          = wrapper  ? wrapper.querySelector('.scroll-frames-sticky') : null;
   var canvas          = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
   var ctx             = canvas.getContext('2d');
@@ -62,20 +58,31 @@
   var sfLabel         = servicesOverlay ? servicesOverlay.querySelector('.sf-services-label') : null;
   var sfCols          = servicesOverlay ? Array.prototype.slice.call(servicesOverlay.querySelectorAll('.sf-col')) : [];
 
-  /* Hauteur du wrapper injectée */
-  wrapper.style.setProperty('--sf-total-height', TOTAL_HEIGHT + 'px');
+  /* Hauteur wrapper */
   wrapper.style.height = TOTAL_HEIGHT + 'px';
+
+  /* wrapperTop absolu — somme des offsetTop en remontant jusqu'au body */
+  function getOffsetTop(el) {
+    var top = 0;
+    while (el) { top += el.offsetTop; el = el.offsetParent; }
+    return top;
+  }
+  var wrapperTop = 0;
+
+  function updateWrapperTop() {
+    wrapperTop = getOffsetTop(wrapper);
+  }
 
   /* Canvas resize */
   function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
+    updateWrapperTop();
     if (allImages.length) drawFrame(currentFrame);
   }
-  resize();
   window.addEventListener('resize', resize);
 
-  /* Chargement images */
+  /* Chargement */
   var allImages   = [];
   var totalLoaded = 0;
 
@@ -127,10 +134,9 @@
     drawCover(allImages[currentFrame]);
   }
 
-  /* ── Scroll : calcul du frame depuis scrollY ── */
-  var wrapperTop = 0;
-  var rafId      = null;
-  var lastFrame  = -1;
+  /* Scroll */
+  var rafId     = null;
+  var lastFrame = -1;
 
   function onScroll() {
     if (rafId) return;
@@ -139,12 +145,10 @@
 
   function tick() {
     rafId = null;
-    wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
     var scrolled = window.scrollY - wrapperTop;
     var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
     var frame    = progress * (TOTAL - 1);
 
-    /* Visibilité des éléments overlay */
     var inside = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
     if (progressNav) progressNav.classList.toggle('is-visible', inside);
 
@@ -156,7 +160,7 @@
 
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  /* ── Services overlay ── */
+  /* Services overlay */
   var overlayVisible = false;
   var overlayTween   = null;
 
@@ -170,7 +174,7 @@
     var tl = gsap.timeline();
     tl.set(servicesOverlay, { opacity: 1 });
     tl.to(sfLabel, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
-    tl.to(sfCols, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.15 }, '-=0.2');
+    tl.to(sfCols,  { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.15 }, '-=0.2');
     overlayTween = tl;
   }
 
@@ -184,7 +188,7 @@
     overlayTween.call(function () { servicesOverlay.classList.remove('is-visible'); });
   }
 
-  /* ── Textes chapitres ── */
+  /* Textes */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -220,8 +224,12 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
-  /* ── Init ── */
+  /* Init */
   function initScroll() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    updateWrapperTop();
+
     if (loaderWrap) {
       gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
     }
@@ -240,18 +248,15 @@
     if (sfCols.length)   gsap.set(sfCols,  { opacity: 0, y: 28 });
 
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
-    gsap.to(textEls, { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5 });
+    gsap.to(textEls,  { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5 });
 
-    /* Navigation dots */
     dotEls.forEach(function (dot, i) {
       dot.addEventListener('click', function () {
         var pct = CHAPTERS[i].frameIn / (TOTAL - 1);
-        wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({ top: wrapperTop + pct * TOTAL_HEIGHT, behavior: 'smooth' });
       });
     });
 
-    /* Premier tick */
     tick();
   }
 

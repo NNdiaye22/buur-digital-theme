@@ -1,6 +1,8 @@
 /**
- * BUUR Digital — scroll-frames.js v6.4
- * Overlays ADN + Services pilotés par le progress du scroll (scrub)
+ * BUUR Digital — scroll-frames.js v6.5
+ * Overlays ADN + Services avec effets 3D premium scrubés au scroll
+ * ADN  : rotateX + translateZ (dalle holographique)
+ * SVC  : rotateY (panneau qui pivote) + stagger de profondeur
  */
 (function () {
   'use strict';
@@ -28,7 +30,6 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
-  /* Zones d'affichage — 5 frames plus tôt */
   var ADN_IN   = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.65) - 5;
   var ADN_PEAK = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.80);
   var ADN_OUT  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.25);
@@ -61,16 +62,13 @@
   var progressNav= document.getElementById('sf-progress');
   var dotEls     = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
-  /* ADN — sélecteurs alignés sur le HTML v6.3 (sans lion PNG ni intro) */
-  var adnOverlay = document.getElementById('sf-adn-overlay');
-  var adnHeader  = adnOverlay ? adnOverlay.querySelector('.sf-adn-header')  : null;
-  var adnHalo    = adnOverlay ? adnOverlay.querySelector('.sf-adn-halo')    : null;
-  var adnEyebrow = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow') : null;
-  var adnTitle   = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')   : null;
-  var adnValeurs = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
+  var adnOverlay    = document.getElementById('sf-adn-overlay');
+  var adnHalo       = adnOverlay ? adnOverlay.querySelector('.sf-adn-halo')       : null;
+  var adnEyebrow    = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow')    : null;
+  var adnTitleEl    = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')      : null;
+  var adnValeurs    = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
   var adnConnectors = adnOverlay ? adnOverlay.querySelector('.sf-adn-connectors') : null;
 
-  /* Services */
   var svcOverlay = document.getElementById('sf-services-overlay');
   var sfLabel    = svcOverlay ? svcOverlay.querySelector('.sf-services-label') : null;
   var sfCols     = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.sf-col')) : [];
@@ -78,9 +76,7 @@
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
   function getOffsetTop(el) {
-    var top = 0;
-    while (el) { top += el.offsetTop; el = el.offsetParent; }
-    return top;
+    var top = 0; while (el) { top += el.offsetTop; el = el.offsetParent; } return top;
   }
   var wrapperTop = 0;
   function updateWrapperTop() { wrapperTop = getOffsetTop(wrapper); }
@@ -141,52 +137,123 @@
   }
 
   /* ============================================================
-   * SCRUB HELPER — calcule une opacité 0→1→0 selon la frame
-   * fade-in de IN à PEAK, plateau jusqu'à OUT-fade, fade-out
+   * HELPERS SCRUB
+   * t = 0→1 dans la zone [inF, outF]
    * ============================================================ */
-  function scrubOpacity(f, fadeIn, peak, fadeOut) {
-    if (f < fadeIn || f > fadeOut) return 0;
-    if (f <= peak)  return (f - fadeIn)  / (peak - fadeIn);
-    var fadeStart = peak + Math.round((fadeOut - peak) * 0.75);
-    if (f <= fadeStart) return 1;
-    return 1 - (f - fadeStart) / (fadeOut - fadeStart);
+  function zoneT(f, inF, outF) {
+    if (f <= inF)  return 0;
+    if (f >= outF) return 1;
+    return (f - inF) / (outF - inF);
   }
 
+  /* opacité tente : monte de 0→1 entre IN et PEAK, descend de 1→0 entre fadeStart et OUT */
+  function scrubOpacity(f, inF, peak, outF) {
+    if (f < inF || f > outF) return 0;
+    if (f <= peak) return (f - inF) / (peak - inF);
+    var fadeStart = peak + Math.round((outF - peak) * 0.70);
+    if (f <= fadeStart) return 1;
+    return 1 - (f - fadeStart) / (outF - fadeStart);
+  }
+
+  /* lerp linéaire */
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
   /* ============================================================
-   * MISE À JOUR DES OVERLAYS — directement scrubée
+   * OVERLAYS 3D SCRUBÉS
    * ============================================================ */
-  var adnShown = false, svcShown = false;
+  var adnReady = false, svcReady = false;
 
   function updateOverlays(f) {
-    /* ── ADN ── */
+
+    /* ──── ADN ────
+     * Opacity scrubée
+     * Titre + eyebrow : parallaxe Y léger (couche haute)
+     * Halo : scale scrubé (0.6 → 1)
+     * Cartes valeurs : rotateX (40→0) + translateZ (-60→0) scrubés
+     *                  stagger de profondeur : chaque carte a un décalage de phase
+     */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
-      adnOverlay.style.opacity  = adnOp;
+      adnOverlay.style.opacity       = adnOp;
       adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none';
-
-      if (adnOp > 0.01 && !adnShown) {
-        /* Premier passage dans la zone : réinitialise les enfants à visible */
-        adnShown = true;
-        var adnChildren = [adnHalo, adnEyebrow, adnTitle, adnConnectors].filter(Boolean);
-        adnValeurs.forEach(function(v){ adnChildren.push(v); });
-        gsap.set(adnChildren, { opacity: 1, x: 0, y: 0, scale: 1, clipPath: 'none' });
-      }
-      if (adnOp <= 0.01) adnShown = false;
     }
 
-    /* ── SERVICES ── */
+    /* Initialisation unique des styles de base */
+    if (!adnReady && adnOverlay) {
+      adnReady = true;
+      adnOverlay.style.perspective = '900px';
+      if (adnEyebrow) adnEyebrow.style.willChange = 'transform, opacity';
+      if (adnTitleEl) adnTitleEl.style.willChange  = 'transform, opacity';
+      adnValeurs.forEach(function(v) {
+        v.style.willChange  = 'transform, opacity';
+        v.style.transformOrigin = 'center bottom';
+      });
+    }
+
+    if (adnOp > 0) {
+      /* t global dans la zone ADN (0 → 1) */
+      var tAdn = zoneT(f, ADN_IN, ADN_OUT);
+      /* t pour la phase d’entrée seulement (0 → 1 entre IN et PEAK) */
+      var tIn  = Math.min(1, zoneT(f, ADN_IN, ADN_PEAK));
+
+      /* Titre : glisse vers le bas depuis -20px — couche haute */
+      var titleY = lerp(-22, 0, tIn);
+      if (adnEyebrow) adnEyebrow.style.transform = 'translateY(' + titleY * 1.2 + 'px)';
+      if (adnTitleEl) adnTitleEl.style.transform  = 'translateY(' + titleY + 'px)';
+
+      /* Halo : scale 0.55 → 1 */
+      if (adnHalo) adnHalo.style.transform = 'translate(-50%,-50%) scale(' + lerp(0.55, 1, tIn) + ')';
+
+      /* Connectors : opacité synch */
+      if (adnConnectors) adnConnectors.style.opacity = tIn;
+
+      /* Cartes valeurs : rotateX 42→0 + translateZ -70→0, staggeré */
+      adnValeurs.forEach(function (v, i) {
+        /* chaque carte commence un peu plus tard (stagger 0.12) */
+        var tCard = Math.min(1, Math.max(0, (tIn - i * 0.12) / (1 - i * 0.12 * 0.5)));
+        var rx = lerp(42, 0, tCard);
+        var tz = lerp(-70, 0, tCard);
+        v.style.transform = 'rotateX(' + rx + 'deg) translateZ(' + tz + 'px)';
+        v.style.opacity   = tCard;
+      });
+    }
+
+    /* ──── SERVICES ────
+     * Opacity scrubée
+     * Colonnes : rotateY (28→0) + translateZ (-80→0) scrubés
+     *            stagger de profondeur (décalage de phase par colonne)
+     * Label    : translateY (-16→0)
+     */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
-      svcOverlay.style.opacity  = svcOp;
+      svcOverlay.style.opacity       = svcOp;
       svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
+    }
 
-      if (svcOp > 0.01 && !svcShown) {
-        svcShown = true;
-        var svcChildren = [sfLabel].filter(Boolean);
-        sfCols.forEach(function(c){ svcChildren.push(c); });
-        gsap.set(svcChildren, { opacity: 1, y: 0 });
-      }
-      if (svcOp <= 0.01) svcShown = false;
+    if (!svcReady && svcOverlay) {
+      svcReady = true;
+      svcOverlay.style.perspective = '1000px';
+      sfCols.forEach(function(c) {
+        c.style.willChange     = 'transform, opacity';
+        c.style.transformOrigin = 'center center';
+      });
+    }
+
+    if (svcOp > 0) {
+      var tSvc = zoneT(f, SVC_IN, SVC_OUT);
+      var tSvcIn = Math.min(1, zoneT(f, SVC_IN, SVC_PEAK));
+
+      /* Label glisse depuis le haut */
+      if (sfLabel) sfLabel.style.transform = 'translateY(' + lerp(-18, 0, tSvcIn) + 'px)';
+
+      /* Colonnes : rotateY + translateZ avec stagger de phase */
+      sfCols.forEach(function (col, i) {
+        var tCol = Math.min(1, Math.max(0, (tSvcIn - i * 0.10) / (1 - i * 0.10 * 0.4)));
+        var ry = lerp(28, 0, tCol);
+        var tz = lerp(-80, 0, tCol);
+        col.style.transform = 'rotateY(' + ry + 'deg) translateZ(' + tz + 'px)';
+        col.style.opacity   = tCol;
+      });
     }
   }
 
@@ -222,7 +289,6 @@
   }
 
   var rafId = null;
-
   function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
   function tick() {
@@ -257,7 +323,6 @@
     if (progressNav) progressNav.classList.add('is-visible');
     if (dotEls[0]) dotEls[0].classList.add('is-active');
 
-    /* Overlays cachés au départ */
     if (adnOverlay) { adnOverlay.style.opacity = '0'; adnOverlay.style.pointerEvents = 'none'; }
     if (svcOverlay) { svcOverlay.style.opacity = '0'; svcOverlay.style.pointerEvents = 'none'; }
 

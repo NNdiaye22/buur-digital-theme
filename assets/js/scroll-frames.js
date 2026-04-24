@@ -1,7 +1,7 @@
 /**
- * BUUR Digital — scroll-frames.js v5.1
- * Séquence unique v1→v7 — 1153 frames
- * Textes : apparition split-line, sortie fondu haut, stagger précis
+ * BUUR Digital — scroll-frames.js v5.2
+ * Fix : plus de vide noir après la dernière frame
+ * pinSpacing:false + dernier frame gardé visible tant que la section est pinned
  */
 (function () {
   'use strict';
@@ -40,26 +40,29 @@
   ];
 
   /* ── DOM ── */
-  var wrapper    = document.querySelector('.scroll-frames-wrapper');
-  var canvas     = document.getElementById('scroll-main-canvas');
+  var wrapper     = document.querySelector('.scroll-frames-wrapper');
+  var canvas      = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
-  var ctx        = canvas.getContext('2d');
-  var chapEl     = document.getElementById('sf-chapter');
-  var titleEl    = document.getElementById('sf-title');
-  var subEl      = document.getElementById('sf-sub');
-  var counterEl  = document.getElementById('sf-counter');
-  var loaderWrap = document.getElementById('sf-loader-wrap');
-  var loaderBar  = document.getElementById('sf-loader-bar');
-  var progressNav= document.getElementById('sf-progress');
-  var dotEls     = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
+  var ctx         = canvas.getContext('2d');
+  var chapEl      = document.getElementById('sf-chapter');
+  var titleEl     = document.getElementById('sf-title');
+  var subEl       = document.getElementById('sf-sub');
+  var counterEl   = document.getElementById('sf-counter');
+  var loaderWrap  = document.getElementById('sf-loader-wrap');
+  var loaderBar   = document.getElementById('sf-loader-bar');
+  var progressNav = document.getElementById('sf-progress');
+  var dotEls      = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
-  /* ── Resize canvas ── */
+  /* ── Canvas resize ── */
   function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
   }
   resize();
-  window.addEventListener('resize', function () { resize(); if (allImages.length) drawFrame(currentFrame); });
+  window.addEventListener('resize', function () {
+    resize();
+    if (allImages.length) drawFrame(currentFrame);
+  });
 
   /* ── Chargement ── */
   var allImages   = [];
@@ -88,6 +91,7 @@
         }
       });
 
+      /* Aplatir dans l'ordre */
       SEQUENCES.forEach(function (seq, si) {
         for (var i = 0; i < seq.count; i++) allImages.push(temps[si][i]);
       });
@@ -121,38 +125,23 @@
   function showChapter(idx) {
     if (textTween) textTween.kill();
     var ch = CHAPTERS[idx];
-
-    /* Mise à jour du contenu immédiatement (invisible) */
     if (chapEl)  chapEl.textContent = ch.chapter;
     if (titleEl) titleEl.innerHTML  = ch.title;
     if (subEl)   subEl.textContent  = ch.sub;
-
-    /* Entrée : chaque élément monte depuis le bas, stagger 100ms */
+    if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
+    dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
     textTween = gsap.to(textEls, {
-      opacity:  1,
-      y:        0,
-      clipPath: 'inset(0 0 0% 0)',
-      duration: 0.9,
-      ease:     'power4.out',
-      stagger:  0.11,
+      opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)',
+      duration: 0.9, ease: 'power4.out', stagger: 0.11,
     });
-
-    /* Dots */
-    dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
-
-    /* Compteur */
-    if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
   }
 
   function hideChapter(onDone) {
     if (textTween) textTween.kill();
     textTween = gsap.to(textEls, {
-      opacity:  0,
-      y:        -28,
-      clipPath: 'inset(0 0 100% 0)',
-      duration: 0.45,
-      ease:     'power3.in',
+      opacity: 0, y: -28, clipPath: 'inset(0 0 100% 0)',
+      duration: 0.45, ease: 'power3.in',
       onComplete: onDone || null,
     });
   }
@@ -163,50 +152,39 @@
       if (f >= CHAPTERS[i].frameIn && f <= CHAPTERS[i].frameOut) { chIdx = i; break; }
     }
     if (chIdx === currentChapter) return;
-
     var next = chIdx;
     currentChapter = next;
-
-    if (next < 0) {
-      hideChapter();
-      return;
-    }
+    if (next < 0) { hideChapter(); return; }
     hideChapter(function () { showChapter(next); });
   }
 
   /* ── ScrollTrigger ── */
   function initScroll() {
-    if (loaderWrap) { gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } }); }
+    if (loaderWrap) {
+      gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
+    }
 
     drawFrame(0);
     currentChapter = 0;
-    if (chapEl)  chapEl.textContent = CHAPTERS[0].chapter;
-    if (titleEl) titleEl.innerHTML  = CHAPTERS[0].title;
-    if (subEl)   subEl.textContent  = CHAPTERS[0].sub;
+    if (chapEl)    chapEl.textContent  = CHAPTERS[0].chapter;
+    if (titleEl)   titleEl.innerHTML   = CHAPTERS[0].title;
+    if (subEl)     subEl.textContent   = CHAPTERS[0].sub;
     if (counterEl) counterEl.textContent = '01 / 07';
-
-    gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
-    gsap.to(textEls, {
-      opacity:  1,
-      y:        0,
-      clipPath: 'inset(0 0 0% 0)',
-      duration: 1.1,
-      ease:     'power4.out',
-      stagger:  0.13,
-      delay:    0.5,
-    });
-
     if (progressNav) progressNav.classList.add('is-visible');
     if (dotEls[0]) dotEls[0].classList.add('is-active');
 
-    /* Dot click → scroll vers le frameIn correspondant */
+    gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
+    gsap.to(textEls, {
+      opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)',
+      duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5,
+    });
+
+    /* Dot click */
     dotEls.forEach(function (dot, i) {
       dot.addEventListener('click', function () {
-        var targetFrame = CHAPTERS[i].frameIn;
-        var pct = targetFrame / (TOTAL - 1);
-        var totalScroll = TOTAL * PX_PER_FRAME;
-        var wrapperTop  = wrapper.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({ top: wrapperTop + pct * totalScroll, behavior: 'smooth' });
+        var pct        = CHAPTERS[i].frameIn / (TOTAL - 1);
+        var wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: wrapperTop + pct * TOTAL * PX_PER_FRAME, behavior: 'smooth' });
       });
     });
 
@@ -219,15 +197,28 @@
         updateText(state.frame);
       },
       scrollTrigger: {
-        trigger:       wrapper,
-        start:         'top top',
-        end:           '+=' + (TOTAL * PX_PER_FRAME),
-        scrub:         true,
-        pin:           true,
-        pinSpacing:    true,
+        trigger:    wrapper,
+        start:      'top top',
+        end:        '+=' + (TOTAL * PX_PER_FRAME),
+        scrub:      true,
+        pin:        true,
+        /* pinSpacing:false — supprime l'espace vide après le dépinning */
+        pinSpacing: false,
         anticipatePin: 1,
-        onLeaveBack: function () { if (progressNav) progressNav.classList.remove('is-visible'); },
-        onEnter:      function () { if (progressNav) progressNav.classList.add('is-visible'); },
+        onLeave: function () {
+          /* Garantit que le dernier frame reste dessiné quand la section dépine */
+          drawFrame(TOTAL - 1);
+          if (progressNav) progressNav.classList.remove('is-visible');
+        },
+        onLeaveBack: function () {
+          if (progressNav) progressNav.classList.remove('is-visible');
+        },
+        onEnter: function () {
+          if (progressNav) progressNav.classList.add('is-visible');
+        },
+        onEnterBack: function () {
+          if (progressNav) progressNav.classList.add('is-visible');
+        },
       },
     });
   }

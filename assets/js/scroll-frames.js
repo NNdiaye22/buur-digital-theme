@@ -1,12 +1,12 @@
 /**
- * BUUR Digital — scroll-frames.js v5.3
- * Services overlay clean : fade in colonnes + label, pas de glitch
+ * BUUR Digital — scroll-frames.js v6.0
+ * Sticky CSS natif — pas de GSAP pin
+ * Le wrapper a la hauteur totale, le canvas sticky reste visible sans jamais se vider.
  */
 (function () {
   'use strict';
 
-  if (!window.gsap || !window.ScrollTrigger) return;
-  gsap.registerPlugin(ScrollTrigger);
+  if (!window.gsap) return;
 
   var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
   var FRAMES_PATH  = THEME_URL + '/assets/frames';
@@ -23,6 +23,9 @@
   ];
 
   var TOTAL = SEQUENCES.reduce(function (a, s) { return a + s.count; }, 0);
+
+  /* Hauteur totale du wrapper = frames * px, injectée en CSS var */
+  var TOTAL_HEIGHT = TOTAL * PX_PER_FRAME;
 
   var offsets = [];
   var acc = 0;
@@ -41,7 +44,9 @@
     { frameIn: offsets[6], frameOut: TOTAL - 1,      chapter: '07', title: 'R\u00e9sultats <em>Mesurables</em>', sub: 'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
   ];
 
-  var wrapper         = document.querySelector('.scroll-frames-wrapper');
+  /* DOM */
+  var wrapper         = document.getElementById('scroll-frames');
+  var sticky          = wrapper  ? wrapper.querySelector('.scroll-frames-sticky') : null;
   var canvas          = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
   var ctx             = canvas.getContext('2d');
@@ -57,13 +62,20 @@
   var sfLabel         = servicesOverlay ? servicesOverlay.querySelector('.sf-services-label') : null;
   var sfCols          = servicesOverlay ? Array.prototype.slice.call(servicesOverlay.querySelectorAll('.sf-col')) : [];
 
+  /* Hauteur du wrapper injectée */
+  wrapper.style.setProperty('--sf-total-height', TOTAL_HEIGHT + 'px');
+  wrapper.style.height = TOTAL_HEIGHT + 'px';
+
+  /* Canvas resize */
   function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
+    if (allImages.length) drawFrame(currentFrame);
   }
   resize();
-  window.addEventListener('resize', function () { resize(); if (allImages.length) drawFrame(currentFrame); });
+  window.addEventListener('resize', resize);
 
+  /* Chargement images */
   var allImages   = [];
   var totalLoaded = 0;
 
@@ -94,6 +106,7 @@
     });
   }
 
+  /* Dessin */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -110,11 +123,40 @@
   var textTween      = null;
 
   function drawFrame(f) {
-    currentFrame = f;
-    drawCover(allImages[Math.min(Math.round(f), TOTAL - 1)]);
+    currentFrame = Math.max(0, Math.min(Math.round(f), TOTAL - 1));
+    drawCover(allImages[currentFrame]);
   }
 
-  /* ── Overlay services ── */
+  /* ── Scroll : calcul du frame depuis scrollY ── */
+  var wrapperTop = 0;
+  var rafId      = null;
+  var lastFrame  = -1;
+
+  function onScroll() {
+    if (rafId) return;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function tick() {
+    rafId = null;
+    wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
+    var scrolled = window.scrollY - wrapperTop;
+    var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
+    var frame    = progress * (TOTAL - 1);
+
+    /* Visibilité des éléments overlay */
+    var inside = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
+    if (progressNav) progressNav.classList.toggle('is-visible', inside);
+
+    if (Math.abs(frame - lastFrame) < 0.3) return;
+    lastFrame = frame;
+    drawFrame(frame);
+    updateText(frame);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── Services overlay ── */
   var overlayVisible = false;
   var overlayTween   = null;
 
@@ -123,22 +165,12 @@
     overlayVisible = true;
     if (overlayTween) overlayTween.kill();
     servicesOverlay.classList.add('is-visible');
-
-    var tl = gsap.timeline();
-    /* Label + colonnes : tout à opacity 0 au départ */
     gsap.set(sfLabel, { opacity: 0, y: 10 });
     gsap.set(sfCols,  { opacity: 0, y: 28 });
-
-    /* L'overlay lui-même devient juste non-display:none */
+    var tl = gsap.timeline();
     tl.set(servicesOverlay, { opacity: 1 });
-    /* Label */
     tl.to(sfLabel, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
-    /* Colonnes en stagger */
-    tl.to(sfCols, {
-      opacity: 1, y: 0,
-      duration: 0.6, ease: 'power3.out', stagger: 0.15,
-    }, '-=0.2');
-
+    tl.to(sfCols, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.15 }, '-=0.2');
     overlayTween = tl;
   }
 
@@ -146,18 +178,13 @@
     if (!overlayVisible || !servicesOverlay) return;
     overlayVisible = false;
     if (overlayTween) overlayTween.kill();
-
     overlayTween = gsap.timeline();
-    overlayTween.to([sfLabel].concat(sfCols), {
-      opacity: 0, y: -16,
-      duration: 0.35, ease: 'power2.in', stagger: 0.06,
-    });
+    overlayTween.to([sfLabel].concat(sfCols), { opacity: 0, y: -16, duration: 0.35, ease: 'power2.in', stagger: 0.06 });
     overlayTween.set(servicesOverlay, { opacity: 0 });
-    overlayTween.call(function () {
-      servicesOverlay.classList.remove('is-visible');
-    });
+    overlayTween.call(function () { servicesOverlay.classList.remove('is-visible'); });
   }
 
+  /* ── Textes chapitres ── */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -169,19 +196,12 @@
     if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
     dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
-    textTween = gsap.to(textEls, {
-      opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)',
-      duration: 0.9, ease: 'power4.out', stagger: 0.11,
-    });
+    textTween = gsap.to(textEls, { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 0.9, ease: 'power4.out', stagger: 0.11 });
   }
 
   function hideChapter(onDone) {
     if (textTween) textTween.kill();
-    textTween = gsap.to(textEls, {
-      opacity: 0, y: -28, clipPath: 'inset(0 0 100% 0)',
-      duration: 0.45, ease: 'power3.in',
-      onComplete: onDone || null,
-    });
+    textTween = gsap.to(textEls, { opacity: 0, y: -28, clipPath: 'inset(0 0 100% 0)', duration: 0.45, ease: 'power3.in', onComplete: onDone || null });
   }
 
   function updateText(f) {
@@ -190,7 +210,6 @@
     } else {
       hideServicesOverlay();
     }
-
     var chIdx = -1;
     for (var i = 0; i < CHAPTERS.length; i++) {
       if (f >= CHAPTERS[i].frameIn && f <= CHAPTERS[i].frameOut) { chIdx = i; break; }
@@ -201,6 +220,7 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
+  /* ── Init ── */
   function initScroll() {
     if (loaderWrap) {
       gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
@@ -220,44 +240,19 @@
     if (sfCols.length)   gsap.set(sfCols,  { opacity: 0, y: 28 });
 
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
-    gsap.to(textEls, {
-      opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)',
-      duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5,
-    });
+    gsap.to(textEls, { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5 });
 
+    /* Navigation dots */
     dotEls.forEach(function (dot, i) {
       dot.addEventListener('click', function () {
-        var pct        = CHAPTERS[i].frameIn / (TOTAL - 1);
-        var wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({ top: wrapperTop + pct * TOTAL * PX_PER_FRAME, behavior: 'smooth' });
+        var pct = CHAPTERS[i].frameIn / (TOTAL - 1);
+        wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: wrapperTop + pct * TOTAL_HEIGHT, behavior: 'smooth' });
       });
     });
 
-    var state = { frame: 0 };
-    gsap.to(state, {
-      frame: TOTAL - 1,
-      ease:  'none',
-      onUpdate: function () {
-        drawFrame(state.frame);
-        updateText(state.frame);
-      },
-      scrollTrigger: {
-        trigger:       wrapper,
-        start:         'top top',
-        end:           '+=' + (TOTAL * PX_PER_FRAME),
-        scrub:         true,
-        pin:           true,
-        pinSpacing:    true,
-        anticipatePin: 1,
-        onLeave:     function () {
-          hideServicesOverlay();
-          if (progressNav) progressNav.classList.remove('is-visible');
-        },
-        onLeaveBack: function () { if (progressNav) progressNav.classList.remove('is-visible'); },
-        onEnter:     function () { if (progressNav) progressNav.classList.add('is-visible'); },
-        onEnterBack: function () { if (progressNav) progressNav.classList.add('is-visible'); },
-      },
-    });
+    /* Premier tick */
+    tick();
   }
 
   loadAll().then(initScroll);

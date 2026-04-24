@@ -8,7 +8,6 @@ get_header();
   <?php get_template_part('template-parts/hero'); ?>
   <?php get_template_part('template-parts/scroll-frames'); ?>
   <?php get_template_part('template-parts/services'); ?>
-  <?php get_template_part('template-parts/pourquoi'); ?>
   <?php get_template_part('template-parts/stats'); ?>
   <?php get_template_part('template-parts/temoignages'); ?>
   <?php get_template_part('template-parts/cta'); ?>

@@ -1,8 +1,7 @@
 /**
  * BUUR Digital — scroll-frames.js
- * Animation séquence d'images (frame-by-frame) pilotée par le scroll.
+ * Animation frame-by-frame pilotée par le scroll (GSAP ScrollTrigger + Canvas).
  * Dépendances : gsap, ScrollTrigger
- * Sections : v1 → v7 (chacune avec canvas + frames préchargées)
  */
 (function () {
   'use strict';
@@ -11,98 +10,103 @@
   gsap.registerPlugin(ScrollTrigger);
 
   /* ======================================================
-     CONFIG — adapter selon le thème WordPress
+     CONFIG
      ====================================================== */
-  const THEME_URL   = window.buurTheme?.url || '/wp-content/themes/buur-digital-theme';
+  const THEME_URL   = (window.buurTheme && window.buurTheme.url) || '';
   const FRAMES_PATH = THEME_URL + '/assets/frames';
 
   const SEQUENCES = [
-    { id: 'scroll-seq-v1', path: 'v1', count: 192, section: '.scroll-section-v1' },
-    { id: 'scroll-seq-v2', path: 'v2', count: 144, section: '.scroll-section-v2' },
-    { id: 'scroll-seq-v3', path: 'v3', count: 192, section: '.scroll-section-v3' },
-    { id: 'scroll-seq-v4', path: 'v4', count: 144, section: '.scroll-section-v4' },
-    { id: 'scroll-seq-v5', path: 'v5', count: 144, section: '.scroll-section-v5' },
-    { id: 'scroll-seq-v6', path: 'v6', count: 144, section: '.scroll-section-v6' },
-    { id: 'scroll-seq-v7', path: 'v7', count: 193, section: '.scroll-section-v7' },
+    { id: 'v1', count: 192 },
+    { id: 'v2', count: 144 },
+    { id: 'v3', count: 192 },
+    { id: 'v4', count: 144 },
+    { id: 'v5', count: 144 },
+    { id: 'v6', count: 144 },
+    { id: 'v7', count: 193 },
   ];
 
   /* ======================================================
-     UTILITAIRE — padded filename
+     UTILITAIRES
      ====================================================== */
-  function frameSrc(path, index) {
-    const n = String(index).padStart(3, '0');
-    return `${FRAMES_PATH}/${path}/frame_${n}.jpg`;
+  function frameSrc(id, index) {
+    return FRAMES_PATH + '/' + id + '/frame_' + String(index).padStart(3, '0') + '.jpg';
   }
 
-  /* ======================================================
-     PRÉCHARGEMENT — toutes les images d'une séquence
-     ====================================================== */
-  function preloadFrames(path, count, onProgress) {
-    return new Promise((resolve) => {
-      const images = [];
-      let loaded = 0;
-
-      for (let i = 1; i <= count; i++) {
-        const img = new Image();
-        img.src = frameSrc(path, i);
-        img.onload = img.onerror = () => {
-          loaded++;
-          if (onProgress) onProgress(loaded / count);
-          if (loaded === count) resolve(images);
-        };
-        images.push(img);
+  function preload(id, count, onProgress) {
+    return new Promise(function (resolve) {
+      var images = new Array(count);
+      var loaded = 0;
+      for (var i = 0; i < count; i++) {
+        (function (idx) {
+          var img = new Image();
+          img.src = frameSrc(id, idx + 1);
+          img.onload = img.onerror = function () {
+            loaded++;
+            if (onProgress) onProgress(loaded / count);
+            if (loaded === count) resolve(images);
+          };
+          images[idx] = img;
+        })(i);
       }
     });
   }
 
   /* ======================================================
-     INITIALISATION D'UNE SÉQUENCE
+     INIT UNE SÉQUENCE
      ====================================================== */
-  function initSequence({ id, path, count, section }) {
-    const sectionEl = document.querySelector(section);
+  function initSequence(seq) {
+    var sectionEl = document.querySelector('.scroll-section-' + seq.id);
     if (!sectionEl) return;
 
-    // Canvas
-    const canvas = document.getElementById(id);
+    var canvas = document.getElementById('scroll-seq-' + seq.id);
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
 
-    // Loader overlay (optionnel — si présent dans le HTML)
-    const loader = sectionEl.querySelector('.seq-loader');
+    var loaderEl  = sectionEl.querySelector('.seq-loader');
+    var loaderWrap = sectionEl.querySelector('.seq-loader-wrap');
 
-    // Préchargement
-    preloadFrames(path, count, (progress) => {
-      if (loader) loader.style.width = (progress * 100) + '%';
-    }).then((images) => {
-      if (loader) loader.closest('.seq-loader-wrap')?.remove();
+    preload(seq.id, seq.count, function (progress) {
+      if (loaderEl) loaderEl.style.width = (progress * 100) + '%';
+    }).then(function (images) {
 
-      // Resize canvas selon première image
-      const firstImg = images[0];
-      canvas.width  = firstImg.naturalWidth  || 1920;
-      canvas.height = firstImg.naturalHeight || 1080;
-      ctx.drawImage(firstImg, 0, 0);
+      // Supprimer la barre de chargement
+      if (loaderWrap) loaderWrap.remove();
 
-      // Objet de progression (GSAP anime cette valeur)
-      const state = { frame: 0 };
+      // Dimensionner le canvas
+      var first = images[0];
+      canvas.width  = first.naturalWidth  || 1920;
+      canvas.height = first.naturalHeight || 1080;
+      ctx.drawImage(first, 0, 0);
 
-      function renderFrame(index) {
-        const img = images[Math.round(index)];
+      var state = { frame: 0 };
+
+      function render(index) {
+        var img = images[Math.round(index)];
         if (!img || !img.complete) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
       }
 
-      // ScrollTrigger — pin + scrub
+      // Activation du texte overlay
+      ScrollTrigger.create({
+        trigger: sectionEl,
+        start: 'top center',
+        end: 'bottom center',
+        onEnter:      function () { sectionEl.classList.add('is-active'); },
+        onLeave:      function () { sectionEl.classList.remove('is-active'); },
+        onEnterBack:  function () { sectionEl.classList.add('is-active'); },
+        onLeaveBack:  function () { sectionEl.classList.remove('is-active'); },
+      });
+
+      // Animation frames par scroll
       gsap.to(state, {
-        frame: count - 1,
+        frame: seq.count - 1,
         ease: 'none',
-        onUpdate() {
-          renderFrame(state.frame);
-        },
+        onUpdate: function () { render(state.frame); },
         scrollTrigger: {
           trigger:    sectionEl,
           start:      'top top',
-          end:        `+=${count * 5}`,   // 5px par frame → ajustable
+          end:        '+=' + (seq.count * 5),
           scrub:      1,
           pin:        true,
           pinSpacing: true,
@@ -113,7 +117,7 @@
   }
 
   /* ======================================================
-     LANCEMENT AU DOMCONTENTLOADED
+     LANCEMENT
      ====================================================== */
   function init() {
     SEQUENCES.forEach(initSequence);

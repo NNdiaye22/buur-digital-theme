@@ -1,0 +1,107 @@
+/* BUUR Digital — scroll-frames.css */
+
+.scroll-frames-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.scroll-frame-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+.scroll-frame-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.scroll-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Overlay texte centré */
+.scroll-frame-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.10) 0%,
+    rgba(0,0,0,0.45) 60%,
+    rgba(0,0,0,0.70) 100%
+  );
+}
+
+.scroll-frame-content {
+  text-align: center;
+  padding: 0 2rem;
+  max-width: 760px;
+}
+
+.scroll-frame-title {
+  font-family: var(--font-heading, 'Montserrat', sans-serif);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.scroll-frame-sub {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  color: rgba(255,255,255,0.88);
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s;
+}
+
+/* Actif quand la section est épinglée */
+.scroll-frame-section.is-active .scroll-frame-title,
+.scroll-frame-section.is-active .scroll-frame-sub {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Barre de chargement */
+.seq-loader-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.15);
+  z-index: 10;
+}
+
+.seq-loader {
+  height: 100%;
+  width: 0%;
+  background: var(--color-accent, #D4AF37);
+  transition: width 0.2s linear;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .scroll-frame-content {
+    padding: 0 1.25rem;
+  }
+}

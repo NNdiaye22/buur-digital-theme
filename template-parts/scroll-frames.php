@@ -1,6 +1,6 @@
 <?php
 /**
- * BUUR Digital — Scroll Frames v6.2
+ * BUUR Digital — Scroll Frames v6.3
  * Sticky canvas + overlay Services (ch06→ch07) + overlay Notre ADN (ch05→ch06)
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -15,53 +15,48 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <!-- ===== OVERLAY : NOTRE ADN (fin ch05 → début ch06) ===== -->
     <div id="sf-adn-overlay" class="sf-adn-overlay" aria-hidden="true">
 
-      <div class="sf-adn-lion" aria-hidden="true">
-        <div class="sf-adn-halo"></div>
-        <img
-          src="<?php echo esc_url( BUUR_URI . '/assets/images/lion-royal.png' ); ?>"
-          alt=""
-          class="sf-adn-lion-img"
-          width="320" height="320"
-        >
-      </div>
-
-      <div class="sf-adn-content">
+      <div class="sf-adn-header">
         <span class="sf-adn-eyebrow">NOTRE ADN</span>
         <h2 class="sf-adn-title">Pourquoi choisir <em>BUUR&nbsp;?</em></h2>
-        <p class="sf-adn-intro">Nés à Dakar pour les entrepreneurs africains — des sites de classe mondiale, au prix de l&rsquo;Afrique.</p>
+      </div>
 
-        <div class="sf-adn-valeurs">
+      <div class="sf-adn-orbital">
+        <div class="sf-adn-halo" aria-hidden="true"></div>
 
-          <div class="sf-adn-valeur">
-            <div class="sf-adn-valeur-icon" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            </div>
-            <div>
-              <h3>Excellence</h3>
-              <p>Des sites qui rivalisent avec les meilleures agences internationales.</p>
-            </div>
+        <svg class="sf-adn-connectors" aria-hidden="true" viewBox="0 0 1000 620" preserveAspectRatio="none">
+          <line class="sf-adn-line" x1="235" y1="145" x2="500" y2="310" />
+          <line class="sf-adn-line" x1="235" y1="485" x2="500" y2="310" />
+          <line class="sf-adn-line" x1="770" y1="310" x2="500" y2="310" />
+        </svg>
+
+        <div class="sf-adn-valeur sf-adn-valeur--excellence">
+          <div class="sf-adn-valeur-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
-
-          <div class="sf-adn-valeur">
-            <div class="sf-adn-valeur-icon" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-            </div>
-            <div>
-              <h3>Accessibilité</h3>
-              <p>Prix transparents et honnêtes. Le luxe web pour tous les budgets.</p>
-            </div>
+          <div>
+            <h3>Excellence</h3>
+            <p>Des sites qui rivalisent avec les meilleures agences internationales.</p>
           </div>
+        </div>
 
-          <div class="sf-adn-valeur">
-            <div class="sf-adn-valeur-icon" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            </div>
-            <div>
-              <h3>Innovation</h3>
-              <p>Technologies de pointe : IA, animations 3D, vidéos génératives.</p>
-            </div>
+        <div class="sf-adn-valeur sf-adn-valeur--accessibilite">
+          <div class="sf-adn-valeur-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           </div>
+          <div>
+            <h3>Accessibilité</h3>
+            <p>Prix transparents et honnêtes. Le luxe web pour tous les budgets.</p>
+          </div>
+        </div>
 
+        <div class="sf-adn-valeur sf-adn-valeur--innovation">
+          <div class="sf-adn-valeur-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div>
+            <h3>Innovation</h3>
+            <p>Technologies de pointe : IA, animations 3D, vidéos génératives.</p>
+          </div>
         </div>
       </div>
 

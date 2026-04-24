@@ -1,7 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v6.3
- * Overlay ADN (fin ch05 → ch06) + Overlay Services (fin ch06 → ch07)
- * Fix : overlays détectés par zone (lastZone) pour éviter les sauts de frame au scroll rapide
+ * BUUR Digital — scroll-frames.js v6.4
+ * Overlays ADN + Services pilotés par le progress du scroll (scrub)
  */
 (function () {
   'use strict';
@@ -29,12 +28,13 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
-  /* ADN : fin ch05 (65%) → début ch06 (25%) — 5 frames plus tôt */
+  /* Zones d'affichage — 5 frames plus tôt */
   var ADN_IN   = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.65) - 5;
+  var ADN_PEAK = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.80);
   var ADN_OUT  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.25);
 
-  /* Services : fin ch06 (65%) → début ch07 (20%) — 5 frames plus tôt */
   var SVC_IN   = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.65) - 5;
+  var SVC_PEAK = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.80);
   var SVC_OUT  = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.20);
 
   var CHAPTERS = [
@@ -61,17 +61,20 @@
   var progressNav= document.getElementById('sf-progress');
   var dotEls     = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
+  /* ADN — sélecteurs alignés sur le HTML v6.3 (sans lion PNG ni intro) */
   var adnOverlay = document.getElementById('sf-adn-overlay');
+  var adnHeader  = adnOverlay ? adnOverlay.querySelector('.sf-adn-header')  : null;
   var adnHalo    = adnOverlay ? adnOverlay.querySelector('.sf-adn-halo')    : null;
   var adnEyebrow = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow') : null;
   var adnTitle   = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')   : null;
   var adnValeurs = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
+  var adnConnectors = adnOverlay ? adnOverlay.querySelector('.sf-adn-connectors') : null;
 
+  /* Services */
   var svcOverlay = document.getElementById('sf-services-overlay');
   var sfLabel    = svcOverlay ? svcOverlay.querySelector('.sf-services-label') : null;
   var sfCols     = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.sf-col')) : [];
 
-  /* Hauteur wrapper */
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
   function getOffsetTop(el) {
@@ -137,94 +140,54 @@
     drawCover(allImages[currentFrame]);
   }
 
-  /* ─────────────────────────────────────────────────────────
-   * ZONE TRACKING — clé de la fix scroll rapide
-   * On mémorise la dernière zone pour détecter chaque
-   * TRANSITION de zone, quelle que soit la vitesse de scroll.
-   * zones : 'none' | 'adn' | 'svc'
-   * ───────────────────────────────────────────────────────── */
-  var lastZone = 'none';
-
-  function getZone(f) {
-    if (f >= ADN_IN && f <= ADN_OUT) return 'adn';
-    if (f >= SVC_IN && f <= SVC_OUT) return 'svc';
-    return 'none';
+  /* ============================================================
+   * SCRUB HELPER — calcule une opacité 0→1→0 selon la frame
+   * fade-in de IN à PEAK, plateau jusqu'à OUT-fade, fade-out
+   * ============================================================ */
+  function scrubOpacity(f, fadeIn, peak, fadeOut) {
+    if (f < fadeIn || f > fadeOut) return 0;
+    if (f <= peak)  return (f - fadeIn)  / (peak - fadeIn);
+    var fadeStart = peak + Math.round((fadeOut - peak) * 0.75);
+    if (f <= fadeStart) return 1;
+    return 1 - (f - fadeStart) / (fadeOut - fadeStart);
   }
 
-  var rafId = null;
+  /* ============================================================
+   * MISE À JOUR DES OVERLAYS — directement scrubée
+   * ============================================================ */
+  var adnShown = false, svcShown = false;
 
-  function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
+  function updateOverlays(f) {
+    /* ── ADN ── */
+    var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
+    if (adnOverlay) {
+      adnOverlay.style.opacity  = adnOp;
+      adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none';
 
-  function tick() {
-    rafId = null;
-    var scrolled = window.scrollY - wrapperTop;
-    var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
-    var frame    = progress * (TOTAL - 1);
-    var inside   = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
+      if (adnOp > 0.01 && !adnShown) {
+        /* Premier passage dans la zone : réinitialise les enfants à visible */
+        adnShown = true;
+        var adnChildren = [adnHalo, adnEyebrow, adnTitle, adnConnectors].filter(Boolean);
+        adnValeurs.forEach(function(v){ adnChildren.push(v); });
+        gsap.set(adnChildren, { opacity: 1, x: 0, y: 0, scale: 1, clipPath: 'none' });
+      }
+      if (adnOp <= 0.01) adnShown = false;
+    }
 
-    if (progressNav) progressNav.classList.toggle('is-visible', inside);
+    /* ── SERVICES ── */
+    var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
+    if (svcOverlay) {
+      svcOverlay.style.opacity  = svcOp;
+      svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
 
-    drawFrame(frame);
-    updateText(frame);
-  }
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-
-  /* ── ADN overlay ── */
-  var adnTween = null;
-
-  function showAdn() {
-    if (adnTween && adnTween._active) return;
-    if (adnTween) adnTween.kill();
-    if (adnOverlay) adnOverlay.classList.add('is-visible');
-
-    gsap.set(adnOverlay,  { opacity: 1 });
-    gsap.set(adnHalo,     { opacity: 0, scale: 0.7 });
-    gsap.set(adnEyebrow,  { opacity: 0, y: 12 });
-    gsap.set(adnTitle,    { opacity: 0, clipPath: 'inset(0 0 100% 0)' });
-    gsap.set(adnValeurs,  { opacity: 0, x: -16 });
-
-    var tl = gsap.timeline();
-    tl.to(adnHalo,    { opacity: 1, scale: 1, duration: 1.2, ease: 'power2.out' });
-    tl.to(adnEyebrow, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.6');
-    tl.to(adnTitle,   { opacity: 1, clipPath: 'inset(0 0 0% 0)', duration: 0.7, ease: 'power4.out' }, '-=0.3');
-    tl.to(adnValeurs, { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out', stagger: 0.18 }, '-=0.2');
-    adnTween = tl;
-  }
-
-  function hideAdn() {
-    if (adnTween) adnTween.kill();
-    adnTween = gsap.timeline();
-    adnTween.to(adnValeurs.concat([adnTitle, adnEyebrow]), {
-      opacity: 0, y: -12, duration: 0.3, ease: 'power2.in', stagger: 0.05,
-    });
-    adnTween.to([adnHalo], { opacity: 0, scale: 0.9, duration: 0.3, ease: 'power2.in' }, '-=0.15');
-    adnTween.set(adnOverlay, { opacity: 0 });
-    adnTween.call(function () { if (adnOverlay) adnOverlay.classList.remove('is-visible'); });
-  }
-
-  /* ── Services overlay ── */
-  var svcTween = null;
-
-  function showSvc() {
-    if (svcTween && svcTween._active) return;
-    if (svcTween) svcTween.kill();
-    if (svcOverlay) svcOverlay.classList.add('is-visible');
-    gsap.set(sfLabel, { opacity: 0, y: 10 });
-    gsap.set(sfCols,  { opacity: 0, y: 28 });
-    var tl = gsap.timeline();
-    tl.set(svcOverlay, { opacity: 1 });
-    tl.to(sfLabel, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
-    tl.to(sfCols,  { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.15 }, '-=0.2');
-    svcTween = tl;
-  }
-
-  function hideSvc() {
-    if (svcTween) svcTween.kill();
-    svcTween = gsap.timeline();
-    svcTween.to([sfLabel].concat(sfCols), { opacity: 0, y: -16, duration: 0.35, ease: 'power2.in', stagger: 0.06 });
-    svcTween.set(svcOverlay, { opacity: 0 });
-    svcTween.call(function () { if (svcOverlay) svcOverlay.classList.remove('is-visible'); });
+      if (svcOp > 0.01 && !svcShown) {
+        svcShown = true;
+        var svcChildren = [sfLabel].filter(Boolean);
+        sfCols.forEach(function(c){ svcChildren.push(c); });
+        gsap.set(svcChildren, { opacity: 1, y: 0 });
+      }
+      if (svcOp <= 0.01) svcShown = false;
+    }
   }
 
   /* Textes chapitres */
@@ -248,25 +211,6 @@
   }
 
   function updateText(f) {
-    /* ── Gestion des zones par transition (résistante au scroll rapide) ── */
-    var zone = getZone(f);
-
-    if (zone !== lastZone) {
-      if (zone === 'adn') {
-        showAdn();
-        hideSvc();
-      } else if (zone === 'svc') {
-        showSvc();
-        hideAdn();
-      } else {
-        /* On sort des zones : on cache ce qui était visible */
-        if (lastZone === 'adn') hideAdn();
-        if (lastZone === 'svc') hideSvc();
-      }
-      lastZone = zone;
-    }
-
-    /* ── Chapitres ── */
     var chIdx = -1;
     for (var i = 0; i < CHAPTERS.length; i++) {
       if (f >= CHAPTERS[i].frameIn && f <= CHAPTERS[i].frameOut) { chIdx = i; break; }
@@ -276,6 +220,26 @@
     if (chIdx < 0) { hideChapter(); return; }
     hideChapter(function () { showChapter(chIdx); });
   }
+
+  var rafId = null;
+
+  function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
+
+  function tick() {
+    rafId = null;
+    var scrolled = window.scrollY - wrapperTop;
+    var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
+    var frame    = progress * (TOTAL - 1);
+    var inside   = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
+
+    if (progressNav) progressNav.classList.toggle('is-visible', inside);
+
+    drawFrame(frame);
+    updateOverlays(frame);
+    updateText(frame);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
 
   function initScroll() {
     canvas.width  = window.innerWidth;
@@ -293,10 +257,9 @@
     if (progressNav) progressNav.classList.add('is-visible');
     if (dotEls[0]) dotEls[0].classList.add('is-active');
 
-    if (adnOverlay) gsap.set(adnOverlay, { opacity: 0 });
-    if (svcOverlay) gsap.set(svcOverlay, { opacity: 0 });
-    if (sfLabel)    gsap.set(sfLabel,    { opacity: 0 });
-    if (sfCols.length) gsap.set(sfCols,  { opacity: 0, y: 28 });
+    /* Overlays cachés au départ */
+    if (adnOverlay) { adnOverlay.style.opacity = '0'; adnOverlay.style.pointerEvents = 'none'; }
+    if (svcOverlay) { svcOverlay.style.opacity = '0'; svcOverlay.style.pointerEvents = 'none'; }
 
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
     gsap.to(textEls,  { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5 });

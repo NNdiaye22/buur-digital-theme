@@ -1,6 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v5.2
- * Services hologramme overlay : apparaît fin ch06, disparaît début ch07
+ * BUUR Digital — scroll-frames.js v5.3
+ * Services overlay clean : fade in colonnes + label, pas de glitch
  */
 (function () {
   'use strict';
@@ -28,9 +28,6 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
-  /* Chapitre 06 : offsets[5] → offsets[6]-1
-     Chapitre 07 : offsets[6] → TOTAL-1
-     L'overlay apparaît à 65% du ch06 et disparaît à 20% du ch07 */
   var OVERLAY_IN  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.65);
   var OVERLAY_OUT = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.20);
 
@@ -44,23 +41,22 @@
     { frameIn: offsets[6], frameOut: TOTAL - 1,      chapter: '07', title: 'R\u00e9sultats <em>Mesurables</em>', sub: 'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
   ];
 
-  /* DOM */
-  var wrapper        = document.querySelector('.scroll-frames-wrapper');
-  var canvas         = document.getElementById('scroll-main-canvas');
+  var wrapper         = document.querySelector('.scroll-frames-wrapper');
+  var canvas          = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
-  var ctx            = canvas.getContext('2d');
-  var chapEl         = document.getElementById('sf-chapter');
-  var titleEl        = document.getElementById('sf-title');
-  var subEl          = document.getElementById('sf-sub');
-  var counterEl      = document.getElementById('sf-counter');
-  var loaderWrap     = document.getElementById('sf-loader-wrap');
-  var loaderBar      = document.getElementById('sf-loader-bar');
-  var progressNav    = document.getElementById('sf-progress');
-  var dotEls         = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
+  var ctx             = canvas.getContext('2d');
+  var chapEl          = document.getElementById('sf-chapter');
+  var titleEl         = document.getElementById('sf-title');
+  var subEl           = document.getElementById('sf-sub');
+  var counterEl       = document.getElementById('sf-counter');
+  var loaderWrap      = document.getElementById('sf-loader-wrap');
+  var loaderBar       = document.getElementById('sf-loader-bar');
+  var progressNav     = document.getElementById('sf-progress');
+  var dotEls          = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
   var servicesOverlay = document.getElementById('sf-services-overlay');
-  var sfCols         = servicesOverlay ? Array.prototype.slice.call(servicesOverlay.querySelectorAll('.sf-col')) : [];
+  var sfLabel         = servicesOverlay ? servicesOverlay.querySelector('.sf-services-label') : null;
+  var sfCols          = servicesOverlay ? Array.prototype.slice.call(servicesOverlay.querySelectorAll('.sf-col')) : [];
 
-  /* Canvas resize */
   function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -68,7 +64,6 @@
   resize();
   window.addEventListener('resize', function () { resize(); if (allImages.length) drawFrame(currentFrame); });
 
-  /* Chargement */
   var allImages   = [];
   var totalLoaded = 0;
 
@@ -99,7 +94,6 @@
     });
   }
 
-  /* Dessin */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -120,7 +114,7 @@
     drawCover(allImages[Math.min(Math.round(f), TOTAL - 1)]);
   }
 
-  /* ── Services overlay ── */
+  /* ── Overlay services ── */
   var overlayVisible = false;
   var overlayTween   = null;
 
@@ -128,36 +122,22 @@
     if (overlayVisible || !servicesOverlay) return;
     overlayVisible = true;
     if (overlayTween) overlayTween.kill();
-
     servicesOverlay.classList.add('is-visible');
 
-    /* Reset colonnes */
-    gsap.set(sfCols, { opacity: 0, y: 32, filter: 'blur(6px)' });
-
     var tl = gsap.timeline();
-    /* Overlay fade in avec léger glitch skew */
-    tl.to(servicesOverlay, {
-      opacity: 1, duration: 0.5, ease: 'power2.out',
-      onStart: function () {
-        gsap.fromTo(servicesOverlay,
-          { skewX: 3 },
-          { skewX: 0, duration: 0.18, ease: 'power1.out' }
-        );
-      },
-    });
-    /* Colonnes en stagger — entrée hologramme */
-    tl.to(sfCols, {
-      opacity: 1, y: 0, filter: 'blur(0px)',
-      duration: 0.55, ease: 'power3.out', stagger: 0.14,
-    }, '-=0.15');
+    /* Label + colonnes : tout à opacity 0 au départ */
+    gsap.set(sfLabel, { opacity: 0, y: 10 });
+    gsap.set(sfCols,  { opacity: 0, y: 28 });
 
-    /* Micro glitch sur chaque col */
-    sfCols.forEach(function (col, i) {
-      gsap.fromTo(col,
-        { x: (i % 2 === 0 ? -6 : 6) },
-        { x: 0, duration: 0.12, delay: 0.35 + i * 0.14, ease: 'power1.out' }
-      );
-    });
+    /* L'overlay lui-même devient juste non-display:none */
+    tl.set(servicesOverlay, { opacity: 1 });
+    /* Label */
+    tl.to(sfLabel, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+    /* Colonnes en stagger */
+    tl.to(sfCols, {
+      opacity: 1, y: 0,
+      duration: 0.6, ease: 'power3.out', stagger: 0.15,
+    }, '-=0.2');
 
     overlayTween = tl;
   }
@@ -168,20 +148,16 @@
     if (overlayTween) overlayTween.kill();
 
     overlayTween = gsap.timeline();
-    overlayTween.to(sfCols, {
-      opacity: 0, y: -20, filter: 'blur(4px)',
-      duration: 0.3, ease: 'power2.in', stagger: 0.07,
+    overlayTween.to([sfLabel].concat(sfCols), {
+      opacity: 0, y: -16,
+      duration: 0.35, ease: 'power2.in', stagger: 0.06,
     });
-    overlayTween.to(servicesOverlay, {
-      opacity: 0, skewX: -2, duration: 0.25, ease: 'power2.in',
-      onComplete: function () {
-        servicesOverlay.classList.remove('is-visible');
-        gsap.set(servicesOverlay, { skewX: 0 });
-      },
-    }, '-=0.1');
+    overlayTween.set(servicesOverlay, { opacity: 0 });
+    overlayTween.call(function () {
+      servicesOverlay.classList.remove('is-visible');
+    });
   }
 
-  /* Textes chapitres */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -209,14 +185,12 @@
   }
 
   function updateText(f) {
-    /* Gestion overlay services */
     if (f >= OVERLAY_IN && f <= OVERLAY_OUT) {
       showServicesOverlay();
     } else {
       hideServicesOverlay();
     }
 
-    /* Gestion chapitres normaux */
     var chIdx = -1;
     for (var i = 0; i < CHAPTERS.length; i++) {
       if (f >= CHAPTERS[i].frameIn && f <= CHAPTERS[i].frameOut) { chIdx = i; break; }
@@ -227,7 +201,6 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
-  /* Init scroll */
   function initScroll() {
     if (loaderWrap) {
       gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
@@ -242,9 +215,9 @@
     if (progressNav) progressNav.classList.add('is-visible');
     if (dotEls[0]) dotEls[0].classList.add('is-active');
 
-    /* Reset overlay */
     if (servicesOverlay) gsap.set(servicesOverlay, { opacity: 0 });
-    if (sfCols.length)   gsap.set(sfCols, { opacity: 0, y: 32 });
+    if (sfLabel)         gsap.set(sfLabel, { opacity: 0 });
+    if (sfCols.length)   gsap.set(sfCols,  { opacity: 0, y: 28 });
 
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
     gsap.to(textEls, {

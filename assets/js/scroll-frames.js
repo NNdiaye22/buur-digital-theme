@@ -1,15 +1,16 @@
 /**
- * BUUR Digital — scroll-frames.js v3.1
- * PX_PER_FRAME=14 : chaque séquence dure ~2000–2700px de scroll
+ * BUUR Digital — scroll-frames.js v4
+ * Cross-fade cinématique entre sections
+ * Chaque section commence opaque sur sa première frame,
+ * la section suivante s'anime en fondu en entrant.
  */
 (function () {
   'use strict';
-
   if (!window.gsap || !window.ScrollTrigger) return;
   gsap.registerPlugin(ScrollTrigger);
 
-  var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
-  var FRAMES_PATH  = THEME_URL + '/assets/frames';
+  var THEME_URL   = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
+  var FRAMES_PATH = THEME_URL + '/assets/frames';
   var PX_PER_FRAME = 14;
 
   var SEQUENCES = [
@@ -22,78 +23,77 @@
     { id: 'v7', count: 193, chapter: '07', title: 'Résultats <em>Mesurables</em>', sub: 'Chaque action optimisée. Chaque chiffre suivi.' },
   ];
 
-  function frameSrc(id, index) {
-    return FRAMES_PATH + '/' + id + '/frame_' + String(index).padStart(3, '0') + '.jpg';
+  function frameSrc(id, n) {
+    return FRAMES_PATH + '/' + id + '/frame_' + String(n).padStart(3,'0') + '.jpg';
   }
 
-  function drawCover(ctx, img, cw, ch) {
+  function drawCover(ctx, img, w, h) {
     if (!img || !img.naturalWidth) return;
-    var iw = img.naturalWidth;
-    var ih = img.naturalHeight;
-    var scale = Math.max(cw / iw, ch / ih);
-    var dx = (cw - iw * scale) / 2;
-    var dy = (ch - ih * scale) / 2;
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.drawImage(img, dx, dy, iw * scale, ih * scale);
+    var s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(img,
+      (w - img.naturalWidth  * s) / 2,
+      (h - img.naturalHeight * s) / 2,
+      img.naturalWidth  * s,
+      img.naturalHeight * s
+    );
   }
 
   function preload(id, count, onProgress) {
     return new Promise(function (resolve) {
-      var images = new Array(count);
-      var loaded = 0;
+      var imgs = new Array(count);
+      var done = 0;
       for (var i = 0; i < count; i++) {
         (function (idx) {
           var img = new Image();
           img.src = frameSrc(id, idx + 1);
           img.onload = img.onerror = function () {
-            loaded++;
-            if (onProgress) onProgress(loaded / count);
-            if (loaded === count) resolve(images);
+            done++;
+            if (onProgress) onProgress(done / count);
+            if (done === count) resolve(imgs);
           };
-          images[idx] = img;
+          imgs[idx] = img;
         })(i);
       }
     });
   }
 
-  /* ── Progress dots ── */
+  /* ── Progress ── */
   var progressEl = null;
   var dots = [];
 
   function buildProgress() {
     progressEl = document.createElement('nav');
     progressEl.className = 'scroll-frames-progress';
-    progressEl.setAttribute('aria-label', 'Navigation sections');
+    progressEl.setAttribute('aria-label', 'Chapitres');
     SEQUENCES.forEach(function (seq, i) {
-      var dot = document.createElement('button');
-      dot.className = 'progress-dot';
-      dot.setAttribute('aria-label', 'Chapitre ' + seq.chapter);
-      dot.style.pointerEvents = 'auto';
-      dot.addEventListener('click', function () {
+      var d = document.createElement('button');
+      d.className = 'progress-dot';
+      d.setAttribute('aria-label', 'Chapitre ' + seq.chapter);
+      d.style.pointerEvents = 'auto';
+      d.addEventListener('click', function () {
         var el = document.querySelector('.scroll-section-' + seq.id);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       });
-      progressEl.appendChild(dot);
-      dots.push(dot);
+      progressEl.appendChild(d);
+      dots.push(d);
     });
     document.body.appendChild(progressEl);
   }
 
-  function setActiveDot(i) {
-    dots.forEach(function (d, j) { d.classList.toggle('is-active', j === i); });
+  function setDot(i) {
+    dots.forEach(function (d, j) { d.classList.toggle('is-active', i === j); });
   }
 
   /* ── Init séquence ── */
-  function initSequence(seq, index) {
-    var sectionEl = document.querySelector('.scroll-section-' + seq.id);
-    if (!sectionEl) return;
-
-    var canvas = document.getElementById('scroll-seq-' + seq.id);
+  function initSeq(seq, index) {
+    var section = document.querySelector('.scroll-section-' + seq.id);
+    if (!section) return;
+    var canvas  = document.getElementById('scroll-seq-' + seq.id);
     if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-
-    var loaderWrap = sectionEl.querySelector('.seq-loader-wrap');
-    var loaderEl   = sectionEl.querySelector('.seq-loader');
+    var ctx        = canvas.getContext('2d');
+    var loaderWrap = section.querySelector('.seq-loader-wrap');
+    var loaderEl   = section.querySelector('.seq-loader');
 
     function resize() {
       canvas.width  = window.innerWidth;
@@ -107,6 +107,7 @@
     }).then(function (images) {
       if (loaderWrap) loaderWrap.remove();
 
+      /* ── Dessine la première frame dès le chargement ── */
       drawCover(ctx, images[0], canvas.width, canvas.height);
 
       var state = { frame: 0 };
@@ -118,26 +119,51 @@
         }
       }
 
-      /* Texte overlay */
+      /* ── Cross-fade d'entrée ──
+         Quand la section entre dans le viewport, le canvas
+         part de opacity:0 → 1 via CSS transition.
+         On ajoute is-entering au mount, puis on l'enlève après 50ms
+         pour déclencher la transition CSS. */
+      if (index > 0) {
+        canvas.style.opacity = '0';
+        canvas.style.transition = 'opacity 0.7s ease';
+      }
+
+      /* ── Texte overlay ── */
       ScrollTrigger.create({
-        trigger: sectionEl,
-        start: 'top 55%',
-        end: 'bottom 45%',
-        onEnter:     function () { sectionEl.classList.add('is-active');    if (progressEl) progressEl.classList.add('is-visible'); setActiveDot(index); },
-        onLeave:     function () { sectionEl.classList.remove('is-active'); sectionEl.classList.add('is-ending'); },
-        onEnterBack: function () { sectionEl.classList.add('is-active');    sectionEl.classList.remove('is-ending'); setActiveDot(index); },
+        trigger: section,
+        start: 'top 58%',
+        end: 'bottom 42%',
+        onEnter: function () {
+          /* Cross-fade in */
+          if (index > 0) canvas.style.opacity = '1';
+          section.classList.add('is-active');
+          if (progressEl) progressEl.classList.add('is-visible');
+          setDot(index);
+        },
+        onLeave: function () {
+          section.classList.remove('is-active');
+        },
+        onEnterBack: function () {
+          if (index > 0) canvas.style.opacity = '1';
+          section.classList.add('is-active');
+          setDot(index);
+        },
         onLeaveBack: function () {
-          sectionEl.classList.remove('is-active', 'is-ending');
+          /* Cross-fade out vers section précédente */
+          if (index > 0) canvas.style.opacity = '0';
+          section.classList.remove('is-active');
           if (index === 0 && progressEl) progressEl.classList.remove('is-visible');
         },
       });
 
+      /* ── Animation frames ── */
       gsap.to(state, {
         frame: seq.count - 1,
         ease: 'none',
         onUpdate: function () { render(state.frame); },
         scrollTrigger: {
-          trigger:       sectionEl,
+          trigger:       section,
           start:         'top top',
           end:           '+=' + (seq.count * PX_PER_FRAME),
           scrub:         true,
@@ -151,13 +177,11 @@
 
   function init() {
     buildProgress();
-    SEQUENCES.forEach(initSequence);
+    SEQUENCES.forEach(initSeq);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', init)
+    : init();
 
 })();

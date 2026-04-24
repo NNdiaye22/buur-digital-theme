@@ -1,152 +1,88 @@
-/* ============================================================
-   BUUR Digital — pourquoi.css
-   ============================================================ */
+/* BUUR Digital — pourquoi.css v2 */
 
 .pourquoi-section {
-  padding: var(--space-24) var(--container-pad);
-  background: #060608;
-  position: relative;
-  overflow: hidden;
-}
-.pourquoi-section::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--blue), var(--orange));
+  padding: clamp(5rem, 10vh, 8rem) var(--container-pad);
+  max-width: var(--container-max);
+  margin: 0 auto;
 }
 
 .pourquoi-inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-16);
+  gap: clamp(3rem, 6vw, 7rem);
   align-items: center;
-  max-width: var(--container-max);
-  margin-inline: auto;
 }
 
-/* ---- Lion visuel ---- */
-.pourquoi-visual {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-6);
-}
-
+/* Visuel */
+.pourquoi-visual { position: relative; }
 .lion-wrap {
   position: relative;
-  width: 420px;
-  max-width: 100%;
-  aspect-ratio: 1;
-  opacity: 0;
-  transform: scale(0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
 .lion-halo {
   position: absolute;
-  inset: -20%;
+  width: 380px; height: 380px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(234,91,19,0.18) 0%,
-    rgba(234,91,19,0.06) 50%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(234,91,19,0.15) 0%, transparent 70%);
   animation: halo-pulse 3s ease-in-out infinite;
 }
 @keyframes halo-pulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
+  0%,100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
 }
-
 .lion-img {
   position: relative;
   z-index: 1;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-lg);
-  border: 2px solid rgba(234,91,19,0.3);
-  filter: brightness(0.9) contrast(1.05);
+  width: 100%;
+  max-width: 400px;
+  filter: drop-shadow(0 0 40px rgba(234,91,19,0.2));
 }
 
-.lion-particles {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.lion-caption {
-  font-family: var(--font-mono);
-  font-size: var(--size-2xl);
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: var(--orange);
-  text-shadow: 0 0 30px rgba(234,91,19,0.5);
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-/* ---- Contenu texte ---- */
-.pourquoi-content {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
+/* Contenu */
 .pourquoi-intro {
-  font-size: var(--size-lg);
+  font-size: 1.05rem;
   color: var(--grey-400);
-  line-height: 1.7;
-  margin-bottom: var(--space-8);
+  line-height: 1.75;
+  max-width: 480px;
+  margin-bottom: 2.5rem;
 }
 
 .valeurs-grid {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: 1.75rem;
 }
-
 .valeur-item {
   display: flex;
-  gap: var(--space-4);
   align-items: flex-start;
-  padding: var(--space-5);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  transition: border-color var(--transition-base), box-shadow var(--transition-base);
-}
-.valeur-item:hover {
-  border-color: rgba(234,91,19,0.4);
-  box-shadow: 0 4px 20px rgba(234,91,19,0.08);
+  gap: 1.25rem;
 }
 .valeur-icon {
-  flex-shrink: 0;
   width: 48px; height: 48px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(234,91,19,0.1);
+  background: rgba(234,91,19,0.08);
+  border: 1px solid rgba(234,91,19,0.18);
   border-radius: var(--radius-md);
   color: var(--orange);
 }
 .valeur-item h3 {
-  font-size: var(--size-base);
+  font-size: 1rem;
   font-weight: 700;
   color: var(--white);
-  margin-bottom: var(--space-1);
+  margin-bottom: 0.3rem;
 }
 .valeur-item p {
-  font-size: var(--size-sm);
+  font-size: 0.875rem;
   color: var(--grey-400);
-  line-height: 1.5;
+  line-height: 1.65;
 }
 
-/* ---- Responsive ---- */
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .pourquoi-inner { grid-template-columns: 1fr; }
-  .lion-wrap { width: 300px; }
-  .pourquoi-content { transform: none; }
+  .lion-wrap { max-width: 280px; margin: 0 auto; }
 }

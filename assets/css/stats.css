@@ -1,61 +1,52 @@
-/* ============================================================
-   BUUR Digital — stats.css
-   ============================================================ */
+/* BUUR Digital — stats.css v2 */
 
 .stats-section {
-  padding: var(--space-16) var(--container-pad);
-  background: linear-gradient(135deg, var(--orange) 0%, var(--blue) 100%);
+  padding: clamp(4rem, 8vh, 6rem) var(--container-pad);
+  background: var(--surface);
   position: relative;
-  overflow: hidden;
 }
-.stats-section::before {
+.stats-section::before, .stats-section::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-  pointer-events: none;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
+.stats-section::before { top: 0; }
+.stats-section::after  { bottom: 0; }
 
-.stats-inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: var(--space-8);
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
   max-width: var(--container-max);
-  margin-inline: auto;
+  margin: 0 auto;
+  border: 1px solid var(--border);
 }
 
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
+  background: var(--surface);
+  padding: 2.5rem 2rem;
   text-align: center;
-  opacity: 0;
-  transform: translateY(20px);
 }
-
-.stat-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-  opacity: 0.8;
-}
-
-.stat-value {
+.stat-number {
   font-family: var(--font-mono);
-  font-size: clamp(var(--size-3xl), 4vw, var(--size-5xl));
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 700;
-  color: var(--white);
+  color: var(--orange);
   line-height: 1;
-  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.03em;
+}
+.stat-label {
+  font-size: 0.82rem;
+  color: var(--grey-600);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
 }
 
-.stat-label {
-  font-size: var(--size-sm);
-  color: rgba(255,255,255,0.8);
-  max-width: 140px;
-  line-height: 1.4;
+@media (max-width: 700px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }

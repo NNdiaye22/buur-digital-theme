@@ -1,15 +1,18 @@
 /**
- * BUUR Digital — scroll-frames.js v6.8
- * Fix 3D : perspective() inline dans chaque transform
- * Fix scrub : plages ADN/SVC élargies pour animation visible plus longtemps
+ * BUUR Digital — scroll-frames.js v7.0
+ * Chargement progressif 3 phases :
+ *   Phase 1 : ch01 (192 frames) → affichage immédiat, loader masqué
+ *   Phase 2 : ch02+ch03 en arrière-plan (requestIdleCallback)
+ *   Phase 3 : ch04→ch07 en arrière-plan
+ * Vidéos services : lazy load au moment où l’overlay devient visible
  */
 (function () {
   'use strict';
 
   if (!window.gsap) return;
 
-  var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
-  var FRAMES_PATH  = THEME_URL + '/assets/frames';
+  var THEME_URL   = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
+  var FRAMES_PATH = THEME_URL + '/assets/frames';
   var PX_PER_FRAME = 12;
 
   var SEQUENCES = [
@@ -29,38 +32,36 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
-  /* ADN : entre 55% du ch05 et 40% du ch06 — plage large */
   var ADN_IN   = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.55);
   var ADN_PEAK = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.75);
   var ADN_OUT  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.40);
 
-  /* SVC : entre 55% du ch06 et 35% du ch07 — plage large */
   var SVC_IN   = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.55);
   var SVC_PEAK = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.75);
   var SVC_OUT  = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.35);
 
   var CHAPTERS = [
     { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'Strat\u00e9gie <em>Digitale</em>',    sub:'Une vision claire pour dominer votre march\u00e9 en ligne.' },
-    { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Design <em>Premium</em>',         sub:'Des interfaces qui captivent, engagent et convertissent.' },
-    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Code <em>Sur-Mesure</em>',        sub:'Rapide, propre, \u00e9volutif \u2014 construit pour durer.' },
-    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'SEO & <em>Performance</em>',      sub:'Premier sur Google. Rapide sur tous les \u00e9crans.' },
-    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'E-<em>Commerce</em>',             sub:'Votre boutique pens\u00e9e pour vendre, 24h/24.' },
-    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Support <em>D\u00e9di\u00e9</em>',  sub:'Une \u00e9quipe disponible pour faire grandir votre projet.' },
-    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'R\u00e9sultats <em>Mesurables</em>', sub:'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
+    { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Design <em>Premium</em>',             sub:'Des interfaces qui captivent, engagent et convertissent.' },
+    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Code <em>Sur-Mesure</em>',            sub:'Rapide, propre, \u00e9volutif \u2014 construit pour durer.' },
+    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'SEO & <em>Performance</em>',          sub:'Premier sur Google. Rapide sur tous les \u00e9crans.' },
+    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'E-<em>Commerce</em>',                 sub:'Votre boutique pens\u00e9e pour vendre, 24h/24.' },
+    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Support <em>D\u00e9di\u00e9</em>',    sub:'Une \u00e9quipe disponible pour faire grandir votre projet.' },
+    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'R\u00e9sultats <em>Mesurables</em>',  sub:'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
   ];
 
-  var wrapper    = document.getElementById('scroll-frames');
-  var canvas     = document.getElementById('scroll-main-canvas');
+  var wrapper     = document.getElementById('scroll-frames');
+  var canvas      = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
-  var ctx        = canvas.getContext('2d');
-  var chapEl     = document.getElementById('sf-chapter');
-  var titleEl    = document.getElementById('sf-title');
-  var subEl      = document.getElementById('sf-sub');
-  var counterEl  = document.getElementById('sf-counter');
-  var loaderWrap = document.getElementById('sf-loader-wrap');
-  var loaderBar  = document.getElementById('sf-loader-bar');
-  var progressNav= document.getElementById('sf-progress');
-  var dotEls     = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
+  var ctx         = canvas.getContext('2d');
+  var chapEl      = document.getElementById('sf-chapter');
+  var titleEl     = document.getElementById('sf-title');
+  var subEl       = document.getElementById('sf-sub');
+  var counterEl   = document.getElementById('sf-counter');
+  var loaderWrap  = document.getElementById('sf-loader-wrap');
+  var loaderBar   = document.getElementById('sf-loader-bar');
+  var progressNav = document.getElementById('sf-progress');
+  var dotEls      = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
   var adnOverlay    = document.getElementById('sf-adn-overlay');
   var adnEyebrow    = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow')    : null;
@@ -69,9 +70,9 @@
   var adnConnectors = adnOverlay ? adnOverlay.querySelector('.sf-adn-connectors') : null;
   var adnValeurs    = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
 
-  var svcOverlay = document.getElementById('sf-services-overlay');
-  var sfLabel    = svcOverlay ? svcOverlay.querySelector('.sf-services-label') : null;
-  var sfCols     = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.sf-col')) : [];
+  var svcOverlay    = document.getElementById('sf-services-overlay');
+  var svcVideos     = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('video[data-src]')) : [];
+  var svcVideosLoaded = false;
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
@@ -84,39 +85,56 @@
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
     updateWrapperTop();
-    if (allImages.length) drawFrame(currentFrame);
+    if (allImages[0]) drawFrame(currentFrame);
   }
   window.addEventListener('resize', resize);
 
-  var allImages = [], totalLoaded = 0;
+  /* ============================================================
+   * IMAGES : tableau plat pré-alloué, rempli par phases
+   * ============================================================ */
+  var allImages = new Array(TOTAL);
+  var totalLoaded = 0;
 
-  function frameSrc(id, idx) {
-    return FRAMES_PATH + '/' + id + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
+  function frameSrc(seqId, idx) {
+    return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
   }
 
-  function loadAll() {
-    return new Promise(function (resolve) {
-      var temps = SEQUENCES.map(function (s) { return new Array(s.count); });
-      SEQUENCES.forEach(function (seq, si) {
+  function loadRange(seqStart, seqEnd, onDone) {
+    var toLoad = 0;
+    var done   = 0;
+    for (var si = seqStart; si <= seqEnd; si++) {
+      toLoad += SEQUENCES[si].count;
+    }
+    if (toLoad === 0) { if (onDone) onDone(); return; }
+
+    for (var s = seqStart; s <= seqEnd; s++) {
+      (function (seq, globalOffset) {
         for (var i = 0; i < seq.count; i++) {
-          (function (seqIdx, li) {
-            var img = new Image();
-            img.src = frameSrc(seq.id, li);
+          (function (li) {
+            var img    = new Image();
+            var absIdx = globalOffset + li;
             img.onload = img.onerror = function () {
+              allImages[absIdx] = img;
               totalLoaded++;
+              done++;
               if (loaderBar) loaderBar.style.width = (totalLoaded / TOTAL * 100) + '%';
-              if (totalLoaded === TOTAL) resolve();
+              if (done === toLoad && onDone) onDone();
             };
-            temps[seqIdx][li] = img;
-          })(si, i);
+            img.src = frameSrc(seq.id, li);
+          })(i);
         }
-      });
-      SEQUENCES.forEach(function (seq, si) {
-        for (var i = 0; i < seq.count; i++) allImages.push(temps[si][i]);
-      });
-    });
+      })(SEQUENCES[s], offsets[s]);
+    }
   }
 
+  function idle(fn) {
+    if (window.requestIdleCallback) { requestIdleCallback(fn, { timeout: 2000 }); }
+    else { setTimeout(fn, 200); }
+  }
+
+  /* ============================================================
+   * DESSIN
+   * ============================================================ */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -131,10 +149,14 @@
   var currentFrame = 0, currentChapter = -1, textTween = null;
 
   function drawFrame(f) {
-    currentFrame = Math.max(0, Math.min(Math.round(f), TOTAL - 1));
-    drawCover(allImages[currentFrame]);
+    var idx = Math.max(0, Math.min(Math.round(f), TOTAL - 1));
+    currentFrame = idx;
+    if (allImages[idx]) drawCover(allImages[idx]);
   }
 
+  /* ============================================================
+   * OVERLAYS
+   * ============================================================ */
   function zoneT(f, inF, outF) {
     if (f <= inF) return 0;
     if (f >= outF) return 1;
@@ -152,89 +174,73 @@
   function lerp(a, b, t) { return a + (b - a) * t; }
   function clamp01(v)    { return Math.max(0, Math.min(1, v)); }
 
+  function lazyLoadSvcVideos() {
+    if (svcVideosLoaded) return;
+    svcVideosLoaded = true;
+    svcVideos.forEach(function (v) {
+      if (v.dataset.src) { v.src = v.dataset.src; v.load(); }
+    });
+  }
+
   function updateOverlays(f) {
 
-    /* ====== ADN ====== */
+    /* —— ADN —— */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
       adnOverlay.style.opacity       = adnOp;
       adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none';
     }
-
     if (adnOp > 0) {
       var tIn = clamp01(zoneT(f, ADN_IN, ADN_PEAK));
-
-      if (adnEyebrow) {
-        adnEyebrow.style.opacity   = tIn;
-        adnEyebrow.style.transform = 'translateY(' + lerp(-20, 0, tIn) + 'px)';
-      }
-      if (adnTitleEl) {
-        adnTitleEl.style.opacity   = tIn;
-        adnTitleEl.style.clipPath  = 'inset(0 0 0% 0)';
-        adnTitleEl.style.transform = 'translateY(' + lerp(-12, 0, tIn) + 'px)';
-      }
-      if (adnHalo) {
-        adnHalo.style.opacity   = lerp(0, 0.95, tIn);
-        adnHalo.style.transform = 'translate(-50%, -50%) scale(' + lerp(0.5, 1, tIn) + ')';
-      }
-      if (adnConnectors) {
-        adnConnectors.style.opacity = tIn;
-      }
-
-      /* Cartes : perspective() inline pour effet 3D réel sur position:absolute */
+      if (adnEyebrow)    { adnEyebrow.style.opacity = tIn; adnEyebrow.style.transform = 'translateY(' + lerp(-20,0,tIn) + 'px)'; }
+      if (adnTitleEl)    { adnTitleEl.style.opacity = tIn; adnTitleEl.style.clipPath = 'inset(0 0 0% 0)'; adnTitleEl.style.transform = 'translateY(' + lerp(-12,0,tIn) + 'px)'; }
+      if (adnHalo)       { adnHalo.style.opacity = lerp(0,0.95,tIn); adnHalo.style.transform = 'translate(-50%,-50%) scale(' + lerp(0.5,1,tIn) + ')'; }
+      if (adnConnectors) { adnConnectors.style.opacity = tIn; }
       adnValeurs.forEach(function (card, i) {
         var tx = 0, ty = 0;
         if      (card.classList.contains('sf-adn-valeur--excellence'))    { tx = -16; ty =  -8; }
         else if (card.classList.contains('sf-adn-valeur--accessibilite')) { tx = -16; ty =   8; }
         else if (card.classList.contains('sf-adn-valeur--innovation'))    { tx =  16; ty =   0; }
-
-        var delay  = i * 0.12;
-        var tCard  = clamp01((tIn - delay) / (1 - delay || 0.88));
-        var rx     = lerp(38, 0, tCard);
-        var ty2    = lerp(30, ty, tCard);
+        var delay = i * 0.12;
+        var tCard = clamp01((tIn - delay) / (1 - delay || 0.88));
         card.style.opacity   = tCard;
-        card.style.transform = 'perspective(700px) translate(' + tx + 'px,' + ty2 + 'px) rotateX(' + rx + 'deg)';
+        card.style.transform = 'perspective(700px) translate(' + tx + 'px,' + lerp(30,ty,tCard) + 'px) rotateX(' + lerp(38,0,tCard) + 'deg)';
       });
-
     } else {
       if (adnEyebrow)    adnEyebrow.style.opacity    = 0;
       if (adnTitleEl)    adnTitleEl.style.opacity    = 0;
       if (adnHalo)       adnHalo.style.opacity       = 0;
       if (adnConnectors) adnConnectors.style.opacity = 0;
-      adnValeurs.forEach(function (card) { card.style.opacity = 0; });
+      adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
 
-    /* ====== SERVICES ====== */
+    /* —— SERVICES —— */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
       svcOverlay.style.opacity       = svcOp;
       svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
     }
+    /* Lazy load vidéos dès que l’overlay commence à être visible */
+    if (svcOp > 0) lazyLoadSvcVideos();
 
     if (svcOp > 0) {
       var tSvcIn = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
-
-      if (sfLabel) {
-        sfLabel.style.opacity   = tSvcIn;
-        sfLabel.style.transform = 'translateY(' + lerp(-18, 0, tSvcIn) + 'px)';
-      }
-
-      /* Colonnes : perspective() inline pour effet 3D réel */
-      sfCols.forEach(function (col, i) {
+      var svcCards = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')) : [];
+      svcCards.forEach(function (card, i) {
         var delay = i * 0.10;
         var tCol  = clamp01((tSvcIn - delay) / (1 - delay || 0.90));
-        var ry    = lerp(28, 0, tCol);
-        var ty    = lerp(28, 0, tCol);
-        col.style.opacity   = tCol;
-        col.style.transform = 'perspective(900px) translateY(' + ty + 'px) rotateY(' + ry + 'deg)';
+        card.style.opacity   = tCol;
+        card.style.transform = 'perspective(900px) translateY(' + lerp(32,0,tCol) + 'px) rotateY(' + lerp(20,0,tCol) + 'deg)';
       });
-
-    } else {
-      if (sfLabel) sfLabel.style.opacity = 0;
-      sfCols.forEach(function (c) { c.style.opacity = 0; });
+    } else if (svcOverlay) {
+      var svcCards2 = Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card'));
+      svcCards2.forEach(function (c) { c.style.opacity = 0; });
     }
   }
 
+  /* ============================================================
+   * TEXTE CHAPITRES
+   * ============================================================ */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -243,15 +249,15 @@
     if (chapEl)    chapEl.textContent    = ch.chapter;
     if (titleEl)   titleEl.innerHTML     = ch.title;
     if (subEl)     subEl.textContent     = ch.sub;
-    if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
+    if (counterEl) counterEl.textContent = '0' + (idx+1) + ' / 07';
     dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
-    textTween = gsap.to(textEls, { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 0.9, ease: 'power4.out', stagger: 0.11 });
+    textTween = gsap.to(textEls, { opacity:1, y:0, clipPath:'inset(0 0 0% 0)', duration:0.9, ease:'power4.out', stagger:0.11 });
   }
 
   function hideChapter(onDone) {
     if (textTween) textTween.kill();
-    textTween = gsap.to(textEls, { opacity: 0, y: -28, clipPath: 'inset(0 0 100% 0)', duration: 0.45, ease: 'power3.in', onComplete: onDone || null });
+    textTween = gsap.to(textEls, { opacity:0, y:-28, clipPath:'inset(0 0 100% 0)', duration:0.45, ease:'power3.in', onComplete: onDone || null });
   }
 
   function updateText(f) {
@@ -265,6 +271,9 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
+  /* ============================================================
+   * BOUCLE SCROLL
+   * ============================================================ */
   var rafId = null;
   function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
@@ -282,14 +291,16 @@
 
   window.addEventListener('scroll', onScroll, { passive: true });
 
+  /* ============================================================
+   * INIT : Phase 1 → affichage immédiat dès ch01 chargé
+   * ============================================================ */
   function initScroll() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
     updateWrapperTop();
 
-    if (loaderWrap) gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
+    if (loaderWrap) gsap.to(loaderWrap, { opacity:0, duration:0.4, onComplete: function(){ loaderWrap.remove(); } });
 
-    drawFrame(0);
     currentChapter = 0;
     if (chapEl)    chapEl.textContent    = CHAPTERS[0].chapter;
     if (titleEl)   titleEl.innerHTML     = CHAPTERS[0].title;
@@ -301,8 +312,8 @@
     if (adnOverlay) { adnOverlay.style.opacity = '0'; adnOverlay.style.pointerEvents = 'none'; }
     if (svcOverlay) { svcOverlay.style.opacity = '0'; svcOverlay.style.pointerEvents = 'none'; }
 
-    gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
-    gsap.to(textEls,  { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5 });
+    gsap.set(textEls, { opacity:0, y:40, clipPath:'inset(0 0 100% 0)' });
+    gsap.to(textEls,  { opacity:1, y:0,  clipPath:'inset(0 0 0% 0)', duration:1.1, ease:'power4.out', stagger:0.13, delay:0.3 });
 
     dotEls.forEach(function (dot, i) {
       dot.addEventListener('click', function () {
@@ -311,9 +322,21 @@
       });
     });
 
+    drawFrame(0);
     tick();
+
+    /* Phase 2 : ch02 + ch03 en idle */
+    idle(function () {
+      loadRange(1, 2, function () {
+        /* Phase 3 : ch04 → ch07 en idle */
+        idle(function () {
+          loadRange(3, 6, null);
+        });
+      });
+    });
   }
 
-  loadAll().then(initScroll);
+  /* Phase 1 : ch01 uniquement — dès que prêt on affiche */
+  loadRange(0, 0, initScroll);
 
 })();

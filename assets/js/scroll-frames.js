@@ -1,6 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v5.1 restore
- * pinSpacing:true — stable
+ * BUUR Digital — scroll-frames.js v5.2
+ * Services hologramme overlay : apparaît fin ch06, disparaît début ch07
  */
 (function () {
   'use strict';
@@ -28,29 +28,39 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
+  /* Chapitre 06 : offsets[5] → offsets[6]-1
+     Chapitre 07 : offsets[6] → TOTAL-1
+     L'overlay apparaît à 65% du ch06 et disparaît à 20% du ch07 */
+  var OVERLAY_IN  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.65);
+  var OVERLAY_OUT = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.20);
+
   var CHAPTERS = [
-    { frameIn: offsets[0], frameOut: offsets[1] - 1, chapter: '01', title: 'Stratégie <em>Digitale</em>',   sub: 'Une vision claire pour dominer votre marché en ligne.' },
+    { frameIn: offsets[0], frameOut: offsets[1] - 1, chapter: '01', title: 'Strat\u00e9gie <em>Digitale</em>',   sub: 'Une vision claire pour dominer votre march\u00e9 en ligne.' },
     { frameIn: offsets[1], frameOut: offsets[2] - 1, chapter: '02', title: 'Design <em>Premium</em>',        sub: 'Des interfaces qui captivent, engagent et convertissent.' },
-    { frameIn: offsets[2], frameOut: offsets[3] - 1, chapter: '03', title: 'Code <em>Sur-Mesure</em>',       sub: 'Rapide, propre, évolutif — construit pour durer.' },
-    { frameIn: offsets[3], frameOut: offsets[4] - 1, chapter: '04', title: 'SEO & <em>Performance</em>',     sub: 'Premier sur Google. Rapide sur tous les écrans.' },
-    { frameIn: offsets[4], frameOut: offsets[5] - 1, chapter: '05', title: 'E-<em>Commerce</em>',            sub: 'Votre boutique pensée pour vendre, 24h/24.' },
-    { frameIn: offsets[5], frameOut: offsets[6] - 1, chapter: '06', title: 'Support <em>Dédié</em>',         sub: 'Une équipe disponible pour faire grandir votre projet.' },
-    { frameIn: offsets[6], frameOut: TOTAL - 1,      chapter: '07', title: 'Résultats <em>Mesurables</em>',  sub: 'Chaque action optimisée. Chaque chiffre suivi.' },
+    { frameIn: offsets[2], frameOut: offsets[3] - 1, chapter: '03', title: 'Code <em>Sur-Mesure</em>',       sub: 'Rapide, propre, \u00e9volutif \u2014 construit pour durer.' },
+    { frameIn: offsets[3], frameOut: offsets[4] - 1, chapter: '04', title: 'SEO & <em>Performance</em>',     sub: 'Premier sur Google. Rapide sur tous les \u00e9crans.' },
+    { frameIn: offsets[4], frameOut: offsets[5] - 1, chapter: '05', title: 'E-<em>Commerce</em>',            sub: 'Votre boutique pens\u00e9e pour vendre, 24h/24.' },
+    { frameIn: offsets[5], frameOut: offsets[6] - 1, chapter: '06', title: 'Support <em>D\u00e9di\u00e9</em>', sub: 'Une \u00e9quipe disponible pour faire grandir votre projet.' },
+    { frameIn: offsets[6], frameOut: TOTAL - 1,      chapter: '07', title: 'R\u00e9sultats <em>Mesurables</em>', sub: 'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
   ];
 
-  var wrapper     = document.querySelector('.scroll-frames-wrapper');
-  var canvas      = document.getElementById('scroll-main-canvas');
+  /* DOM */
+  var wrapper        = document.querySelector('.scroll-frames-wrapper');
+  var canvas         = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
-  var ctx         = canvas.getContext('2d');
-  var chapEl      = document.getElementById('sf-chapter');
-  var titleEl     = document.getElementById('sf-title');
-  var subEl       = document.getElementById('sf-sub');
-  var counterEl   = document.getElementById('sf-counter');
-  var loaderWrap  = document.getElementById('sf-loader-wrap');
-  var loaderBar   = document.getElementById('sf-loader-bar');
-  var progressNav = document.getElementById('sf-progress');
-  var dotEls      = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
+  var ctx            = canvas.getContext('2d');
+  var chapEl         = document.getElementById('sf-chapter');
+  var titleEl        = document.getElementById('sf-title');
+  var subEl          = document.getElementById('sf-sub');
+  var counterEl      = document.getElementById('sf-counter');
+  var loaderWrap     = document.getElementById('sf-loader-wrap');
+  var loaderBar      = document.getElementById('sf-loader-bar');
+  var progressNav    = document.getElementById('sf-progress');
+  var dotEls         = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
+  var servicesOverlay = document.getElementById('sf-services-overlay');
+  var sfCols         = servicesOverlay ? Array.prototype.slice.call(servicesOverlay.querySelectorAll('.sf-col')) : [];
 
+  /* Canvas resize */
   function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -58,6 +68,7 @@
   resize();
   window.addEventListener('resize', function () { resize(); if (allImages.length) drawFrame(currentFrame); });
 
+  /* Chargement */
   var allImages   = [];
   var totalLoaded = 0;
 
@@ -88,6 +99,7 @@
     });
   }
 
+  /* Dessin */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -108,6 +120,68 @@
     drawCover(allImages[Math.min(Math.round(f), TOTAL - 1)]);
   }
 
+  /* ── Services overlay ── */
+  var overlayVisible = false;
+  var overlayTween   = null;
+
+  function showServicesOverlay() {
+    if (overlayVisible || !servicesOverlay) return;
+    overlayVisible = true;
+    if (overlayTween) overlayTween.kill();
+
+    servicesOverlay.classList.add('is-visible');
+
+    /* Reset colonnes */
+    gsap.set(sfCols, { opacity: 0, y: 32, filter: 'blur(6px)' });
+
+    var tl = gsap.timeline();
+    /* Overlay fade in avec léger glitch skew */
+    tl.to(servicesOverlay, {
+      opacity: 1, duration: 0.5, ease: 'power2.out',
+      onStart: function () {
+        gsap.fromTo(servicesOverlay,
+          { skewX: 3 },
+          { skewX: 0, duration: 0.18, ease: 'power1.out' }
+        );
+      },
+    });
+    /* Colonnes en stagger — entrée hologramme */
+    tl.to(sfCols, {
+      opacity: 1, y: 0, filter: 'blur(0px)',
+      duration: 0.55, ease: 'power3.out', stagger: 0.14,
+    }, '-=0.15');
+
+    /* Micro glitch sur chaque col */
+    sfCols.forEach(function (col, i) {
+      gsap.fromTo(col,
+        { x: (i % 2 === 0 ? -6 : 6) },
+        { x: 0, duration: 0.12, delay: 0.35 + i * 0.14, ease: 'power1.out' }
+      );
+    });
+
+    overlayTween = tl;
+  }
+
+  function hideServicesOverlay() {
+    if (!overlayVisible || !servicesOverlay) return;
+    overlayVisible = false;
+    if (overlayTween) overlayTween.kill();
+
+    overlayTween = gsap.timeline();
+    overlayTween.to(sfCols, {
+      opacity: 0, y: -20, filter: 'blur(4px)',
+      duration: 0.3, ease: 'power2.in', stagger: 0.07,
+    });
+    overlayTween.to(servicesOverlay, {
+      opacity: 0, skewX: -2, duration: 0.25, ease: 'power2.in',
+      onComplete: function () {
+        servicesOverlay.classList.remove('is-visible');
+        gsap.set(servicesOverlay, { skewX: 0 });
+      },
+    }, '-=0.1');
+  }
+
+  /* Textes chapitres */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -135,17 +209,25 @@
   }
 
   function updateText(f) {
+    /* Gestion overlay services */
+    if (f >= OVERLAY_IN && f <= OVERLAY_OUT) {
+      showServicesOverlay();
+    } else {
+      hideServicesOverlay();
+    }
+
+    /* Gestion chapitres normaux */
     var chIdx = -1;
     for (var i = 0; i < CHAPTERS.length; i++) {
       if (f >= CHAPTERS[i].frameIn && f <= CHAPTERS[i].frameOut) { chIdx = i; break; }
     }
     if (chIdx === currentChapter) return;
-    var next = chIdx;
-    currentChapter = next;
-    if (next < 0) { hideChapter(); return; }
-    hideChapter(function () { showChapter(next); });
+    currentChapter = chIdx;
+    if (chIdx < 0) { hideChapter(); return; }
+    hideChapter(function () { showChapter(chIdx); });
   }
 
+  /* Init scroll */
   function initScroll() {
     if (loaderWrap) {
       gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
@@ -159,6 +241,10 @@
     if (counterEl) counterEl.textContent = '01 / 07';
     if (progressNav) progressNav.classList.add('is-visible');
     if (dotEls[0]) dotEls[0].classList.add('is-active');
+
+    /* Reset overlay */
+    if (servicesOverlay) gsap.set(servicesOverlay, { opacity: 0 });
+    if (sfCols.length)   gsap.set(sfCols, { opacity: 0, y: 32 });
 
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
     gsap.to(textEls, {
@@ -190,7 +276,10 @@
         pin:           true,
         pinSpacing:    true,
         anticipatePin: 1,
-        onLeave:     function () { if (progressNav) progressNav.classList.remove('is-visible'); },
+        onLeave:     function () {
+          hideServicesOverlay();
+          if (progressNav) progressNav.classList.remove('is-visible');
+        },
         onLeaveBack: function () { if (progressNav) progressNav.classList.remove('is-visible'); },
         onEnter:     function () { if (progressNav) progressNav.classList.add('is-visible'); },
         onEnterBack: function () { if (progressNav) progressNav.classList.add('is-visible'); },

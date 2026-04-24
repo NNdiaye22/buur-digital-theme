@@ -1,7 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v5.2
- * Fix : plus de vide noir après la dernière frame
- * pinSpacing:false + dernier frame gardé visible tant que la section est pinned
+ * BUUR Digital — scroll-frames.js v5.3
+ * Fix vide noir : pinSpacing:true + onLeave snapshot du dernier frame
  */
 (function () {
   'use strict';
@@ -75,7 +74,6 @@
   function loadAll() {
     return new Promise(function (resolve) {
       var temps = SEQUENCES.map(function (s) { return new Array(s.count); });
-
       SEQUENCES.forEach(function (seq, si) {
         for (var i = 0; i < seq.count; i++) {
           (function (seqIdx, li) {
@@ -90,8 +88,6 @@
           })(si, i);
         }
       });
-
-      /* Aplatir dans l'ordre */
       SEQUENCES.forEach(function (seq, si) {
         for (var i = 0; i < seq.count; i++) allImages.push(temps[si][i]);
       });
@@ -119,15 +115,42 @@
     drawCover(allImages[Math.min(Math.round(f), TOTAL - 1)]);
   }
 
+  /* ── Snapshot : copie le dernier frame dans un <img> de fond
+     pour qu’il reste visible pendant le pinSpacing (espace blanc) ── */
+  function injectSnapshot() {
+    var existing = document.getElementById('sf-snapshot');
+    if (existing) return;
+    var snap = new Image();
+    canvas.toBlob(function (blob) {
+      snap.src = URL.createObjectURL(blob);
+      snap.id  = 'sf-snapshot';
+      snap.style.cssText = [
+        'position:absolute',
+        'inset:0',
+        'width:100%',
+        'height:100%',
+        'object-fit:cover',
+        'z-index:0',
+        'pointer-events:none',
+      ].join(';');
+      wrapper.appendChild(snap);
+    });
+  }
+
+  function removeSnapshot() {
+    var snap = document.getElementById('sf-snapshot');
+    if (snap) snap.remove();
+  }
+
   /* ── Textes ── */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
     if (textTween) textTween.kill();
     var ch = CHAPTERS[idx];
-    if (chapEl)  chapEl.textContent = ch.chapter;
-    if (titleEl) titleEl.innerHTML  = ch.title;
-    if (subEl)   subEl.textContent  = ch.sub;
+    if (chapEl)    chapEl.textContent    = ch.chapter;
+    if (titleEl)   titleEl.innerHTML     = ch.title;
+    if (subEl)     subEl.textContent     = ch.sub;
     if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
     dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
@@ -166,9 +189,9 @@
 
     drawFrame(0);
     currentChapter = 0;
-    if (chapEl)    chapEl.textContent  = CHAPTERS[0].chapter;
-    if (titleEl)   titleEl.innerHTML   = CHAPTERS[0].title;
-    if (subEl)     subEl.textContent   = CHAPTERS[0].sub;
+    if (chapEl)    chapEl.textContent    = CHAPTERS[0].chapter;
+    if (titleEl)   titleEl.innerHTML     = CHAPTERS[0].title;
+    if (subEl)     subEl.textContent     = CHAPTERS[0].sub;
     if (counterEl) counterEl.textContent = '01 / 07';
     if (progressNav) progressNav.classList.add('is-visible');
     if (dotEls[0]) dotEls[0].classList.add('is-active');
@@ -179,7 +202,6 @@
       duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.5,
     });
 
-    /* Dot click */
     dotEls.forEach(function (dot, i) {
       dot.addEventListener('click', function () {
         var pct        = CHAPTERS[i].frameIn / (TOTAL - 1);
@@ -197,26 +219,29 @@
         updateText(state.frame);
       },
       scrollTrigger: {
-        trigger:    wrapper,
-        start:      'top top',
-        end:        '+=' + (TOTAL * PX_PER_FRAME),
-        scrub:      true,
-        pin:        true,
-        /* pinSpacing:false — supprime l'espace vide après le dépinning */
-        pinSpacing: false,
+        trigger:       wrapper,
+        start:         'top top',
+        end:           '+=' + (TOTAL * PX_PER_FRAME),
+        scrub:         true,
+        pin:           true,
+        pinSpacing:    true,
         anticipatePin: 1,
         onLeave: function () {
-          /* Garantit que le dernier frame reste dessiné quand la section dépine */
+          /* Le canvas est réinitialisé quand GSAP le dépine —
+             on injecte un snapshot du dernier frame comme fond fixe */
           drawFrame(TOTAL - 1);
+          injectSnapshot();
           if (progressNav) progressNav.classList.remove('is-visible');
+        },
+        onEnterBack: function () {
+          removeSnapshot();
+          if (progressNav) progressNav.classList.add('is-visible');
         },
         onLeaveBack: function () {
           if (progressNav) progressNav.classList.remove('is-visible');
         },
         onEnter: function () {
-          if (progressNav) progressNav.classList.add('is-visible');
-        },
-        onEnterBack: function () {
+          removeSnapshot();
           if (progressNav) progressNav.classList.add('is-visible');
         },
       },

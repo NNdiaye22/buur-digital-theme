@@ -1,6 +1,7 @@
 /**
  * BUUR Digital — preloader.js
- * Preloader cinématique : texte progressif + disparition fluide
+ * Animation : défilement vertical des mots "roi" dans différentes langues
+ * Séquence : BUUR → ROI → MAAD → ATEY → KING → LAAMƊO → BUUR
  */
 (function () {
   'use strict';
@@ -8,27 +9,37 @@
   const overlay = document.getElementById('buur-preloader');
   if (!overlay) return;
 
-  const steps = [
-    'Initialisation...',
-    'Chargement des assets...',
-    'Construction du portail...',
-    'BUUR DIGITAL',
-  ];
+  const words = ['BUUR', 'ROI', 'MAAD', 'ATEY', 'KING', 'LAAMƊO', 'BUUR'];
+  const bar = overlay.querySelector('.preloader-bar-fill');
+  const slot = overlay.querySelector('.preloader-word-slot');
 
-  const label = overlay.querySelector('.preloader-label');
-  const bar   = overlay.querySelector('.preloader-bar-fill');
-  let current = 0;
+  if (!slot) return;
+
+  let index = 0;
+
+  function setWord(word, animate) {
+    if (animate) {
+      slot.classList.remove('slide-in');
+      void slot.offsetWidth; // reflow
+      slot.classList.add('slide-in');
+    }
+    slot.textContent = word;
+  }
 
   function next() {
-    if (!label || !bar) return hide();
-    label.textContent = steps[current];
-    bar.style.width   = ((current + 1) / steps.length * 100) + '%';
-    current++;
-    if (current < steps.length) {
-      setTimeout(next, current === steps.length - 1 ? 400 : 350);
-    } else {
-      setTimeout(hide, 600);
+    if (index >= words.length) {
+      // Mettre à jour la barre à 100% et masquer
+      if (bar) bar.style.width = '100%';
+      setTimeout(hide, 500);
+      return;
     }
+
+    setWord(words[index], index > 0);
+    if (bar) bar.style.width = ((index + 1) / words.length * 100) + '%';
+    index++;
+
+    const delay = index === words.length ? 800 : 300;
+    setTimeout(next, delay);
   }
 
   function hide() {

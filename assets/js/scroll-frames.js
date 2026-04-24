@@ -1,8 +1,7 @@
 /**
- * BUUR Digital — scroll-frames.js v6.5
+ * BUUR Digital — scroll-frames.js v6.6
  * Overlays ADN + Services avec effets 3D premium scrubés au scroll
- * ADN  : rotateX + translateZ (dalle holographique)
- * SVC  : rotateY (panneau qui pivote) + stagger de profondeur
+ * Fix transform conflicts CSS/JS
  */
 (function () {
   'use strict';
@@ -48,7 +47,6 @@
     { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'R\u00e9sultats <em>Mesurables</em>', sub:'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
   ];
 
-  /* DOM */
   var wrapper    = document.getElementById('scroll-frames');
   var canvas     = document.getElementById('scroll-main-canvas');
   if (!wrapper || !canvas) return;
@@ -63,11 +61,11 @@
   var dotEls     = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
   var adnOverlay    = document.getElementById('sf-adn-overlay');
-  var adnHalo       = adnOverlay ? adnOverlay.querySelector('.sf-adn-halo')       : null;
   var adnEyebrow    = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow')    : null;
   var adnTitleEl    = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')      : null;
-  var adnValeurs    = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
+  var adnHalo       = adnOverlay ? adnOverlay.querySelector('.sf-adn-halo')       : null;
   var adnConnectors = adnOverlay ? adnOverlay.querySelector('.sf-adn-connectors') : null;
+  var adnValeurs    = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
 
   var svcOverlay = document.getElementById('sf-services-overlay');
   var sfLabel    = svcOverlay ? svcOverlay.querySelector('.sf-services-label') : null;
@@ -136,17 +134,12 @@
     drawCover(allImages[currentFrame]);
   }
 
-  /* ============================================================
-   * HELPERS SCRUB
-   * t = 0→1 dans la zone [inF, outF]
-   * ============================================================ */
   function zoneT(f, inF, outF) {
-    if (f <= inF)  return 0;
+    if (f <= inF) return 0;
     if (f >= outF) return 1;
     return (f - inF) / (outF - inF);
   }
 
-  /* opacité tente : monte de 0→1 entre IN et PEAK, descend de 1→0 entre fadeStart et OUT */
   function scrubOpacity(f, inF, peak, outF) {
     if (f < inF || f > outF) return 0;
     if (f <= peak) return (f - inF) / (peak - inF);
@@ -155,109 +148,96 @@
     return 1 - (f - fadeStart) / (outF - fadeStart);
   }
 
-  /* lerp linéaire */
   function lerp(a, b, t) { return a + (b - a) * t; }
 
-  /* ============================================================
-   * OVERLAYS 3D SCRUBÉS
-   * ============================================================ */
-  var adnReady = false, svcReady = false;
+  function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+
+  function setTranslateRotateX(el, tx, ty, tz, rx) {
+    if (!el) return;
+    el.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,' + tz + 'px) rotateX(' + rx + 'deg)';
+  }
+
+  function setTranslateRotateY(el, tx, ty, tz, ry) {
+    if (!el) return;
+    el.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,' + tz + 'px) rotateY(' + ry + 'deg)';
+  }
 
   function updateOverlays(f) {
-
-    /* ──── ADN ────
-     * Opacity scrubée
-     * Titre + eyebrow : parallaxe Y léger (couche haute)
-     * Halo : scale scrubé (0.6 → 1)
-     * Cartes valeurs : rotateX (40→0) + translateZ (-60→0) scrubés
-     *                  stagger de profondeur : chaque carte a un décalage de phase
-     */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
-      adnOverlay.style.opacity       = adnOp;
+      adnOverlay.style.opacity = adnOp;
       adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none';
     }
 
-    /* Initialisation unique des styles de base */
-    if (!adnReady && adnOverlay) {
-      adnReady = true;
-      adnOverlay.style.perspective = '900px';
-      if (adnEyebrow) adnEyebrow.style.willChange = 'transform, opacity';
-      if (adnTitleEl) adnTitleEl.style.willChange  = 'transform, opacity';
-      adnValeurs.forEach(function(v) {
-        v.style.willChange  = 'transform, opacity';
-        v.style.transformOrigin = 'center bottom';
-      });
-    }
-
     if (adnOp > 0) {
-      /* t global dans la zone ADN (0 → 1) */
-      var tAdn = zoneT(f, ADN_IN, ADN_OUT);
-      /* t pour la phase d’entrée seulement (0 → 1 entre IN et PEAK) */
-      var tIn  = Math.min(1, zoneT(f, ADN_IN, ADN_PEAK));
+      var tIn = clamp01(zoneT(f, ADN_IN, ADN_PEAK));
+      if (adnEyebrow) {
+        adnEyebrow.style.opacity = tIn;
+        adnEyebrow.style.transform = 'translate3d(0,' + lerp(-18, 0, tIn) + 'px,40px)';
+      }
+      if (adnTitleEl) {
+        adnTitleEl.style.opacity = tIn;
+        adnTitleEl.style.clipPath = 'inset(0 0 0% 0)';
+        adnTitleEl.style.transform = 'translate3d(0,' + lerp(-10, 0, tIn) + 'px,28px)';
+      }
+      if (adnHalo) {
+        adnHalo.style.opacity = tIn * 0.95;
+        adnHalo.style.transform = 'translate(-50%, -50%) scale(' + lerp(0.65, 1, tIn) + ')';
+      }
+      if (adnConnectors) {
+        adnConnectors.style.opacity = tIn;
+        adnConnectors.style.transform = 'translate3d(0,0,8px)';
+      }
 
-      /* Titre : glisse vers le bas depuis -20px — couche haute */
-      var titleY = lerp(-22, 0, tIn);
-      if (adnEyebrow) adnEyebrow.style.transform = 'translateY(' + titleY * 1.2 + 'px)';
-      if (adnTitleEl) adnTitleEl.style.transform  = 'translateY(' + titleY + 'px)';
+      adnValeurs.forEach(function (card, i) {
+        var tx = 0, ty = 0;
+        if (card.classList.contains('sf-adn-valeur--excellence'))      { tx = -16; ty = -8; }
+        else if (card.classList.contains('sf-adn-valeur--accessibilite')) { tx = -16; ty = 8; }
+        else if (card.classList.contains('sf-adn-valeur--innovation'))    { tx = 16; ty = -50; }
 
-      /* Halo : scale 0.55 → 1 */
-      if (adnHalo) adnHalo.style.transform = 'translate(-50%,-50%) scale(' + lerp(0.55, 1, tIn) + ')';
-
-      /* Connectors : opacité synch */
-      if (adnConnectors) adnConnectors.style.opacity = tIn;
-
-      /* Cartes valeurs : rotateX 42→0 + translateZ -70→0, staggeré */
-      adnValeurs.forEach(function (v, i) {
-        /* chaque carte commence un peu plus tard (stagger 0.12) */
-        var tCard = Math.min(1, Math.max(0, (tIn - i * 0.12) / (1 - i * 0.12 * 0.5)));
-        var rx = lerp(42, 0, tCard);
+        var delay = i * 0.10;
+        var tCard = clamp01((tIn - delay) / (1 - delay || 1));
+        var rx = lerp(34, 0, tCard);
         var tz = lerp(-70, 0, tCard);
-        v.style.transform = 'rotateX(' + rx + 'deg) translateZ(' + tz + 'px)';
-        v.style.opacity   = tCard;
+        card.style.opacity = tCard;
+        setTranslateRotateX(card, tx, ty, tz, rx);
       });
+    } else {
+      if (adnEyebrow) adnEyebrow.style.opacity = 0;
+      if (adnTitleEl) adnTitleEl.style.opacity = 0;
+      if (adnHalo) adnHalo.style.opacity = 0;
+      if (adnConnectors) adnConnectors.style.opacity = 0;
+      adnValeurs.forEach(function (card) { card.style.opacity = 0; });
     }
 
-    /* ──── SERVICES ────
-     * Opacity scrubée
-     * Colonnes : rotateY (28→0) + translateZ (-80→0) scrubés
-     *            stagger de profondeur (décalage de phase par colonne)
-     * Label    : translateY (-16→0)
-     */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
-      svcOverlay.style.opacity       = svcOp;
+      svcOverlay.style.opacity = svcOp;
       svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
     }
 
-    if (!svcReady && svcOverlay) {
-      svcReady = true;
-      svcOverlay.style.perspective = '1000px';
-      sfCols.forEach(function(c) {
-        c.style.willChange     = 'transform, opacity';
-        c.style.transformOrigin = 'center center';
-      });
-    }
-
     if (svcOp > 0) {
-      var tSvc = zoneT(f, SVC_IN, SVC_OUT);
-      var tSvcIn = Math.min(1, zoneT(f, SVC_IN, SVC_PEAK));
+      var tSvcIn = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
+      if (sfLabel) {
+        sfLabel.style.opacity = tSvcIn;
+        sfLabel.style.transform = 'translate3d(0,' + lerp(-16, 0, tSvcIn) + 'px,24px)';
+      }
 
-      /* Label glisse depuis le haut */
-      if (sfLabel) sfLabel.style.transform = 'translateY(' + lerp(-18, 0, tSvcIn) + 'px)';
-
-      /* Colonnes : rotateY + translateZ avec stagger de phase */
       sfCols.forEach(function (col, i) {
-        var tCol = Math.min(1, Math.max(0, (tSvcIn - i * 0.10) / (1 - i * 0.10 * 0.4)));
-        var ry = lerp(28, 0, tCol);
+        var delay = i * 0.08;
+        var tCol = clamp01((tSvcIn - delay) / (1 - delay || 1));
+        var ry = lerp(24, 0, tCol);
         var tz = lerp(-80, 0, tCol);
-        col.style.transform = 'rotateY(' + ry + 'deg) translateZ(' + tz + 'px)';
-        col.style.opacity   = tCol;
+        var ty = lerp(24, 0, tCol);
+        col.style.opacity = tCol;
+        setTranslateRotateY(col, 0, ty, tz, ry);
       });
+    } else {
+      if (sfLabel) sfLabel.style.opacity = 0;
+      sfCols.forEach(function (col) { col.style.opacity = 0; });
     }
   }
 
-  /* Textes chapitres */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {

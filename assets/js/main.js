@@ -1,64 +1,78 @@
 /**
- * BUUR Digital — main.js v2
- * Reveal au scroll, nav scrolled, hero anim, video lazy
+ * BUUR Digital — main.js v2 Premium
+ * Navbar, scroll reveal, lazy video, lazy nav scroll
  */
 (function () {
   'use strict';
 
-  /* ── Nav scrolled ── */
+  /* ── Navbar scroll ── */
   var nav = document.querySelector('.buur-nav');
   if (nav) {
-    window.addEventListener('scroll', function () {
-      nav.classList.toggle('scrolled', window.scrollY > 40);
-    }, { passive: true });
+    var onScroll = function () {
+      nav.classList.toggle('scrolled', window.scrollY > 30);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
   }
 
-  /* ── Burger ── */
-  var burger = document.querySelector('.nav-burger');
-  var mobileMenu = document.querySelector('.nav-mobile');
-  if (burger && mobileMenu) {
+  /* ── Burger menu mobile ── */
+  var burger = document.getElementById('nav-burger');
+  var mobileNav = document.getElementById('nav-mobile');
+  if (burger && mobileNav) {
     burger.addEventListener('click', function () {
       var open = burger.getAttribute('aria-expanded') === 'true';
-      burger.setAttribute('aria-expanded', !open);
-      mobileMenu.classList.toggle('is-open', !open);
+      burger.setAttribute('aria-expanded', String(!open));
+      mobileNav.classList.toggle('is-open', !open);
+    });
+    mobileNav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        burger.setAttribute('aria-expanded', 'false');
+        mobileNav.classList.remove('is-open');
+      });
     });
   }
 
-  /* ── Hero entrance ── */
-  if (window.gsap) {
-    gsap.to('.hero-title',   { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', delay: 0.2 });
-    gsap.to('.hero-tagline', { opacity: 1, y: 0, duration: 1.0, ease: 'power3.out', delay: 0.45 });
-    gsap.to('.hero-cta',     { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.7 });
-  }
-
-  /* ── Reveal au scroll ── */
-  var reveals = document.querySelectorAll('[data-reveal]');
-  if ('IntersectionObserver' in window && reveals.length) {
-    var io = new IntersectionObserver(function (entries) {
+  /* ── Scroll reveal ── */
+  var revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && revealEls.length) {
+    var revealObs = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) {
           e.target.classList.add('is-visible');
-          io.unobserve(e.target);
+          revealObs.unobserve(e.target);
         }
       });
-    }, { threshold: 0.15 });
-    reveals.forEach(function (el) { io.observe(el); });
+    }, { threshold: 0.14, rootMargin: '0px 0px -60px 0px' });
+    revealEls.forEach(function (el) { revealObs.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add('is-visible'); });
   }
 
-  /* ── Video lazy ── */
-  var videos = document.querySelectorAll('video[data-src]');
-  if ('IntersectionObserver' in window && videos.length) {
-    var vio = new IntersectionObserver(function (entries) {
+  /* ── Lazy load videos (data-src) ── */
+  var videoEls = document.querySelectorAll('video[data-src]');
+  if ('IntersectionObserver' in window && videoEls.length) {
+    var videoObs = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) {
           var v = e.target;
           v.src = v.dataset.src;
           v.load();
-          vio.unobserve(v);
+          videoObs.unobserve(v);
         }
       });
     }, { rootMargin: '200px' });
-    videos.forEach(function (v) { vio.observe(v); });
+    videoEls.forEach(function (v) { videoObs.observe(v); });
   }
+
+  /* ── Smooth anchor scroll ── */
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
 
 })();

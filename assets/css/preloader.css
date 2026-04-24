@@ -28,9 +28,39 @@ body.is-loading { overflow: hidden; }
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.15em;
+  display: flex;
+  align-items: baseline;
+  gap: 0.15em;
+  overflow: hidden;
 }
-.preloader-logo .logo-buur    { color: #ea5b13; }
-.preloader-logo .logo-digital { color: #f5f4f0; opacity: 0.85; font-size: 1.4rem; }
+
+.preloader-logo .logo-digital {
+  color: #f5f4f0;
+  opacity: 0.85;
+  font-size: 1.4rem;
+}
+
+/* Slot de défilement des mots */
+.preloader-word-slot {
+  color: #ea5b13;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.preloader-word-slot.slide-in {
+  animation: wordSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes wordSlideUp {
+  from {
+    transform: translateY(60%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
 
 .preloader-bar {
   width: 220px;
@@ -44,15 +74,5 @@ body.is-loading { overflow: hidden; }
   width: 0%;
   background: linear-gradient(90deg, #ea5b13, #243a85);
   border-radius: 2px;
-  transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-
-.preloader-label {
-  font-family: var(--font-mono, monospace);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #666;
-  min-height: 1em;
-  transition: opacity 0.2s ease;
+  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
 }

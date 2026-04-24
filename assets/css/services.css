@@ -1,139 +1,131 @@
-/* BUUR Digital — services.css v2 */
-
+/* ── Services v2 Premium ── */
 .services-section {
   padding: clamp(5rem, 10vh, 8rem) 0;
-  background: var(--surface);
-  position: relative;
-  overflow: hidden;
-}
-.services-section::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+  background: var(--black);
 }
 
 .services-header {
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto clamp(3rem, 6vh, 5rem);
+  max-width: var(--container-max);
+  margin-inline: auto;
   padding-inline: var(--container-pad);
+  margin-bottom: clamp(3rem, 6vh, 5rem);
 }
 
 .services-grid {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
+  gap: 1.5px;
   background: var(--border);
-  max-width: var(--container-max);
-  margin: 0 auto;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .service-card {
-  background: var(--surface-2);
+  position: relative;
+  background: var(--surface);
+  padding: 2.5rem 2rem;
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
+  transition: background 300ms;
   overflow: hidden;
-  position: relative;
-  transition: background 0.3s;
 }
-.service-card:hover { background: #18181f; }
-.service-card--featured { background: #101020; }
+.service-card:hover { background: var(--surface-2); }
 
-/* Vidéo haut de carte */
-.card-video-wrap {
-  position: relative;
-  width: 100%;
-  height: 220px;
-  overflow: hidden;
-  background: #0a0a14;
-}
-.card-video {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0.45;
-  transition: opacity 0.4s, transform 0.6s;
-}
-.service-card:hover .card-video { opacity: 0.65; transform: scale(1.04); }
-.card-video-overlay {
+/* Badge "populaire" */
+.service-card--featured::before {
+  content: 'Le plus populaire';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 30%, var(--surface-2) 100%);
-}
-.service-card--featured .card-video-overlay {
-  background: linear-gradient(to bottom, transparent 30%, #101020 100%);
-}
-.card-icon {
-  position: absolute;
-  bottom: 1rem; left: 1.5rem;
-  color: var(--orange);
-  opacity: 0.9;
-}
-
-/* Badge featured */
-.service-card--featured .card-body::before {
-  content: 'POPULAIRE';
-  display: inline-flex;
-  padding: 0.2rem 0.7rem;
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 0.25rem 0.75rem;
   background: var(--orange);
   color: #fff;
   font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  border-radius: var(--radius-sm);
-  margin-bottom: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
 }
 
-.card-body {
-  padding: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  gap: 0.75rem;
+.card-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  margin-bottom: 0.25rem;
 }
+.card-video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+  transition: opacity 400ms;
+}
+.service-card:hover .card-video { opacity: 0.75; }
+.card-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8,8,16,0.7), transparent 50%);
+}
+.card-icon {
+  position: absolute;
+  bottom: 1rem; left: 1rem;
+  color: var(--orange);
+  opacity: 0.9;
+}
+
+.card-body { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
+
 .card-title {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--white);
 }
+
 .card-desc {
-  font-size: 0.9rem;
-  color: var(--grey-400);
-  line-height: 1.7;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgba(245,244,240,0.6);
 }
 
 .card-features {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
+  flex: 1;
 }
 .card-features li {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.82rem;
-  color: var(--grey-100);
+  color: rgba(245,244,240,0.75);
 }
-.card-features svg { color: var(--orange); flex-shrink: 0; }
+.card-features li svg { color: var(--orange); flex-shrink: 0; }
 
 .card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: auto;
+  gap: 0.75rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border);
+  margin-top: auto;
 }
-.card-price { display: flex; flex-direction: column; }
-.price-from { font-size: 0.7rem; color: var(--grey-600); letter-spacing: 0.04em; }
-.price-amount { font-size: 1.05rem; font-weight: 700; color: var(--white); }
+.card-price { display: flex; flex-direction: column; gap: 0.1rem; }
+.price-from { font-size: 0.7rem; color: var(--grey-400); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+.price-amount { font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
 
 @media (max-width: 900px) {
-  .services-grid { grid-template-columns: 1fr; }
-  .card-video-wrap { height: 180px; }
+  .services-grid { grid-template-columns: 1fr; gap: 0; }
+  .card-video-wrap { aspect-ratio: 21/9; }
 }

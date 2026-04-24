@@ -1,52 +1,57 @@
-/* BUUR Digital — stats.css v2 */
-
+/* ── Stats v2 Premium ── */
 .stats-section {
-  padding: clamp(4rem, 8vh, 6rem) var(--container-pad);
-  background: var(--surface);
-  position: relative;
+  padding: clamp(3.5rem, 6vh, 5rem) 0;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
-.stats-section::before, .stats-section::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-}
-.stats-section::before { top: 0; }
-.stats-section::after  { bottom: 0; }
-
-.stats-grid {
+.stats-inner {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-  max-width: var(--container-max);
-  margin: 0 auto;
-  border: 1px solid var(--border);
+  gap: 0;
 }
-
 .stat-item {
-  background: var(--surface);
-  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: 2rem 1.5rem;
+  border-right: 1px solid var(--border);
+  gap: 0.4rem;
+  transition: background 300ms;
 }
-.stat-number {
-  font-family: var(--font-mono);
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
-  font-weight: 700;
-  color: var(--orange);
-  line-height: 1;
-  margin-bottom: 0.5rem;
-  letter-spacing: -0.03em;
+.stat-item:last-child { border-right: none; }
+.stat-item:hover { background: rgba(234,91,19,0.04); }
+
+.stat-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.25rem;
+  opacity: 0.85;
+}
+.stat-value {
+  display: block;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--white);
+  font-family: var(--font-sans);
 }
 .stat-label {
-  font-size: 0.82rem;
-  color: var(--grey-600);
+  font-size: 0.78rem;
+  color: rgba(245,244,240,0.5);
+  font-family: var(--font-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-family: var(--font-mono);
+  line-height: 1.4;
 }
 
-@media (max-width: 700px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 640px) {
+  .stats-inner { grid-template-columns: repeat(2, 1fr); }
+  .stat-item:nth-child(2) { border-right: none; }
+  .stat-item:nth-child(1),
+  .stat-item:nth-child(2) { border-bottom: 1px solid var(--border); }
 }

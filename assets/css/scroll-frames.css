@@ -1,49 +1,54 @@
-/* ============================================================
-   BUUR Digital — scroll-frames.css v4
-   Cross-fade entre sections : impression d'une seule séquence
-   ============================================================ */
+/* ── Scroll Frames v4 — Cross-fade cinématique ── */
 
+/* Wrapper : empile tout en position relative */
 .scroll-frames-wrapper {
   position: relative;
   width: 100%;
-  background: #000;
-  /* Stacking context pour les canvas superposes */
-  isolation: isolate;
+  background: var(--black);
 }
 
-/* Chaque section est une scène épinglée */
+/* Chaque section = 100vh, empilée */
 .scroll-frame-section {
   position: relative;
   width: 100%;
   height: 100vh;
   overflow: hidden;
   background: #000;
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .scroll-frame-inner {
   position: relative;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 /* Canvas cover */
 .scroll-canvas {
   position: absolute;
   inset: 0;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   display: block;
-  /* Cross-fade : la section entrant commence invisible */
-  opacity: 1;
-  transition: opacity 0.6s ease;
 }
 
-/* ── CROSS-FADE : la nouvelle section part de opacity 0 et monte ──
-   On utilise une classe .entering ajoutée/retirée par JS */
-.scroll-frame-section.is-entering .scroll-canvas {
+/* ── Cross-fade : deux canvas superposés ── */
+/* Le canvas principal joue la séquence courante,
+   le canvas de transition fait le fondu vers la suivante */
+.scroll-canvas-next {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
   opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0s; /* géré en JS via GSAP */
 }
 
-/* Overlay cinématique gauche + bas */
+/* Overlay : gradient gauche + bas */
 .scroll-frame-overlay {
   position: absolute;
   inset: 0;
@@ -53,31 +58,24 @@
   flex-direction: column;
   justify-content: flex-end;
   background:
-    linear-gradient(110deg,
-      rgba(0,0,0,0.78) 0%,
-      rgba(0,0,0,0.30) 48%,
-      transparent 100%
-    ),
-    linear-gradient(to top,
-      rgba(0,0,0,0.72) 0%,
-      transparent 50%
-    );
+    linear-gradient(110deg, rgba(8,8,16,0.80) 0%, rgba(8,8,16,0.30) 45%, transparent 100%),
+    linear-gradient(to top,  rgba(8,8,16,0.70) 0%, transparent 50%);
 }
 
-/* Contenu */
+/* Contenu texte */
 .scroll-frame-content {
-  padding: 0 var(--container-pad, 2rem) clamp(3rem, 8vh, 6rem);
+  padding: 0 var(--container-pad, 2rem) clamp(2.5rem, 8vh, 6rem);
   max-width: 620px;
   opacity: 0;
   transform: translateY(30px);
   transition:
-    opacity 0.9s var(--ease-out, cubic-bezier(0.22,1,0.36,1)),
-    transform 0.9s var(--ease-out, cubic-bezier(0.22,1,0.36,1));
+    opacity 0.85s cubic-bezier(0.16,1,0.3,1),
+    transform 0.85s cubic-bezier(0.16,1,0.3,1);
   will-change: opacity, transform;
 }
 .scroll-frame-section.is-active .scroll-frame-content {
   opacity: 1;
-  transform: none;
+  transform: translateY(0);
 }
 
 /* Chapitre */
@@ -85,72 +83,81 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 1rem;
   font-family: var(--font-mono, monospace);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--orange, #ea5b13);
   opacity: 0;
   transform: translateX(-18px);
-  transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
+  transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
 }
 .scroll-frame-chapter::before {
   content: '';
   display: block;
-  width: 26px; height: 1px;
+  width: 26px;
+  height: 1.5px;
   background: var(--orange, #ea5b13);
-  flex-shrink: 0;
 }
 .scroll-frame-section.is-active .scroll-frame-chapter {
   opacity: 1;
-  transform: none;
+  transform: translateX(0);
 }
 
 /* Titre */
 .scroll-frame-title {
   font-family: var(--font-sans, sans-serif);
-  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-size: clamp(2rem, 5.5vw, 4.5rem);
   font-weight: 800;
   line-height: 1.04;
   letter-spacing: -0.035em;
-  color: var(--white, #f0ede8);
+  color: var(--white, #f5f4f0);
   margin-bottom: 1rem;
   opacity: 0;
   transform: translateY(24px);
   transition:
-    opacity 0.9s var(--ease-out, cubic-bezier(0.22,1,0.36,1)) 0.18s,
-    transform 0.9s var(--ease-out, cubic-bezier(0.22,1,0.36,1)) 0.18s;
+    opacity 0.85s cubic-bezier(0.16,1,0.3,1) 0.18s,
+    transform 0.85s cubic-bezier(0.16,1,0.3,1) 0.18s;
 }
-.scroll-frame-title em { font-style: normal; color: var(--orange, #ea5b13); }
-.scroll-frame-section.is-active .scroll-frame-title { opacity: 1; transform: none; }
+.scroll-frame-title em {
+  font-style: normal;
+  color: var(--orange, #ea5b13);
+}
+.scroll-frame-section.is-active .scroll-frame-title {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* Sous-titre */
 .scroll-frame-sub {
   font-size: clamp(0.95rem, 1.6vw, 1.15rem);
   font-weight: 400;
-  line-height: 1.75;
-  color: rgba(240,237,232,0.72);
+  line-height: 1.72;
+  color: rgba(245,244,240,0.72);
   max-width: 420px;
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 0.9s ease 0.34s, transform 0.9s ease 0.34s;
+  transition: opacity 0.85s ease 0.34s, transform 0.85s ease 0.34s;
 }
-.scroll-frame-section.is-active .scroll-frame-sub { opacity: 1; transform: none; }
+.scroll-frame-section.is-active .scroll-frame-sub {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-/* ── Progress dots ── */
+/* Progress dots */
 .scroll-frames-progress {
   position: fixed;
   right: clamp(1rem, 2.5vw, 1.75rem);
   top: 50%;
   transform: translateY(-50%);
-  z-index: 200;
+  z-index: 800;
   display: flex;
   flex-direction: column;
   gap: 10px;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.5s ease;
   pointer-events: none;
 }
 .scroll-frames-progress.is-visible { opacity: 1; }
@@ -158,13 +165,17 @@
   width: 5px; height: 5px;
   border-radius: 50%;
   background: rgba(255,255,255,0.2);
-  border: none; padding: 0;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
+  transition: background 0.3s, transform 0.3s var(--ease-spring, ease);
 }
-.progress-dot.is-active { background: var(--orange, #ea5b13); transform: scale(1.8); }
+.progress-dot.is-active {
+  background: var(--orange, #ea5b13);
+  transform: scale(1.7);
+}
 
-/* ── Loader ── */
+/* Loader barre */
 .seq-loader-wrap {
   position: absolute;
   bottom: 0; left: 0;
@@ -173,16 +184,17 @@
   z-index: 10;
 }
 .seq-loader {
-  height: 100%; width: 0%;
+  height: 100%;
+  width: 0%;
   background: linear-gradient(90deg, var(--orange, #ea5b13), var(--blue, #243a85));
   transition: width 0.12s linear;
 }
 
-/* Mobile */
 @media (max-width: 768px) {
   .scroll-frame-overlay {
-    background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.88) 60%, rgba(0,0,0,0.96) 100%);
+    background:
+      linear-gradient(to bottom, transparent 0%, rgba(8,8,16,0.82) 60%, rgba(8,8,16,0.95) 100%);
   }
-  .scroll-frame-content { max-width: 100%; padding: 0 1.25rem clamp(2.5rem, 7vh, 4rem); }
+  .scroll-frame-content { max-width: 100%; padding: 0 1.25rem clamp(2rem,7vh,4rem); }
   .scroll-frames-progress { display: none; }
 }

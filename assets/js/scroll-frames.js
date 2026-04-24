@@ -1,6 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v3
- * Une seule animation continue : pinSpacing:false, scrub:true, no gap
+ * BUUR Digital — scroll-frames.js v3.1
+ * PX_PER_FRAME=14 : chaque séquence dure ~2000–2700px de scroll
  */
 (function () {
   'use strict';
@@ -10,7 +10,7 @@
 
   var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
   var FRAMES_PATH  = THEME_URL + '/assets/frames';
-  var PX_PER_FRAME = 5;
+  var PX_PER_FRAME = 14;
 
   var SEQUENCES = [
     { id: 'v1', count: 192, chapter: '01', title: 'Stratégie <em>Digitale</em>',   sub: 'Une vision claire pour dominer votre marché en ligne.' },
@@ -95,7 +95,6 @@
     var loaderWrap = sectionEl.querySelector('.seq-loader-wrap');
     var loaderEl   = sectionEl.querySelector('.seq-loader');
 
-    /* Canvas = viewport */
     function resize() {
       canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -108,7 +107,6 @@
     }).then(function (images) {
       if (loaderWrap) loaderWrap.remove();
 
-      /* Dessiner première frame immédiatement */
       drawCover(ctx, images[0], canvas.width, canvas.height);
 
       var state = { frame: 0 };
@@ -134,8 +132,6 @@
         },
       });
 
-      /* Animation frames — scrub:true = collé au doigt
-         pinSpacing:false = pas d'espace ajouté, sections empilées */
       gsap.to(state, {
         frame: seq.count - 1,
         ease: 'none',

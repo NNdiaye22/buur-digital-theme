@@ -1,6 +1,7 @@
 /**
- * BUUR Digital — scroll-frames.js v6.7
- * Fix wrapperTop : getBoundingClientRect au lieu de la boucle offsetParent
+ * BUUR Digital — scroll-frames.js v6.8
+ * Fix 3D : perspective() inline dans chaque transform
+ * Fix scrub : plages ADN/SVC élargies pour animation visible plus longtemps
  */
 (function () {
   'use strict';
@@ -28,13 +29,15 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
-  var ADN_IN   = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.65) - 5;
-  var ADN_PEAK = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.80);
-  var ADN_OUT  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.25);
+  /* ADN : entre 55% du ch05 et 40% du ch06 — plage large */
+  var ADN_IN   = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.55);
+  var ADN_PEAK = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.75);
+  var ADN_OUT  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.40);
 
-  var SVC_IN   = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.65) - 5;
-  var SVC_PEAK = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.80);
-  var SVC_OUT  = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.20);
+  /* SVC : entre 55% du ch06 et 35% du ch07 — plage large */
+  var SVC_IN   = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.55);
+  var SVC_PEAK = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.75);
+  var SVC_OUT  = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.35);
 
   var CHAPTERS = [
     { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'Strat\u00e9gie <em>Digitale</em>',    sub:'Une vision claire pour dominer votre march\u00e9 en ligne.' },
@@ -72,7 +75,6 @@
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
-  /* ── FIX : getBoundingClientRect toujours correct quel que soit le layout ── */
   var wrapperTop = 0;
   function updateWrapperTop() {
     wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
@@ -142,7 +144,7 @@
   function scrubOpacity(f, inF, peak, outF) {
     if (f < inF || f > outF) return 0;
     if (f <= peak) return (f - inF) / (peak - inF);
-    var fadeStart = peak + Math.round((outF - peak) * 0.70);
+    var fadeStart = peak + Math.round((outF - peak) * 0.65);
     if (f <= fadeStart) return 1;
     return 1 - (f - fadeStart) / (outF - fadeStart);
   }
@@ -150,18 +152,9 @@
   function lerp(a, b, t) { return a + (b - a) * t; }
   function clamp01(v)    { return Math.max(0, Math.min(1, v)); }
 
-  function setTranslateRotateX(el, tx, ty, tz, rx) {
-    if (!el) return;
-    el.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,' + tz + 'px) rotateX(' + rx + 'deg)';
-  }
-
-  function setTranslateRotateY(el, tx, ty, tz, ry) {
-    if (!el) return;
-    el.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,' + tz + 'px) rotateY(' + ry + 'deg)';
-  }
-
   function updateOverlays(f) {
-    /* ── ADN ── */
+
+    /* ====== ADN ====== */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
       adnOverlay.style.opacity       = adnOp;
@@ -170,42 +163,48 @@
 
     if (adnOp > 0) {
       var tIn = clamp01(zoneT(f, ADN_IN, ADN_PEAK));
+
       if (adnEyebrow) {
         adnEyebrow.style.opacity   = tIn;
-        adnEyebrow.style.transform = 'translate3d(0,' + lerp(-18, 0, tIn) + 'px,40px)';
+        adnEyebrow.style.transform = 'translateY(' + lerp(-20, 0, tIn) + 'px)';
       }
       if (adnTitleEl) {
         adnTitleEl.style.opacity   = tIn;
         adnTitleEl.style.clipPath  = 'inset(0 0 0% 0)';
-        adnTitleEl.style.transform = 'translate3d(0,' + lerp(-10, 0, tIn) + 'px,28px)';
+        adnTitleEl.style.transform = 'translateY(' + lerp(-12, 0, tIn) + 'px)';
       }
       if (adnHalo) {
-        adnHalo.style.opacity   = tIn * 0.95;
-        adnHalo.style.transform = 'translate(-50%, -50%) scale(' + lerp(0.65, 1, tIn) + ')';
+        adnHalo.style.opacity   = lerp(0, 0.95, tIn);
+        adnHalo.style.transform = 'translate(-50%, -50%) scale(' + lerp(0.5, 1, tIn) + ')';
       }
       if (adnConnectors) {
-        adnConnectors.style.opacity   = tIn;
-        adnConnectors.style.transform = 'translate3d(0,0,8px)';
+        adnConnectors.style.opacity = tIn;
       }
+
+      /* Cartes : perspective() inline pour effet 3D réel sur position:absolute */
       adnValeurs.forEach(function (card, i) {
         var tx = 0, ty = 0;
         if      (card.classList.contains('sf-adn-valeur--excellence'))    { tx = -16; ty =  -8; }
         else if (card.classList.contains('sf-adn-valeur--accessibilite')) { tx = -16; ty =   8; }
-        else if (card.classList.contains('sf-adn-valeur--innovation'))    { tx =  16; ty = -50; }
-        var delay = i * 0.10;
-        var tCard = clamp01((tIn - delay) / (1 - delay || 1));
-        card.style.opacity = tCard;
-        setTranslateRotateX(card, tx, ty, lerp(-70, 0, tCard), lerp(34, 0, tCard));
+        else if (card.classList.contains('sf-adn-valeur--innovation'))    { tx =  16; ty =   0; }
+
+        var delay  = i * 0.12;
+        var tCard  = clamp01((tIn - delay) / (1 - delay || 0.88));
+        var rx     = lerp(38, 0, tCard);
+        var ty2    = lerp(30, ty, tCard);
+        card.style.opacity   = tCard;
+        card.style.transform = 'perspective(700px) translate(' + tx + 'px,' + ty2 + 'px) rotateX(' + rx + 'deg)';
       });
+
     } else {
       if (adnEyebrow)    adnEyebrow.style.opacity    = 0;
       if (adnTitleEl)    adnTitleEl.style.opacity    = 0;
       if (adnHalo)       adnHalo.style.opacity       = 0;
       if (adnConnectors) adnConnectors.style.opacity = 0;
-      adnValeurs.forEach(function (c) { c.style.opacity = 0; });
+      adnValeurs.forEach(function (card) { card.style.opacity = 0; });
     }
 
-    /* ── SERVICES ── */
+    /* ====== SERVICES ====== */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
       svcOverlay.style.opacity       = svcOp;
@@ -214,16 +213,22 @@
 
     if (svcOp > 0) {
       var tSvcIn = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
+
       if (sfLabel) {
         sfLabel.style.opacity   = tSvcIn;
-        sfLabel.style.transform = 'translate3d(0,' + lerp(-16, 0, tSvcIn) + 'px,24px)';
+        sfLabel.style.transform = 'translateY(' + lerp(-18, 0, tSvcIn) + 'px)';
       }
+
+      /* Colonnes : perspective() inline pour effet 3D réel */
       sfCols.forEach(function (col, i) {
-        var delay = i * 0.08;
-        var tCol  = clamp01((tSvcIn - delay) / (1 - delay || 1));
-        col.style.opacity = tCol;
-        setTranslateRotateY(col, 0, lerp(24, 0, tCol), lerp(-80, 0, tCol), lerp(24, 0, tCol));
+        var delay = i * 0.10;
+        var tCol  = clamp01((tSvcIn - delay) / (1 - delay || 0.90));
+        var ry    = lerp(28, 0, tCol);
+        var ty    = lerp(28, 0, tCol);
+        col.style.opacity   = tCol;
+        col.style.transform = 'perspective(900px) translateY(' + ty + 'px) rotateY(' + ry + 'deg)';
       });
+
     } else {
       if (sfLabel) sfLabel.style.opacity = 0;
       sfCols.forEach(function (c) { c.style.opacity = 0; });

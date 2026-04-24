@@ -20,12 +20,11 @@
 <?php if ( is_front_page() ) : ?>
 <div id="buur-preloader" role="status" aria-label="Chargement de BUUR Digital">
     <div class="preloader-logo">
-        <span class="logo-buur">BUUR</span><span class="logo-digital"> DIGITAL</span>
+        <span class="preloader-word-slot">BUUR</span><span class="logo-digital"> DIGITAL</span>
     </div>
     <div class="preloader-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
         <div class="preloader-bar-fill"></div>
     </div>
-    <p class="preloader-label">Initialisation...</p>
 </div>
 <?php endif; ?>
 

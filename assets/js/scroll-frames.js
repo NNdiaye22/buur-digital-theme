@@ -1,11 +1,14 @@
 /**
- * BUUR Digital — scroll-frames.js v7.1
+ * BUUR Digital — scroll-frames.js v7.2
  * Chargement progressif 3 phases :
- *   Phase 1 : ch01 (192 frames) → affichage immédiat, loader masqué
- *   Phase 2 : ch02+ch03 en arrière-plan (requestIdleCallback)
- *             → forcé si scroll approche du ch02 avant la fin idle
- *   Phase 3 : ch04→ch07 en arrière-plan
+ *   Phase 1 : v1 (192 frames) → affichage immédiat, loader masqué
+ *   Phase 2 : v2+v3 en arrière-plan (requestIdleCallback)
+ *             → forcé si scroll approche du v2 avant la fin idle
+ *   Phase 3 : v4→v7 en arrière-plan
  * Vidéos services : lazy load au moment où l'overlay devient visible
+ *
+ * CORRECTION v7.2 : FRAMES_PATH pointe vers assets/v1...v7
+ * (et non plus assets/frames/v1...v7)
  */
 (function () {
   'use strict';
@@ -13,7 +16,7 @@
   if (!window.gsap) return;
 
   var THEME_URL   = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
-  var FRAMES_PATH = THEME_URL + '/assets/frames';
+  var FRAMES_PATH = THEME_URL + '/assets';
   var PX_PER_FRAME = 12;
 
   var SEQUENCES = [
@@ -96,11 +99,12 @@
   var allImages = new Array(TOTAL);
   var totalLoaded = 0;
 
-  /* FIX v7.1 : flags pour éviter un double déclenchement du chargement */
   var phase2Started = false;
   var phase3Started = false;
 
   function frameSrc(seqId, idx) {
+    /* FRAMES_PATH = THEME_URL + '/assets'
+       → URL finale : .../assets/v1/frame_001.jpg */
     return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
   }
 
@@ -137,7 +141,6 @@
     else { setTimeout(fn, 200); }
   }
 
-  /* FIX v7.1 : déclenche la phase 2 si elle n'a pas encore démarré */
   function ensurePhase2() {
     if (phase2Started) return;
     phase2Started = true;
@@ -165,8 +168,6 @@
 
   var currentFrame = 0, currentChapter = -1, textTween = null;
 
-  /* FIX v7.1 : si la frame cible n'est pas encore chargée,
-   * on cherche la frame disponible la plus proche pour éviter un écran vide */
   function drawFrame(f) {
     var idx = Math.max(0, Math.min(Math.round(f), TOTAL - 1));
     currentFrame = idx;
@@ -174,7 +175,6 @@
       drawCover(allImages[idx]);
       return;
     }
-    /* Fallback : cherche la frame chargée la plus proche (max 60 frames) */
     for (var d = 1; d <= 60; d++) {
       if (idx - d >= 0 && allImages[idx - d]) { drawCover(allImages[idx - d]); return; }
       if (idx + d < TOTAL && allImages[idx + d]) { drawCover(allImages[idx + d]); return; }
@@ -210,8 +210,6 @@
   }
 
   function updateOverlays(f) {
-
-    /* —— ADN —— */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
       adnOverlay.style.opacity       = adnOp;
@@ -241,15 +239,12 @@
       adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
 
-    /* —— SERVICES —— */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
       svcOverlay.style.opacity       = svcOp;
       svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
     }
-    /* Lazy load vidéos dès que l'overlay commence à être visible */
     if (svcOp > 0) lazyLoadSvcVideos();
-
     if (svcOp > 0) {
       var tSvcIn = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
       var svcCards = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')) : [];
@@ -312,8 +307,6 @@
     var inside   = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
     if (progressNav) progressNav.classList.toggle('is-visible', inside);
 
-    /* FIX v7.1 : si on approche de la zone ch02 (30 frames avant) et que
-     * la phase 2 n'a pas encore démarré, on la force immédiatement */
     if (!phase2Started && frame >= offsets[1] - 30) {
       ensurePhase2();
     }
@@ -326,7 +319,7 @@
   window.addEventListener('scroll', onScroll, { passive: true });
 
   /* ============================================================
-   * INIT : Phase 1 → affichage immédiat dès ch01 chargé
+   * INIT
    * ============================================================ */
   function initScroll() {
     canvas.width  = window.innerWidth;
@@ -359,11 +352,9 @@
     drawFrame(0);
     tick();
 
-    /* Phase 2 : ch02 + ch03 en idle (sera également forcé par tick() si besoin) */
     idle(function () { ensurePhase2(); });
   }
 
-  /* Phase 1 : ch01 uniquement — dès que prêt on affiche */
   loadRange(0, 0, initScroll);
 
 })();

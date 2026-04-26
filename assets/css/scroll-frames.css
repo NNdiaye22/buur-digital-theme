@@ -130,6 +130,8 @@
   pointer-events: none;
   perspective: 900px;
   transform-style: preserve-3d;
+  /* Fond sombre derrière l'overlay pour améliorer la lisibilité */
+  background: radial-gradient(ellipse at center, rgba(5,5,15,0.55) 0%, rgba(5,5,15,0.72) 100%);
 }
 .sf-adn-overlay.is-visible { pointer-events: auto; }
 
@@ -165,6 +167,8 @@
   opacity: 0;
   clip-path: inset(0 0 100% 0);
   will-change: transform, opacity;
+  /* Ombre portée pour détacher le titre du fond */
+  text-shadow: 0 2px 24px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.9);
 }
 .sf-adn-title em {
   font-style: normal;
@@ -220,11 +224,12 @@
   max-width: 260px;
   padding: 1rem 1.1rem;
   border-radius: 12px;
-  background: rgba(10,10,20,0.44);
-  border: 1px solid rgba(234,91,19,0.2);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  /* Fond plus opaque et contraste renforcé */
+  background: rgba(6,6,14,0.82);
+  border: 1px solid rgba(234,91,19,0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
   opacity: 0;
   will-change: opacity, transform;
   z-index: 4;
@@ -263,14 +268,17 @@
 .sf-adn-valeur h3 {
   font-size: clamp(0.82rem, 1.15vw, 1rem);
   font-weight: 700;
-  color: #f5f4f0;
+  /* Blanc pur pour les titres */
+  color: #ffffff;
   margin: 0 0 0.25rem;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
 }
 
 .sf-adn-valeur p {
   font-size: clamp(0.72rem, 0.95vw, 0.84rem);
   line-height: 1.6;
-  color: rgba(245,244,240,0.62);
+  /* Opacité augmentée de 0.62 → 0.85 */
+  color: rgba(245,244,240,0.85);
   margin: 0;
 }
 

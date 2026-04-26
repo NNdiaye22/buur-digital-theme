@@ -1,11 +1,10 @@
 /**
- * BUUR Digital — scroll-frames.js v7.5
+ * BUUR Digital — scroll-frames.js v7.6
  *
- * v7.5 FIXES MOBILE :
- *  1. visualViewport resize pour iOS (le 100vh change quand la barre Safari apparaît)
- *  2. touchmove force le tick immédiatement (iOS ne déclenche pas scroll pendant le touch)
- *  3. scroll listener déjà passive:true (conservé)
- *  4. canvas dimensionné via visualViewport si disponible
+ * v7.6 MOBILE TUNING (frames inchangées) :
+ *  1. Recalcule wrapperTop à chaque tick sur mobile (< 900px) pour suivre les changements de viewport.
+ *  2. BATCH_SIZE/BATCH_DELAY/AHEAD_FRAMES adoucis sur mobile pour réduire la pression CPU/RAM.
+ *  3. Garde le même nombre total de frames (1 153) et le même design.
  */
 (function () {
   'use strict';
@@ -15,9 +14,11 @@
   var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
   var FRAMES_PATH  = THEME_URL + '/assets';
   var PX_PER_FRAME = 12;
-  var BATCH_SIZE   = 8;
-  var BATCH_DELAY  = 32;
-  var AHEAD_FRAMES = 40;
+
+  var IS_MOBILE    = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+  var BATCH_SIZE   = IS_MOBILE ? 4  : 8;
+  var BATCH_DELAY  = IS_MOBILE ? 64 : 32;
+  var AHEAD_FRAMES = IS_MOBILE ? 20 : 40;
 
   var SEQUENCES = [
     { id: 'v1', count: 192 },
@@ -85,9 +86,6 @@
     wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
   }
 
-  /* ==============================================================
-   * DIMENSIONS — utilise visualViewport sur iOS
-   * ============================================================== */
   function vpWidth()  { return (window.visualViewport ? window.visualViewport.width  : window.innerWidth);  }
   function vpHeight() { return (window.visualViewport ? window.visualViewport.height : window.innerHeight); }
 
@@ -103,9 +101,6 @@
     window.visualViewport.addEventListener('resize', resize);
   }
 
-  /* ==============================================================
-   * IMAGES
-   * ============================================================== */
   var allImages   = new Array(TOTAL);
   var totalLoaded = 0;
   var seqStarted  = [false, false, false, false, false, false, false];
@@ -171,9 +166,6 @@
     else setTimeout(fn, 400);
   }
 
-  /* ==============================================================
-   * DESSIN
-   * ============================================================== */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -197,9 +189,6 @@
     }
   }
 
-  /* ==============================================================
-   * OVERLAYS
-   * ============================================================== */
   function zoneT(f, inF, outF) {
     if (f <= inF) return 0; if (f >= outF) return 1;
     return (f - inF) / (outF - inF);
@@ -260,9 +249,6 @@
     }
   }
 
-  /* ==============================================================
-   * TEXTE CHAPITRES
-   * ============================================================== */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -293,18 +279,16 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
-  /* ==============================================================
-   * BOUCLE SCROLL + TOUCH (fix iOS)
-   * ============================================================== */
   var rafId = null;
 
   function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
-
-  /* iOS : touchmove force le recalcul car scroll event peut être retardé */
   function onTouchMove() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
   function tick() {
     rafId = null;
+
+    if (IS_MOBILE) updateWrapperTop();
+
     var scrolled = window.scrollY - wrapperTop;
     var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
     var frame    = progress * (TOTAL - 1);
@@ -323,9 +307,6 @@
   window.addEventListener('scroll',    onScroll,   { passive: true });
   window.addEventListener('touchmove', onTouchMove,{ passive: true });
 
-  /* ==============================================================
-   * INIT
-   * ============================================================== */
   function initScroll() {
     canvas.width  = vpWidth();
     canvas.height = vpHeight();

@@ -1,10 +1,11 @@
 /**
- * BUUR Digital — scroll-frames.js v7.0
+ * BUUR Digital — scroll-frames.js v7.1
  * Chargement progressif 3 phases :
  *   Phase 1 : ch01 (192 frames) → affichage immédiat, loader masqué
  *   Phase 2 : ch02+ch03 en arrière-plan (requestIdleCallback)
+ *             → forcé si scroll approche du ch02 avant la fin idle
  *   Phase 3 : ch04→ch07 en arrière-plan
- * Vidéos services : lazy load au moment où l’overlay devient visible
+ * Vidéos services : lazy load au moment où l'overlay devient visible
  */
 (function () {
   'use strict';
@@ -95,6 +96,10 @@
   var allImages = new Array(TOTAL);
   var totalLoaded = 0;
 
+  /* FIX v7.1 : flags pour éviter un double déclenchement du chargement */
+  var phase2Started = false;
+  var phase3Started = false;
+
   function frameSrc(seqId, idx) {
     return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
   }
@@ -132,6 +137,18 @@
     else { setTimeout(fn, 200); }
   }
 
+  /* FIX v7.1 : déclenche la phase 2 si elle n'a pas encore démarré */
+  function ensurePhase2() {
+    if (phase2Started) return;
+    phase2Started = true;
+    loadRange(1, 2, function () {
+      if (!phase3Started) {
+        phase3Started = true;
+        idle(function () { loadRange(3, 6, null); });
+      }
+    });
+  }
+
   /* ============================================================
    * DESSIN
    * ============================================================ */
@@ -148,10 +165,20 @@
 
   var currentFrame = 0, currentChapter = -1, textTween = null;
 
+  /* FIX v7.1 : si la frame cible n'est pas encore chargée,
+   * on cherche la frame disponible la plus proche pour éviter un écran vide */
   function drawFrame(f) {
     var idx = Math.max(0, Math.min(Math.round(f), TOTAL - 1));
     currentFrame = idx;
-    if (allImages[idx]) drawCover(allImages[idx]);
+    if (allImages[idx]) {
+      drawCover(allImages[idx]);
+      return;
+    }
+    /* Fallback : cherche la frame chargée la plus proche (max 60 frames) */
+    for (var d = 1; d <= 60; d++) {
+      if (idx - d >= 0 && allImages[idx - d]) { drawCover(allImages[idx - d]); return; }
+      if (idx + d < TOTAL && allImages[idx + d]) { drawCover(allImages[idx + d]); return; }
+    }
   }
 
   /* ============================================================
@@ -220,7 +247,7 @@
       svcOverlay.style.opacity       = svcOp;
       svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
     }
-    /* Lazy load vidéos dès que l’overlay commence à être visible */
+    /* Lazy load vidéos dès que l'overlay commence à être visible */
     if (svcOp > 0) lazyLoadSvcVideos();
 
     if (svcOp > 0) {
@@ -284,6 +311,13 @@
     var frame    = progress * (TOTAL - 1);
     var inside   = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
     if (progressNav) progressNav.classList.toggle('is-visible', inside);
+
+    /* FIX v7.1 : si on approche de la zone ch02 (30 frames avant) et que
+     * la phase 2 n'a pas encore démarré, on la force immédiatement */
+    if (!phase2Started && frame >= offsets[1] - 30) {
+      ensurePhase2();
+    }
+
     drawFrame(frame);
     updateOverlays(frame);
     updateText(frame);
@@ -325,15 +359,8 @@
     drawFrame(0);
     tick();
 
-    /* Phase 2 : ch02 + ch03 en idle */
-    idle(function () {
-      loadRange(1, 2, function () {
-        /* Phase 3 : ch04 → ch07 en idle */
-        idle(function () {
-          loadRange(3, 6, null);
-        });
-      });
-    });
+    /* Phase 2 : ch02 + ch03 en idle (sera également forcé par tick() si besoin) */
+    idle(function () { ensurePhase2(); });
   }
 
   /* Phase 1 : ch01 uniquement — dès que prêt on affiche */

@@ -1,15 +1,11 @@
 /**
- * BUUR Digital — scroll-frames.js v7.4
+ * BUUR Digital — scroll-frames.js v7.5
  *
- * CORRECTIONS BLOCAGE :
- *  1. Chargement par lots de 8 images (BATCH_SIZE) avec 32ms entre chaque lot
- *     → le navigateur peut respirer et ne freeze plus
- *  2. "Ahead-of-scroll" : quand le scroll approche d'une séquence,
- *     on télécharge les prochaines images en priorité (AHEAD_FRAMES)
- *  3. Phase 2 et 3 chargées uniquement en idle ou on-demand
- *  4. drawFrame cherche la frame disponible la plus proche (pas d'écran blanc)
- *
- * v7.4 : frames .jpg → .webp
+ * v7.5 FIXES MOBILE :
+ *  1. visualViewport resize pour iOS (le 100vh change quand la barre Safari apparaît)
+ *  2. touchmove force le tick immédiatement (iOS ne déclenche pas scroll pendant le touch)
+ *  3. scroll listener déjà passive:true (conservé)
+ *  4. canvas dimensionné via visualViewport si disponible
  */
 (function () {
   'use strict';
@@ -89,14 +85,27 @@
     wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
   }
 
+  /* ==============================================================
+   * DIMENSIONS — utilise visualViewport sur iOS
+   * ============================================================== */
+  function vpWidth()  { return (window.visualViewport ? window.visualViewport.width  : window.innerWidth);  }
+  function vpHeight() { return (window.visualViewport ? window.visualViewport.height : window.innerHeight); }
+
   function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width  = vpWidth();
+    canvas.height = vpHeight();
     updateWrapperTop();
     if (allImages[currentFrame]) drawFrame(currentFrame);
   }
-  window.addEventListener('resize', resize);
 
+  window.addEventListener('resize', resize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resize);
+  }
+
+  /* ==============================================================
+   * IMAGES
+   * ============================================================== */
   var allImages   = new Array(TOTAL);
   var totalLoaded = 0;
   var seqStarted  = [false, false, false, false, false, false, false];
@@ -162,6 +171,9 @@
     else setTimeout(fn, 400);
   }
 
+  /* ==============================================================
+   * DESSIN
+   * ============================================================== */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -185,6 +197,9 @@
     }
   }
 
+  /* ==============================================================
+   * OVERLAYS
+   * ============================================================== */
   function zoneT(f, inF, outF) {
     if (f <= inF) return 0; if (f >= outF) return 1;
     return (f - inF) / (outF - inF);
@@ -245,6 +260,9 @@
     }
   }
 
+  /* ==============================================================
+   * TEXTE CHAPITRES
+   * ============================================================== */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -275,8 +293,15 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
+  /* ==============================================================
+   * BOUCLE SCROLL + TOUCH (fix iOS)
+   * ============================================================== */
   var rafId = null;
+
   function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
+
+  /* iOS : touchmove force le recalcul car scroll event peut être retardé */
+  function onTouchMove() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
   function tick() {
     rafId = null;
@@ -295,11 +320,15 @@
     updateText(frame);
   }
 
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll',    onScroll,   { passive: true });
+  window.addEventListener('touchmove', onTouchMove,{ passive: true });
 
+  /* ==============================================================
+   * INIT
+   * ============================================================== */
   function initScroll() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width  = vpWidth();
+    canvas.height = vpHeight();
     updateWrapperTop();
 
     if (loaderWrap) gsap.to(loaderWrap, { opacity:0, duration:0.4, onComplete: function () { loaderWrap.remove(); } });

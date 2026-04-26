@@ -1,23 +1,25 @@
 /**
- * BUUR Digital — scroll-frames.js v7.2
- * Chargement progressif 3 phases :
- *   Phase 1 : v1 (192 frames) → affichage immédiat, loader masqué
- *   Phase 2 : v2+v3 en arrière-plan (requestIdleCallback)
- *             → forcé si scroll approche du v2 avant la fin idle
- *   Phase 3 : v4→v7 en arrière-plan
- * Vidéos services : lazy load au moment où l'overlay devient visible
+ * BUUR Digital — scroll-frames.js v7.3
  *
- * CORRECTION v7.2 : FRAMES_PATH pointe vers assets/v1...v7
- * (et non plus assets/frames/v1...v7)
+ * CORRECTIONS BLOCAGE :
+ *  1. Chargement par lots de 8 images (BATCH_SIZE) avec 32ms entre chaque lot
+ *     → le navigateur peut respirer et ne freeze plus
+ *  2. "Ahead-of-scroll" : quand le scroll approche d'une séquence,
+ *     on télécharge les prochaines images en priorité (AHEAD_FRAMES)
+ *  3. Phase 2 et 3 chargées uniquement en idle ou on-demand
+ *  4. drawFrame cherche la frame disponible la plus proche (pas d'écran blanc)
  */
 (function () {
   'use strict';
 
   if (!window.gsap) return;
 
-  var THEME_URL   = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
-  var FRAMES_PATH = THEME_URL + '/assets';
+  var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
+  var FRAMES_PATH  = THEME_URL + '/assets';
   var PX_PER_FRAME = 12;
+  var BATCH_SIZE   = 8;   /* images chargées simultanément */
+  var BATCH_DELAY  = 32;  /* ms entre chaque lot */
+  var AHEAD_FRAMES = 40;  /* frames à charger en avance avant la prochaine séquence */
 
   var SEQUENCES = [
     { id: 'v1', count: 192 },
@@ -74,8 +76,8 @@
   var adnConnectors = adnOverlay ? adnOverlay.querySelector('.sf-adn-connectors') : null;
   var adnValeurs    = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
 
-  var svcOverlay    = document.getElementById('sf-services-overlay');
-  var svcVideos     = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('video[data-src]')) : [];
+  var svcOverlay      = document.getElementById('sf-services-overlay');
+  var svcVideos       = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('video[data-src]')) : [];
   var svcVideosLoaded = false;
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
@@ -89,72 +91,92 @@
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
     updateWrapperTop();
-    if (allImages[0]) drawFrame(currentFrame);
+    if (allImages[currentFrame]) drawFrame(currentFrame);
   }
   window.addEventListener('resize', resize);
 
-  /* ============================================================
-   * IMAGES : tableau plat pré-alloué, rempli par phases
-   * ============================================================ */
-  var allImages = new Array(TOTAL);
+  /* ==============================================================
+   * IMAGES : tableau plat + chargement par lots
+   * ============================================================== */
+  var allImages   = new Array(TOTAL);
   var totalLoaded = 0;
 
-  var phase2Started = false;
-  var phase3Started = false;
+  /* Flags pour éviter le double déclenchement */
+  var seqStarted = [false, false, false, false, false, false, false];
 
   function frameSrc(seqId, idx) {
-    /* FRAMES_PATH = THEME_URL + '/assets'
-       → URL finale : .../assets/v1/frame_001.jpg */
     return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
   }
 
-  function loadRange(seqStart, seqEnd, onDone) {
-    var toLoad = 0;
-    var done   = 0;
-    for (var si = seqStart; si <= seqEnd; si++) {
-      toLoad += SEQUENCES[si].count;
-    }
-    if (toLoad === 0) { if (onDone) onDone(); return; }
+  /**
+   * Charge les images d'une liste d'index absolus, par lots de BATCH_SIZE.
+   * @param {number[]} indices  - index absolus dans allImages[]
+   * @param {function} onDone   - callback quand tous chargés
+   */
+  function loadIndices(indices, onDone) {
+    if (!indices.length) { if (onDone) onDone(); return; }
+    var total = indices.length;
+    var done  = 0;
 
-    for (var s = seqStart; s <= seqEnd; s++) {
-      (function (seq, globalOffset) {
-        for (var i = 0; i < seq.count; i++) {
-          (function (li) {
-            var img    = new Image();
-            var absIdx = globalOffset + li;
-            img.onload = img.onerror = function () {
-              allImages[absIdx] = img;
-              totalLoaded++;
-              done++;
-              if (loaderBar) loaderBar.style.width = (totalLoaded / TOTAL * 100) + '%';
-              if (done === toLoad && onDone) onDone();
-            };
-            img.src = frameSrc(seq.id, li);
-          })(i);
-        }
-      })(SEQUENCES[s], offsets[s]);
+    function onOne() {
+      totalLoaded++;
+      done++;
+      if (loaderBar) loaderBar.style.width = Math.min(totalLoaded / TOTAL * 100, 100) + '%';
+      if (done === total && onDone) onDone();
     }
+
+    function loadBatch(start) {
+      var end = Math.min(start + BATCH_SIZE, total);
+      for (var i = start; i < end; i++) {
+        (function(absIdx) {
+          if (allImages[absIdx]) { onOne(); return; } /* déjà chargée */
+          var img = new Image();
+          img.onload = img.onerror = function () {
+            allImages[absIdx] = img;
+            onOne();
+          };
+          img.src = frameSrc(
+            SEQUENCES[ seqOfAbsIdx(absIdx) ].id,
+            absIdx - offsets[ seqOfAbsIdx(absIdx) ]
+          );
+        })(indices[i]);
+      }
+      if (end < total) {
+        setTimeout(function () { loadBatch(end); }, BATCH_DELAY);
+      }
+    }
+    loadBatch(0);
+  }
+
+  function seqOfAbsIdx(absIdx) {
+    for (var s = SEQUENCES.length - 1; s >= 0; s--) {
+      if (absIdx >= offsets[s]) return s;
+    }
+    return 0;
+  }
+
+  /** Construit la liste d'index absolus pour une séquence entière */
+  function seqIndices(s) {
+    var list = [];
+    for (var i = 0; i < SEQUENCES[s].count; i++) list.push(offsets[s] + i);
+    return list;
+  }
+
+  /** Déclenche le chargement d'une séquence (1 seule fois) */
+  function loadSeq(s, onDone) {
+    if (seqStarted[s]) { if (onDone) onDone(); return; }
+    seqStarted[s] = true;
+    loadIndices(seqIndices(s), onDone);
   }
 
   function idle(fn) {
-    if (window.requestIdleCallback) { requestIdleCallback(fn, { timeout: 2000 }); }
-    else { setTimeout(fn, 200); }
+    if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 3000 });
+    else setTimeout(fn, 400);
   }
 
-  function ensurePhase2() {
-    if (phase2Started) return;
-    phase2Started = true;
-    loadRange(1, 2, function () {
-      if (!phase3Started) {
-        phase3Started = true;
-        idle(function () { loadRange(3, 6, null); });
-      }
-    });
-  }
-
-  /* ============================================================
+  /* ==============================================================
    * DESSIN
-   * ============================================================ */
+   * ============================================================== */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -171,50 +193,41 @@
   function drawFrame(f) {
     var idx = Math.max(0, Math.min(Math.round(f), TOTAL - 1));
     currentFrame = idx;
-    if (allImages[idx]) {
-      drawCover(allImages[idx]);
-      return;
-    }
-    for (var d = 1; d <= 60; d++) {
-      if (idx - d >= 0 && allImages[idx - d]) { drawCover(allImages[idx - d]); return; }
-      if (idx + d < TOTAL && allImages[idx + d]) { drawCover(allImages[idx + d]); return; }
+    if (allImages[idx]) { drawCover(allImages[idx]); return; }
+    /* Fallback : frame disponible la plus proche */
+    for (var d = 1; d <= 90; d++) {
+      if (idx - d >= 0        && allImages[idx - d]) { drawCover(allImages[idx - d]); return; }
+      if (idx + d < TOTAL     && allImages[idx + d]) { drawCover(allImages[idx + d]); return; }
     }
   }
 
-  /* ============================================================
-   * OVERLAYS
-   * ============================================================ */
+  /* ==============================================================
+   * OVERLAYS (inchangés)
+   * ============================================================== */
   function zoneT(f, inF, outF) {
-    if (f <= inF) return 0;
-    if (f >= outF) return 1;
+    if (f <= inF) return 0; if (f >= outF) return 1;
     return (f - inF) / (outF - inF);
   }
-
   function scrubOpacity(f, inF, peak, outF) {
     if (f < inF || f > outF) return 0;
     if (f <= peak) return (f - inF) / (peak - inF);
-    var fadeStart = peak + Math.round((outF - peak) * 0.65);
-    if (f <= fadeStart) return 1;
-    return 1 - (f - fadeStart) / (outF - fadeStart);
+    var fs = peak + Math.round((outF - peak) * 0.65);
+    if (f <= fs) return 1;
+    return 1 - (f - fs) / (outF - fs);
   }
-
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function clamp01(v)    { return Math.max(0, Math.min(1, v)); }
+  function lerp(a, b, t)  { return a + (b - a) * t; }
+  function clamp01(v)      { return Math.max(0, Math.min(1, v)); }
 
   function lazyLoadSvcVideos() {
     if (svcVideosLoaded) return;
     svcVideosLoaded = true;
-    svcVideos.forEach(function (v) {
-      if (v.dataset.src) { v.src = v.dataset.src; v.load(); }
-    });
+    svcVideos.forEach(function (v) { if (v.dataset.src) { v.src = v.dataset.src; v.load(); } });
   }
 
   function updateOverlays(f) {
+    /* ADN */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
-    if (adnOverlay) {
-      adnOverlay.style.opacity       = adnOp;
-      adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none';
-    }
+    if (adnOverlay) { adnOverlay.style.opacity = adnOp; adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none'; }
     if (adnOp > 0) {
       var tIn = clamp01(zoneT(f, ADN_IN, ADN_PEAK));
       if (adnEyebrow)    { adnEyebrow.style.opacity = tIn; adnEyebrow.style.transform = 'translateY(' + lerp(-20,0,tIn) + 'px)'; }
@@ -223,11 +236,10 @@
       if (adnConnectors) { adnConnectors.style.opacity = tIn; }
       adnValeurs.forEach(function (card, i) {
         var tx = 0, ty = 0;
-        if      (card.classList.contains('sf-adn-valeur--excellence'))    { tx = -16; ty =  -8; }
-        else if (card.classList.contains('sf-adn-valeur--accessibilite')) { tx = -16; ty =   8; }
-        else if (card.classList.contains('sf-adn-valeur--innovation'))    { tx =  16; ty =   0; }
-        var delay = i * 0.12;
-        var tCard = clamp01((tIn - delay) / (1 - delay || 0.88));
+        if      (card.classList.contains('sf-adn-valeur--excellence'))    { tx = -16; ty = -8; }
+        else if (card.classList.contains('sf-adn-valeur--accessibilite')) { tx = -16; ty =  8; }
+        else if (card.classList.contains('sf-adn-valeur--innovation'))    { tx =  16; ty =  0; }
+        var tCard = clamp01((tIn - i*0.12) / (1 - i*0.12 || 0.88));
         card.style.opacity   = tCard;
         card.style.transform = 'perspective(700px) translate(' + tx + 'px,' + lerp(30,ty,tCard) + 'px) rotateX(' + lerp(38,0,tCard) + 'deg)';
       });
@@ -238,31 +250,25 @@
       if (adnConnectors) adnConnectors.style.opacity = 0;
       adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
-
+    /* Services */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
-    if (svcOverlay) {
-      svcOverlay.style.opacity       = svcOp;
-      svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
-    }
-    if (svcOp > 0) lazyLoadSvcVideos();
+    if (svcOverlay) { svcOverlay.style.opacity = svcOp; svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none'; }
+    if (svcOp > 0) { lazyLoadSvcVideos(); }
     if (svcOp > 0) {
-      var tSvcIn = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
-      var svcCards = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')) : [];
-      svcCards.forEach(function (card, i) {
-        var delay = i * 0.10;
-        var tCol  = clamp01((tSvcIn - delay) / (1 - delay || 0.90));
+      var tSvc = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
+      Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')).forEach(function (card, i) {
+        var tCol = clamp01((tSvc - i*0.10) / (1 - i*0.10 || 0.90));
         card.style.opacity   = tCol;
         card.style.transform = 'perspective(900px) translateY(' + lerp(32,0,tCol) + 'px) rotateY(' + lerp(20,0,tCol) + 'deg)';
       });
     } else if (svcOverlay) {
-      var svcCards2 = Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card'));
-      svcCards2.forEach(function (c) { c.style.opacity = 0; });
+      Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')).forEach(function (c) { c.style.opacity = 0; });
     }
   }
 
-  /* ============================================================
+  /* ==============================================================
    * TEXTE CHAPITRES
-   * ============================================================ */
+   * ============================================================== */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -271,15 +277,15 @@
     if (chapEl)    chapEl.textContent    = ch.chapter;
     if (titleEl)   titleEl.innerHTML     = ch.title;
     if (subEl)     subEl.textContent     = ch.sub;
-    if (counterEl) counterEl.textContent = '0' + (idx+1) + ' / 07';
+    if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
     dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
-    gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
+    gsap.set(textEls, { opacity:0, y:40, clipPath:'inset(0 0 100% 0)' });
     textTween = gsap.to(textEls, { opacity:1, y:0, clipPath:'inset(0 0 0% 0)', duration:0.9, ease:'power4.out', stagger:0.11 });
   }
 
-  function hideChapter(onDone) {
+  function hideChapter(cb) {
     if (textTween) textTween.kill();
-    textTween = gsap.to(textEls, { opacity:0, y:-28, clipPath:'inset(0 0 100% 0)', duration:0.45, ease:'power3.in', onComplete: onDone || null });
+    textTween = gsap.to(textEls, { opacity:0, y:-28, clipPath:'inset(0 0 100% 0)', duration:0.45, ease:'power3.in', onComplete: cb || null });
   }
 
   function updateText(f) {
@@ -293,10 +299,11 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
-  /* ============================================================
+  /* ==============================================================
    * BOUCLE SCROLL
-   * ============================================================ */
+   * ============================================================== */
   var rafId = null;
+
   function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
   function tick() {
@@ -307,8 +314,11 @@
     var inside   = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
     if (progressNav) progressNav.classList.toggle('is-visible', inside);
 
-    if (!phase2Started && frame >= offsets[1] - 30) {
-      ensurePhase2();
+    /* --- Ahead-of-scroll : charge la séquence suivante AVANT d'en avoir besoin --- */
+    for (var s = 0; s < SEQUENCES.length; s++) {
+      if (!seqStarted[s] && frame >= offsets[s] - AHEAD_FRAMES) {
+        loadSeq(s, null);
+      }
     }
 
     drawFrame(frame);
@@ -318,15 +328,15 @@
 
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  /* ============================================================
+  /* ==============================================================
    * INIT
-   * ============================================================ */
+   * ============================================================== */
   function initScroll() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
     updateWrapperTop();
 
-    if (loaderWrap) gsap.to(loaderWrap, { opacity:0, duration:0.4, onComplete: function(){ loaderWrap.remove(); } });
+    if (loaderWrap) gsap.to(loaderWrap, { opacity:0, duration:0.4, onComplete: function () { loaderWrap.remove(); } });
 
     currentChapter = 0;
     if (chapEl)    chapEl.textContent    = CHAPTERS[0].chapter;
@@ -352,9 +362,11 @@
     drawFrame(0);
     tick();
 
-    idle(function () { ensurePhase2(); });
+    /* Charge séquence 2 en idle après la phase 1 */
+    idle(function () { loadSeq(1, function () { idle(function () { loadSeq(2, null); }); }); });
   }
 
-  loadRange(0, 0, initScroll);
+  /* Démarre uniquement avec la séquence 1 */
+  loadSeq(0, initScroll);
 
 })();

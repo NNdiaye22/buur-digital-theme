@@ -1,5 +1,5 @@
 /**
- * BUUR Digital — scroll-frames.js v7.3
+ * BUUR Digital — scroll-frames.js v7.4
  *
  * CORRECTIONS BLOCAGE :
  *  1. Chargement par lots de 8 images (BATCH_SIZE) avec 32ms entre chaque lot
@@ -8,6 +8,8 @@
  *     on télécharge les prochaines images en priorité (AHEAD_FRAMES)
  *  3. Phase 2 et 3 chargées uniquement en idle ou on-demand
  *  4. drawFrame cherche la frame disponible la plus proche (pas d'écran blanc)
+ *
+ * v7.4 : frames .jpg → .webp
  */
 (function () {
   'use strict';
@@ -17,9 +19,9 @@
   var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
   var FRAMES_PATH  = THEME_URL + '/assets';
   var PX_PER_FRAME = 12;
-  var BATCH_SIZE   = 8;   /* images chargées simultanément */
-  var BATCH_DELAY  = 32;  /* ms entre chaque lot */
-  var AHEAD_FRAMES = 40;  /* frames à charger en avance avant la prochaine séquence */
+  var BATCH_SIZE   = 8;
+  var BATCH_DELAY  = 32;
+  var AHEAD_FRAMES = 40;
 
   var SEQUENCES = [
     { id: 'v1', count: 192 },
@@ -95,24 +97,14 @@
   }
   window.addEventListener('resize', resize);
 
-  /* ==============================================================
-   * IMAGES : tableau plat + chargement par lots
-   * ============================================================== */
   var allImages   = new Array(TOTAL);
   var totalLoaded = 0;
-
-  /* Flags pour éviter le double déclenchement */
-  var seqStarted = [false, false, false, false, false, false, false];
+  var seqStarted  = [false, false, false, false, false, false, false];
 
   function frameSrc(seqId, idx) {
-    return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
+    return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.webp';
   }
 
-  /**
-   * Charge les images d'une liste d'index absolus, par lots de BATCH_SIZE.
-   * @param {number[]} indices  - index absolus dans allImages[]
-   * @param {function} onDone   - callback quand tous chargés
-   */
   function loadIndices(indices, onDone) {
     if (!indices.length) { if (onDone) onDone(); return; }
     var total = indices.length;
@@ -129,7 +121,7 @@
       var end = Math.min(start + BATCH_SIZE, total);
       for (var i = start; i < end; i++) {
         (function(absIdx) {
-          if (allImages[absIdx]) { onOne(); return; } /* déjà chargée */
+          if (allImages[absIdx]) { onOne(); return; }
           var img = new Image();
           img.onload = img.onerror = function () {
             allImages[absIdx] = img;
@@ -141,9 +133,7 @@
           );
         })(indices[i]);
       }
-      if (end < total) {
-        setTimeout(function () { loadBatch(end); }, BATCH_DELAY);
-      }
+      if (end < total) setTimeout(function () { loadBatch(end); }, BATCH_DELAY);
     }
     loadBatch(0);
   }
@@ -155,14 +145,12 @@
     return 0;
   }
 
-  /** Construit la liste d'index absolus pour une séquence entière */
   function seqIndices(s) {
     var list = [];
     for (var i = 0; i < SEQUENCES[s].count; i++) list.push(offsets[s] + i);
     return list;
   }
 
-  /** Déclenche le chargement d'une séquence (1 seule fois) */
   function loadSeq(s, onDone) {
     if (seqStarted[s]) { if (onDone) onDone(); return; }
     seqStarted[s] = true;
@@ -174,9 +162,6 @@
     else setTimeout(fn, 400);
   }
 
-  /* ==============================================================
-   * DESSIN
-   * ============================================================== */
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
     var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
@@ -194,16 +179,12 @@
     var idx = Math.max(0, Math.min(Math.round(f), TOTAL - 1));
     currentFrame = idx;
     if (allImages[idx]) { drawCover(allImages[idx]); return; }
-    /* Fallback : frame disponible la plus proche */
     for (var d = 1; d <= 90; d++) {
-      if (idx - d >= 0        && allImages[idx - d]) { drawCover(allImages[idx - d]); return; }
-      if (idx + d < TOTAL     && allImages[idx + d]) { drawCover(allImages[idx + d]); return; }
+      if (idx - d >= 0    && allImages[idx - d]) { drawCover(allImages[idx - d]); return; }
+      if (idx + d < TOTAL && allImages[idx + d]) { drawCover(allImages[idx + d]); return; }
     }
   }
 
-  /* ==============================================================
-   * OVERLAYS (inchangés)
-   * ============================================================== */
   function zoneT(f, inF, outF) {
     if (f <= inF) return 0; if (f >= outF) return 1;
     return (f - inF) / (outF - inF);
@@ -215,8 +196,8 @@
     if (f <= fs) return 1;
     return 1 - (f - fs) / (outF - fs);
   }
-  function lerp(a, b, t)  { return a + (b - a) * t; }
-  function clamp01(v)      { return Math.max(0, Math.min(1, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp01(v)    { return Math.max(0, Math.min(1, v)); }
 
   function lazyLoadSvcVideos() {
     if (svcVideosLoaded) return;
@@ -225,7 +206,6 @@
   }
 
   function updateOverlays(f) {
-    /* ADN */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) { adnOverlay.style.opacity = adnOp; adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none'; }
     if (adnOp > 0) {
@@ -250,7 +230,6 @@
       if (adnConnectors) adnConnectors.style.opacity = 0;
       adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
-    /* Services */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) { svcOverlay.style.opacity = svcOp; svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none'; }
     if (svcOp > 0) { lazyLoadSvcVideos(); }
@@ -266,9 +245,6 @@
     }
   }
 
-  /* ==============================================================
-   * TEXTE CHAPITRES
-   * ============================================================== */
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
 
   function showChapter(idx) {
@@ -299,11 +275,7 @@
     hideChapter(function () { showChapter(chIdx); });
   }
 
-  /* ==============================================================
-   * BOUCLE SCROLL
-   * ============================================================== */
   var rafId = null;
-
   function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
   function tick() {
@@ -314,11 +286,8 @@
     var inside   = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
     if (progressNav) progressNav.classList.toggle('is-visible', inside);
 
-    /* --- Ahead-of-scroll : charge la séquence suivante AVANT d'en avoir besoin --- */
     for (var s = 0; s < SEQUENCES.length; s++) {
-      if (!seqStarted[s] && frame >= offsets[s] - AHEAD_FRAMES) {
-        loadSeq(s, null);
-      }
+      if (!seqStarted[s] && frame >= offsets[s] - AHEAD_FRAMES) loadSeq(s, null);
     }
 
     drawFrame(frame);
@@ -328,9 +297,6 @@
 
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  /* ==============================================================
-   * INIT
-   * ============================================================== */
   function initScroll() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -362,11 +328,9 @@
     drawFrame(0);
     tick();
 
-    /* Charge séquence 2 en idle après la phase 1 */
     idle(function () { loadSeq(1, function () { idle(function () { loadSeq(2, null); }); }); });
   }
 
-  /* Démarre uniquement avec la séquence 1 */
   loadSeq(0, initScroll);
 
 })();

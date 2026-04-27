@@ -1,15 +1,10 @@
 /**
- * BUUR Digital — scroll-frames.js v8.7
+ * BUUR Digital — scroll-frames.js v9.0
  *
- * v8.7 PERF : DPR desktop plafonné à 2 (was uncapped — écrans Retina 3×).
- * v8.6 PERF : 3 quick wins
- *   1. svcCards mis en cache à l’init (supprime querySelectorAll dans le tick scroll).
- *   2. BATCH_SIZE mobile 4 → 6 — chargement des frames plus rapide.
- *   3. BATCH_DELAY mobile 64ms → 32ms — réduction de l’attente inter-lots.
- * v8.5 FIX : suppression complète du système lazy-load vidéo.
- * v8.4 FIX : FRAMES_PATH corrigé : assets/frames/
- * v8.3 PERF : DPR plafonné à 1.5 sur mobile
- * v8.2 PERF : updateWrapperTop() dans ResizeObserver uniquement
+ * v9.0 STORYTELLING : textes chapitres révisés + overlay CTA ch07
+ *   - Titres / sous-titres cohérents avec les visuels de chaque séquence
+ *   - Ajout CTA_IN / CTA_PEAK / CTA_OUT pour overlay ch07
+ *   - Mise en cache ctaOverlay + ctaStats au même pattern que ADN/Services
  */
 (function () {
   'use strict';
@@ -25,7 +20,6 @@
   var BATCH_DELAY  = IS_MOBILE ? 32 : 32;
   var AHEAD_FRAMES = IS_MOBILE ? 20 : 40;
 
-  /* v8.7 : DPR plafonné à 2 sur desktop (1.5 sur mobile inchangé) */
   var DPR = IS_MOBILE
     ? Math.min(window.devicePixelRatio || 1, 1.5)
     : Math.min(window.devicePixelRatio || 1, 2);
@@ -47,6 +41,7 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
+  /* ---- fenêtres d'apparition des overlays ---- */
   var ADN_IN   = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.55);
   var ADN_PEAK = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.75);
   var ADN_OUT  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.40);
@@ -55,14 +50,19 @@
   var SVC_PEAK = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.75);
   var SVC_OUT  = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.35);
 
+  var CTA_IN   = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.45);
+  var CTA_PEAK = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.65);
+  var CTA_OUT  = TOTAL - 1;
+
+  /* ---- chapitres — textes révisés v9.0 ---- */
   var CHAPTERS = [
-    { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'Strat\u00e9gie <em>Digitale</em>',    sub:'Une vision claire pour dominer votre march\u00e9 en ligne.' },
-    { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Design <em>Premium</em>',             sub:'Des interfaces qui captivent, engagent et convertissent.' },
-    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Code <em>Sur-Mesure</em>',            sub:'Rapide, propre, évolutif — construit pour durer.' },
-    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'SEO & <em>Performance</em>',          sub:'Premier sur Google. Rapide sur tous les écrans.' },
-    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'E-<em>Commerce</em>',                 sub:'Votre boutique pensée pour vendre, 24h/24.' },
-    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Support <em>Dédié</em>',             sub:'Une équipe disponible pour faire grandir votre projet.' },
-    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'Résultats <em>Mesurables</em>',      sub:'Chaque action optimisée. Chaque chiffre suivi.' },
+    { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'L&#8217;Afrique <em>en ligne.</em>',          sub:'Votre business mérite une présence digitale de classe mondiale.' },
+    { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Un site qui <em>vous ressemble.</em>',        sub:'Design premium, conçu pour les entrepreneurs africains.' },
+    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Construit <em>pour durer.</em>',              sub:'Code propre, rapide, évolutif. Zéro compromis.' },
+    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'Premier sur <em>Google.</em>',               sub:'SEO local maîtrisé. Vos clients vous trouvent avant la concurrence.' },
+    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'Vendez <em>sans limite.</em>',               sub:'E-commerce, Wave, Orange Money. Votre boutique ouverte 24h/24.' },
+    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Une équipe <em>à vos côtés.</em>',           sub:'Support dédié, formation incluse. Vous n\'êtes jamais seul.' },
+    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'Des résultats <em>mesurables.</em>',         sub:'Chaque action optimisée. Chaque chiffre suivi.' },
   ];
 
   var wrapper     = document.getElementById('scroll-frames');
@@ -84,11 +84,18 @@
   var adnTitleEl = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')   : null;
   var adnValeurs = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
 
-  /* Services overlay — cartes mises en cache une seule fois (v8.6) */
+  /* Services overlay */
   var svcOverlay = document.getElementById('sf-services-overlay');
   var svcCards   = svcOverlay
     ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card'))
     : [];
+
+  /* CTA overlay */
+  var ctaOverlay = document.getElementById('sf-cta-overlay');
+  var ctaStats   = ctaOverlay
+    ? Array.prototype.slice.call(ctaOverlay.querySelectorAll('.sf-cta-stat'))
+    : [];
+  var ctaContent = ctaOverlay ? ctaOverlay.querySelector('.sf-cta-content') : null;
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
@@ -251,6 +258,28 @@
     } else {
       svcCards.forEach(function (c) { c.style.opacity = 0; });
     }
+
+    /* —— CTA ch07 —— */
+    var ctaOp = scrubOpacity(f, CTA_IN, CTA_PEAK, CTA_OUT);
+    if (ctaOverlay) {
+      ctaOverlay.style.opacity       = ctaOp;
+      ctaOverlay.style.pointerEvents = ctaOp > 0.05 ? 'auto' : 'none';
+    }
+    if (ctaOp > 0) {
+      var tCta = clamp01(zoneT(f, CTA_IN, CTA_PEAK));
+      if (ctaContent) {
+        ctaContent.style.opacity   = tCta;
+        ctaContent.style.transform = 'translateY(' + lerp(32, 0, tCta) + 'px)';
+      }
+      ctaStats.forEach(function (stat, i) {
+        var tStat = clamp01((tCta - i * 0.15) / (1 - i * 0.15 || 0.85));
+        stat.style.opacity   = tStat;
+        stat.style.transform = 'translateY(' + lerp(20, 0, tStat) + 'px)';
+      });
+    } else {
+      if (ctaContent) ctaContent.style.opacity = 0;
+      ctaStats.forEach(function (s) { s.style.opacity = 0; });
+    }
   }
 
   var textEls = [chapEl, titleEl, subEl].filter(Boolean);
@@ -326,6 +355,7 @@
 
     if (adnOverlay) { adnOverlay.style.opacity = '0'; adnOverlay.style.pointerEvents = 'none'; }
     if (svcOverlay) { svcOverlay.style.opacity = '0'; svcOverlay.style.pointerEvents = 'none'; }
+    if (ctaOverlay) { ctaOverlay.style.opacity = '0'; ctaOverlay.style.pointerEvents = 'none'; }
 
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
     gsap.to(textEls,  { opacity: 1, y: 0,  clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.3 });

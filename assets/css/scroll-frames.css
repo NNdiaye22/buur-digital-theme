@@ -1,4 +1,4 @@
-/* ── Scroll Frames v7.3 ── */
+/* ── Scroll Frames v9.0 ── */
 
 .scroll-frames-wrapper {
   position: relative;
@@ -11,7 +11,6 @@
   height: 100vh;
   overflow: hidden;
   background: #000;
-  /* v7.3 PERF : isole le repaint du bloc sticky du reste de la page */
   contain: layout paint;
 }
 .scroll-canvas {
@@ -117,7 +116,7 @@
 }
 
 /* ===========================================
-   OVERLAY NOTRE ADN — layout éditorial bas
+   OVERLAY NOTRE ADN
 =========================================== */
 
 .sf-adn-overlay {
@@ -213,14 +212,6 @@
   margin-bottom: 0.3rem;
 }
 
-.sf-adn-valeur-icon {
-  display: flex;
-  align-items: center;
-  color: rgba(245,244,240,0.35);
-  margin-bottom: 0.4rem;
-}
-.sf-adn-valeur-icon svg { width: 20px; height: 20px; stroke-width: 1.2; }
-
 .sf-adn-valeur h3 {
   font-family: var(--font-sans, sans-serif);
   font-size: clamp(1rem, 1.6vw, 1.25rem);
@@ -290,14 +281,12 @@
   color: #f5f4f0; margin: 0;
 }
 
-/* ---- grille desktop ---- */
 .services-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
-/* Carte service */
 .service-card {
   position: relative;
   background: rgba(255,255,255,0.04);
@@ -320,7 +309,6 @@
   background: rgba(234,91,19,0.06);
 }
 
-/* Image de fond optionnelle — lit --card-bg injecté par PHP */
 .card-bg {
   position: absolute;
   inset: 0;
@@ -363,7 +351,7 @@
 }
 .card-features li {
   display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.78rem; color: rgba(245,244,240,0.55);
+  font-size: 0.78rem; color: rgba(245,244,244,0.55);
 }
 .card-features li svg { color: var(--orange, #ea5b13); flex-shrink: 0; width: 12px; height: 12px; }
 
@@ -387,6 +375,159 @@
   white-space: nowrap;
 }
 .btn-card:hover { background: var(--orange, #ea5b13); color: #fff; }
+
+/* ===========================================
+   OVERLAY CTA — CH07
+=========================================== */
+
+.sf-cta-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 6vw, 5rem);
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(4,4,12,0.82) 0%, rgba(4,4,12,0.94) 100%);
+}
+.sf-cta-overlay.is-visible { pointer-events: auto; }
+
+.sf-cta-inner {
+  width: 100%;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+/* --- Côté gauche : texte + boutons --- */
+.sf-cta-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+.sf-cta-eyebrow {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--orange, #ea5b13);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.sf-cta-eyebrow::before {
+  content: '';
+  display: block;
+  width: 28px; height: 1px;
+  background: var(--orange, #ea5b13);
+  opacity: 0.7;
+}
+
+.sf-cta-title {
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: #f5f4f0;
+  margin: 0;
+}
+.sf-cta-title em {
+  font-style: normal;
+  color: var(--orange, #ea5b13);
+}
+
+.sf-cta-sub {
+  font-size: clamp(0.85rem, 1.3vw, 1rem);
+  line-height: 1.75;
+  color: rgba(245,244,240,0.55);
+  margin: 0;
+  max-width: 36ch;
+}
+
+.sf-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.sf-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 100px;
+  transition: background 0.22s ease, color 0.22s ease, transform 0.18s ease, box-shadow 0.22s ease;
+}
+.sf-cta-btn--primary {
+  background: var(--orange, #ea5b13);
+  color: #fff;
+  border: 1px solid var(--orange, #ea5b13);
+  box-shadow: 0 0 20px rgba(234,91,19,0.25);
+}
+.sf-cta-btn--primary:hover {
+  background: #d44e0f;
+  transform: translateY(-2px);
+  box-shadow: 0 0 32px rgba(234,91,19,0.45);
+}
+.sf-cta-btn--secondary {
+  background: transparent;
+  color: rgba(245,244,240,0.75);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.sf-cta-btn--secondary:hover {
+  background: rgba(255,255,255,0.06);
+  color: #f5f4f0;
+  border-color: rgba(255,255,255,0.35);
+  transform: translateY(-2px);
+}
+
+/* --- Côté droit : stats --- */
+.sf-cta-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  padding-left: clamp(1.5rem, 4vw, 3rem);
+  border-left: 1px solid rgba(255,255,255,0.08);
+}
+
+.sf-cta-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.sf-cta-stat-number {
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--orange, #ea5b13);
+}
+
+.sf-cta-stat-label {
+  font-size: 0.78rem;
+  color: rgba(245,244,240,0.45);
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
 
 /* ===========================================
    SWIPER HORIZONTAL MOBILE (≤ 768px)
@@ -432,7 +573,6 @@
     margin-bottom: 0.75rem;
   }
 
-  /* SWIPER HORIZONTAL */
   .services-grid {
     display: flex;
     flex-direction: row;
@@ -456,6 +596,26 @@
     scroll-snap-align: start;
     opacity: 0;
   }
+
+  /* --- CTA overlay mobile --- */
+  .sf-cta-inner {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .sf-cta-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 1.5rem;
+  }
+  .sf-cta-stat { flex: 1 1 120px; }
+  .sf-cta-stat-number { font-size: clamp(1.8rem, 7vw, 2.4rem); }
+  .sf-cta-title { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+  .sf-cta-buttons { flex-direction: column; }
+  .sf-cta-btn { justify-content: center; }
 
   /* Dots swiper */
   .svc-swiper-dots {

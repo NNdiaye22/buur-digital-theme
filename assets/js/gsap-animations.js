@@ -11,21 +11,10 @@
   gsap.registerPlugin(ScrollTrigger);
   if (window.SplitText) gsap.registerPlugin(SplitText);
 
-  /* ======================================================
-     0. REFRESH après suppression du preloader
-     ====================================================== */
-  const preloader = document.getElementById('buur-preloader');
-  if (preloader) {
-    const observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (m) {
-        if (m.removedNodes.length) {
-          setTimeout(function () { ScrollTrigger.refresh(); }, 100);
-          observer.disconnect();
-        }
-      });
-    });
-    observer.observe(preloader.parentNode, { childList: true });
-  }
+  // Refresh ScrollTrigger après que le preloader ait disparu (~1.5s)
+  window.addEventListener('load', function () {
+    setTimeout(function () { ScrollTrigger.refresh(); }, 1500);
+  });
 
   /* ======================================================
      1. HERO — titre + tagline + CTA (au load)

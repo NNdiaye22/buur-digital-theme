@@ -1,10 +1,9 @@
 /**
- * BUUR Digital — scroll-frames.js v8.0
+ * BUUR Digital — scroll-frames.js v8.1
  *
- * v8.0 FIX DEFINITIF :
- *  - FRAMES_PATH = assets (sans /frames)
- *  - Extension = .jpg  (les fichiers réels sont frame_001.jpg)
- *  → URL finale : /assets/v1/frame_001.jpg  ✅
+ * v8.1 FIX :
+ *  - Extension corrigée : .webp (les fichiers réels sont frame_001.webp)
+ *  → URL finale : /assets/v1/frame_001.webp  ✅
  */
 (function () {
   'use strict';
@@ -106,7 +105,7 @@
   var seqStarted  = [false, false, false, false, false, false, false];
 
   function frameSrc(seqId, idx) {
-    return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
+    return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.webp';
   }
 
   function loadIndices(indices, onDone) {

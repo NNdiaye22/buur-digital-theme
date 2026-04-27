@@ -1,9 +1,9 @@
 /**
- * BUUR Digital — scroll-frames.js v7.7
+ * BUUR Digital — scroll-frames.js v7.8
  *
- * v7.7 FIX CRITIQUE :
- *  - FRAMES_PATH corrigé : assets → assets/frames
- *    (les frames sont dans assets/frames/v1/, pas assets/v1/)
+ * v7.8 FIX :
+ *  - Extension frames corrigée : .webp → .jpg
+ *    (les fichiers sur le serveur sont frame_001.jpg, pas .webp)
  */
 (function () {
   'use strict';
@@ -105,7 +105,7 @@
   var seqStarted  = [false, false, false, false, false, false, false];
 
   function frameSrc(seqId, idx) {
-    return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.webp';
+    return FRAMES_PATH + '/' + seqId + '/frame_' + String(idx + 1).padStart(3, '0') + '.jpg';
   }
 
   function loadIndices(indices, onDone) {
@@ -280,7 +280,7 @@
 
   var rafId = null;
 
-  function onScroll()   { if (!rafId) rafId = requestAnimationFrame(tick); }
+  function onScroll()    { if (!rafId) rafId = requestAnimationFrame(tick); }
   function onTouchMove() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
   function tick() {

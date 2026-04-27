@@ -5,6 +5,14 @@
 (function () {
   'use strict';
 
+  /* ── Scroll restoration ──
+     Force le retour en haut à chaque rechargement.
+     Évite les états incohérents des animations scroll-frames. */
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  window.scrollTo(0, 0);
+
   /* ── Navbar scroll ── */
   var nav = document.querySelector('.buur-nav');
   if (nav) {

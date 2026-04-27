@@ -33,7 +33,7 @@ $stats = array(
         <?php foreach ( $stats as $stat ) : ?>
         <div class="stat-item reveal">
             <span class="stat-icon" aria-hidden="true"><?php echo $stat['icon']; ?></span>
-            <strong class="stat-value"><?php echo esc_html( $stat['value'] ); ?></strong>
+            <strong class="stat-value" data-value="<?php echo esc_attr( $stat['value'] ); ?>"><?php echo esc_html( $stat['value'] ); ?></strong>
             <span class="stat-label"><?php echo esc_html( $stat['label'] ); ?></span>
         </div>
         <?php endforeach; ?>

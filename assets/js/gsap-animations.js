@@ -12,6 +12,22 @@
   if (window.SplitText) gsap.registerPlugin(SplitText);
 
   /* ======================================================
+     0. REFRESH après suppression du preloader
+     ====================================================== */
+  const preloader = document.getElementById('buur-preloader');
+  if (preloader) {
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.removedNodes.length) {
+          setTimeout(function () { ScrollTrigger.refresh(); }, 100);
+          observer.disconnect();
+        }
+      });
+    });
+    observer.observe(preloader.parentNode, { childList: true });
+  }
+
+  /* ======================================================
      1. HERO — titre + tagline + CTA (au load)
      ====================================================== */
   const heroTitle   = document.querySelector('.hero-title');
@@ -102,7 +118,7 @@
         stagger: 0.1,
         scrollTrigger: {
           trigger: '.stats-section',
-          start:   'top 80%',
+          start:   'top 90%',
           once:    true,
           onEnter: () => animateCounters(),
         },

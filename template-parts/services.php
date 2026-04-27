@@ -2,7 +2,8 @@
 /**
  * BUUR Digital — Services
  * Desktop : grille 3 colonnes.
- * Mobile  : carrousel scroll-snap avec points de pagination.
+ * Mobile  : swiper flèches + scroll-snap + points.
+ * Bouton : WhatsApp France uniquement.
  */
 
 $eyebrow = get_theme_mod( 'buur_services_eyebrow', 'NOS SERVICES' );
@@ -26,6 +27,8 @@ $icons = array(
     2 => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>',
     3 => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
 );
+
+$wa_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.836L.057 23.882a.75.75 0 00.92.92l6.046-1.466A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 01-5.073-1.389l-.363-.214-3.761.913.928-3.762-.232-.376A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>';
 ?>
 
 <section class="services-section" id="services" aria-label="Nos services">
@@ -60,14 +63,7 @@ $icons = array(
         >
             <div class="card-img-wrap" aria-hidden="true">
                 <?php if ( $img_url ) : ?>
-                    <img
-                        class="card-bg-img"
-                        src="<?php echo esc_url( $img_url ); ?>"
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        width="600" height="338"
-                    >
+                    <img class="card-bg-img" src="<?php echo esc_url( $img_url ); ?>" alt="" loading="lazy" decoding="async" width="600" height="338">
                 <?php else : ?>
                     <div class="card-bg-fallback"></div>
                 <?php endif; ?>
@@ -78,7 +74,6 @@ $icons = array(
             <div class="card-body">
                 <h3 class="card-title"><?php echo esc_html( $s_title ); ?></h3>
                 <p class="card-desc"><?php echo esc_html( $s_desc ); ?></p>
-
                 <ul class="card-features" role="list">
                     <?php foreach ( $features as $feat ) : ?>
                     <li>
@@ -87,7 +82,6 @@ $icons = array(
                     </li>
                     <?php endforeach; ?>
                 </ul>
-
                 <div class="card-footer">
                     <div class="card-price">
                         <?php if ( $s_price !== 'Sur devis' ) : ?>
@@ -95,8 +89,8 @@ $icons = array(
                         <?php endif; ?>
                         <span class="price-amount"><?php echo esc_html( $s_price ); ?></span>
                     </div>
-                    <a href="<?php echo esc_url( buur_whatsapp_url( 'sn' ) ); ?>" class="btn-card" target="_blank" rel="noopener noreferrer">
-                        En savoir plus &rarr;
+                    <a href="<?php echo esc_url( buur_whatsapp_url( 'fr' ) ); ?>" class="btn-card" target="_blank" rel="noopener noreferrer">
+                        <?php echo $wa_icon; ?> Nous contacter
                     </a>
                 </div>
             </div>
@@ -104,10 +98,24 @@ $icons = array(
         <?php endfor; ?>
     </div>
 
-    <!-- Points de pagination (mobile uniquement, gérés par JS) -->
-    <div class="services-dots" id="services-dots" aria-hidden="true">
-        <?php for ( $i = 0; $i < 3; $i++ ) : ?>
-        <button class="services-dot <?php echo $i === 0 ? 'is-active' : ''; ?>" data-index="<?php echo $i; ?>" tabindex="-1"></button>
-        <?php endfor; ?>
+    <!-- Contrôles swiper : flèches + points (mobile uniquement) -->
+    <div class="services-controls" id="services-controls" aria-label="Navigation carrousel services">
+        <button class="services-arrow" id="srv-prev" aria-label="Service précédent" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="services-dots" role="tablist">
+            <?php for ( $i = 0; $i < 3; $i++ ) : ?>
+            <button
+                class="services-dot <?php echo $i === 0 ? 'is-active' : ''; ?>"
+                data-index="<?php echo $i; ?>"
+                role="tab"
+                aria-label="Service <?php echo $i + 1; ?>"
+                aria-selected="<?php echo $i === 0 ? 'true' : 'false'; ?>"
+            ></button>
+            <?php endfor; ?>
+        </div>
+        <button class="services-arrow" id="srv-next" aria-label="Service suivant">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
     </div>
 </section>

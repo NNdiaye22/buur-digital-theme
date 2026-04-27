@@ -1,4 +1,4 @@
-/* ── Services — Grille desktop / Carrousel mobile ── */
+/* ── Services — Grille desktop / Swiper mobile ── */
 .services-section {
   padding: clamp(5rem, 10vh, 8rem) 0;
   background: var(--black);
@@ -25,10 +25,9 @@
   overflow: hidden;
 }
 
-/* ── Mobile : carrousel scroll-snap ── */
+/* ── Mobile : swiper horizontal scroll-snap ── */
 @media (max-width: 900px) {
   .services-grid {
-    /* Désactiver la grille */
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -41,7 +40,6 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scroll-padding-inline: var(--container-pad);
-    /* Masquer la scrollbar mais garder la fonctionnalité */
     scrollbar-width: none;
   }
   .services-grid::-webkit-scrollbar { display: none; }
@@ -62,14 +60,11 @@
 
 @media (max-width: 900px) {
   .service-card {
-    /* Chaque carte = 1 écran complet, s'accroche au snap */
     flex: 0 0 calc(100vw - (var(--container-pad) * 2) - 2rem);
     scroll-snap-align: start;
     scroll-snap-stop: always;
     border-radius: var(--radius-lg);
     border: 1.5px solid var(--border);
-    /* Hauteur auto selon contenu */
-    min-height: 0;
   }
 }
 
@@ -101,7 +96,6 @@
   background: var(--surface-2);
   margin-bottom: 0.25rem;
 }
-
 .card-bg-img {
   width: 100%;
   height: 100%;
@@ -111,63 +105,30 @@
   transition: opacity 400ms, transform 500ms var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1));
   display: block;
 }
-.service-card:hover .card-bg-img {
-  opacity: 0.75;
-  transform: scale(1.04);
-}
-
+.service-card:hover .card-bg-img { opacity: 0.75; transform: scale(1.04); }
 .card-bg-fallback {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   background: linear-gradient(135deg, var(--surface-2) 0%, #1a1a2a 100%);
 }
-
 .card-img-overlay {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background: linear-gradient(to top, rgba(8,8,16,0.7), transparent 50%);
   pointer-events: none;
 }
-
 .card-icon {
   position: absolute;
-  bottom: 1rem;
-  left: 1rem;
+  bottom: 1rem; left: 1rem;
   color: var(--orange);
   opacity: 0.9;
   z-index: 1;
 }
 
-/* ── Corps de carte ── */
+/* ── Corps ── */
 .card-body { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--white);
-}
-
-.card-desc {
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: rgba(245,244,240,0.6);
-}
-
-.card-features {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-  flex: 1;
-}
-.card-features li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  color: rgba(245,244,240,0.75);
-}
+.card-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--white); }
+.card-desc  { font-size: 0.875rem; line-height: 1.65; color: rgba(245,244,240,0.6); }
+.card-features { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem; flex: 1; }
+.card-features li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: rgba(245,244,240,0.75); }
 .card-features li svg { color: var(--orange); flex-shrink: 0; }
 
 .card-footer {
@@ -179,32 +140,57 @@
   border-top: 1px solid var(--border);
   margin-top: auto;
 }
-.card-price { display: flex; flex-direction: column; gap: 0.1rem; }
-.price-from   { font-size: 0.7rem; color: var(--grey-400); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
-.price-amount { font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
+.card-price  { display: flex; flex-direction: column; gap: 0.1rem; }
+.price-from  { font-size: 0.7rem; color: var(--grey-400); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+.price-amount{ font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
 
-/* ── Indicateurs de pagination (points) — mobile only ── */
-.services-dots {
-  display: none;
-}
+/* ── Contrôles swiper (flèches + points) — mobile only ── */
+.services-controls { display: none; }
+
 @media (max-width: 900px) {
-  .services-dots {
+  .services-controls {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 1rem;
     margin-top: 1.5rem;
     padding-inline: var(--container-pad);
+  }
+
+  /* Flèches */
+  .services-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: rgba(245,244,240,0.6);
+    cursor: pointer;
+    transition: border-color 200ms, color 200ms, background 200ms;
+    flex-shrink: 0;
+  }
+  .services-arrow:hover  { border-color: var(--orange); color: var(--orange); }
+  .services-arrow:active { background: rgba(234,91,19,0.1); }
+  .services-arrow:disabled { opacity: 0.25; pointer-events: none; }
+
+  /* Points */
+  .services-dots {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   .services-dot {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
     background: var(--border);
-    transition: background 250ms, width 250ms;
-    cursor: pointer;
     border: none;
     padding: 0;
+    cursor: pointer;
+    transition: background 250ms, width 250ms;
   }
   .services-dot.is-active {
     background: var(--orange);

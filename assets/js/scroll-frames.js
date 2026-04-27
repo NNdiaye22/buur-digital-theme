@@ -1,13 +1,13 @@
 /**
- * BUUR Digital — scroll-frames.js v8.4
+ * BUUR Digital — scroll-frames.js v8.5
  *
- * v8.4 FIX :
- *  - FRAMES_PATH corrigé : assets/frames/ (les dossiers v1-v7 sont dans assets/frames/)
- * v8.3 PERF :
- *  - DPR plafonné à 1.5 sur mobile (réduction charge GPU, qualité visuellement identique)
- * v8.2 PERF :
- *  - updateWrapperTop() supprimé du tick() mobile
- *  - Remplacé par ResizeObserver sur le wrapper
+ * v8.5 FIX : suppression complète du système lazy-load vidéo
+ *            (svcVideos, svcVideosLoaded, lazyLoadSvcVideos).
+ *            Les cartes services utilisent désormais des images CSS
+ *            injectées côté serveur via le customizer WordPress.
+ * v8.4 FIX : FRAMES_PATH corrigé : assets/frames/
+ * v8.3 PERF : DPR plafonné à 1.5 sur mobile
+ * v8.2 PERF : updateWrapperTop() dans ResizeObserver uniquement
  */
 (function () {
   'use strict';
@@ -23,7 +23,6 @@
   var BATCH_DELAY  = IS_MOBILE ? 64 : 32;
   var AHEAD_FRAMES = IS_MOBILE ? 20 : 40;
 
-  // DPR plafonné à 1.5 sur mobile pour alléger le GPU
   var DPR = IS_MOBILE ? Math.min(window.devicePixelRatio || 1, 1.5) : (window.devicePixelRatio || 1);
 
   var SEQUENCES = [
@@ -54,11 +53,11 @@
   var CHAPTERS = [
     { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'Strat\u00e9gie <em>Digitale</em>',    sub:'Une vision claire pour dominer votre march\u00e9 en ligne.' },
     { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Design <em>Premium</em>',             sub:'Des interfaces qui captivent, engagent et convertissent.' },
-    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Code <em>Sur-Mesure</em>',            sub:'Rapide, propre, \u00e9volutif \u2014 construit pour durer.' },
-    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'SEO & <em>Performance</em>',          sub:'Premier sur Google. Rapide sur tous les \u00e9crans.' },
-    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'E-<em>Commerce</em>',                 sub:'Votre boutique pens\u00e9e pour vendre, 24h/24.' },
-    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Support <em>D\u00e9di\u00e9</em>',    sub:'Une \u00e9quipe disponible pour faire grandir votre projet.' },
-    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'R\u00e9sultats <em>Mesurables</em>',  sub:'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
+    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Code <em>Sur-Mesure</em>',            sub:'Rapide, propre, évolutif — construit pour durer.' },
+    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'SEO & <em>Performance</em>',          sub:'Premier sur Google. Rapide sur tous les écrans.' },
+    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'E-<em>Commerce</em>',                 sub:'Votre boutique pensée pour vendre, 24h/24.' },
+    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Support <em>Dédié</em>',             sub:'Une équipe disponible pour faire grandir votre projet.' },
+    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'Résultats <em>Mesurables</em>',      sub:'Chaque action optimisée. Chaque chiffre suivi.' },
   ];
 
   var wrapper     = document.getElementById('scroll-frames');
@@ -74,16 +73,14 @@
   var progressNav = document.getElementById('sf-progress');
   var dotEls      = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
+  /* ADN overlay */
   var adnOverlay    = document.getElementById('sf-adn-overlay');
-  var adnEyebrow    = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow')    : null;
-  var adnTitleEl    = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')      : null;
-  var adnHalo       = adnOverlay ? adnOverlay.querySelector('.sf-adn-halo')       : null;
-  var adnConnectors = adnOverlay ? adnOverlay.querySelector('.sf-adn-connectors') : null;
+  var adnEyebrow    = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow') : null;
+  var adnTitleEl    = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')   : null;
   var adnValeurs    = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
 
-  var svcOverlay      = document.getElementById('sf-services-overlay');
-  var svcVideos       = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('video[data-src]')) : [];
-  var svcVideosLoaded = false;
+  /* Services overlay — plus de vidéos, images CSS uniquement */
+  var svcOverlay = document.getElementById('sf-services-overlay');
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
@@ -91,8 +88,6 @@
   function updateWrapperTop() {
     wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
   }
-
-  // ResizeObserver : recalcule wrapperTop uniquement si le layout change réellement
   if (window.ResizeObserver) {
     new ResizeObserver(function () { updateWrapperTop(); }).observe(wrapper);
   }
@@ -111,11 +106,8 @@
     updateWrapperTop();
     if (allImages[currentFrame]) drawFrame(currentFrame);
   }
-
   window.addEventListener('resize', resize);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', resize);
-  }
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
 
   var allImages   = new Array(TOTAL);
   var totalLoaded = 0;
@@ -127,26 +119,19 @@
 
   function loadIndices(indices, onDone) {
     if (!indices.length) { if (onDone) onDone(); return; }
-    var total = indices.length;
-    var done  = 0;
-
+    var total = indices.length, done = 0;
     function onOne() {
-      totalLoaded++;
-      done++;
+      totalLoaded++; done++;
       if (loaderBar) loaderBar.style.width = Math.min(totalLoaded / TOTAL * 100, 100) + '%';
       if (done === total && onDone) onDone();
     }
-
     function loadBatch(start) {
       var end = Math.min(start + BATCH_SIZE, total);
       for (var i = start; i < end; i++) {
         (function(absIdx) {
           if (allImages[absIdx]) { onOne(); return; }
           var img = new Image();
-          img.onload = img.onerror = function () {
-            allImages[absIdx] = img;
-            onOne();
-          };
+          img.onload = img.onerror = function () { allImages[absIdx] = img; onOne(); };
           img.src = frameSrc(
             SEQUENCES[ seqOfAbsIdx(absIdx) ].id,
             absIdx - offsets[ seqOfAbsIdx(absIdx) ]
@@ -184,8 +169,7 @@
 
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
-    var cw = canvas.width  / DPR;
-    var ch = canvas.height / DPR;
+    var cw = canvas.width / DPR, ch = canvas.height / DPR;
     var s  = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
     ctx.clearRect(0, 0, cw, ch);
     ctx.drawImage(img,
@@ -218,49 +202,43 @@
     if (f <= fs) return 1;
     return 1 - (f - fs) / (outF - fs);
   }
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function clamp01(v)    { return Math.max(0, Math.min(1, v)); }
-
-  function lazyLoadSvcVideos() {
-    if (svcVideosLoaded) return;
-    svcVideosLoaded = true;
-    svcVideos.forEach(function (v) { if (v.dataset.src) { v.src = v.dataset.src; v.load(); } });
-  }
+  function lerp(a, b, t)  { return a + (b - a) * t; }
+  function clamp01(v)      { return Math.max(0, Math.min(1, v)); }
 
   function updateOverlays(f) {
+    /* —— ADN —— */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
-    if (adnOverlay) { adnOverlay.style.opacity = adnOp; adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none'; }
+    if (adnOverlay) {
+      adnOverlay.style.opacity      = adnOp;
+      adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none';
+    }
     if (adnOp > 0) {
       var tIn = clamp01(zoneT(f, ADN_IN, ADN_PEAK));
-      if (adnEyebrow)    { adnEyebrow.style.opacity = tIn; adnEyebrow.style.transform = 'translateY(' + lerp(-20,0,tIn) + 'px)'; }
-      if (adnTitleEl)    { adnTitleEl.style.opacity = tIn; adnTitleEl.style.clipPath = 'inset(0 0 0% 0)'; adnTitleEl.style.transform = 'translateY(' + lerp(-12,0,tIn) + 'px)'; }
-      if (adnHalo)       { adnHalo.style.opacity = lerp(0,0.95,tIn); adnHalo.style.transform = 'translate(-50%,-50%) scale(' + lerp(0.5,1,tIn) + ')'; }
-      if (adnConnectors) { adnConnectors.style.opacity = tIn; }
+      if (adnEyebrow) { adnEyebrow.style.opacity = tIn; adnEyebrow.style.transform = 'translateY(' + lerp(-20, 0, tIn) + 'px)'; }
+      if (adnTitleEl) { adnTitleEl.style.opacity = tIn; adnTitleEl.style.transform  = 'translateY(' + lerp(-12, 0, tIn) + 'px)'; }
       adnValeurs.forEach(function (card, i) {
-        var tx = 0, ty = 0;
-        if      (card.classList.contains('sf-adn-valeur--excellence'))    { tx = -16; ty = -8; }
-        else if (card.classList.contains('sf-adn-valeur--accessibilite')) { tx = -16; ty =  8; }
-        else if (card.classList.contains('sf-adn-valeur--innovation'))    { tx =  16; ty =  0; }
-        var tCard = clamp01((tIn - i*0.12) / (1 - i*0.12 || 0.88));
+        var tCard = clamp01((tIn - i * 0.12) / (1 - i * 0.12 || 0.88));
         card.style.opacity   = tCard;
-        card.style.transform = 'perspective(700px) translate(' + tx + 'px,' + lerp(30,ty,tCard) + 'px) rotateX(' + lerp(38,0,tCard) + 'deg)';
+        card.style.transform = 'translateY(' + lerp(24, 0, tCard) + 'px)';
       });
     } else {
-      if (adnEyebrow)    adnEyebrow.style.opacity    = 0;
-      if (adnTitleEl)    adnTitleEl.style.opacity    = 0;
-      if (adnHalo)       adnHalo.style.opacity       = 0;
-      if (adnConnectors) adnConnectors.style.opacity = 0;
+      if (adnEyebrow) adnEyebrow.style.opacity = 0;
+      if (adnTitleEl) adnTitleEl.style.opacity = 0;
       adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
+
+    /* —— SERVICES —— */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
-    if (svcOverlay) { svcOverlay.style.opacity = svcOp; svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none'; }
-    if (svcOp > 0) { lazyLoadSvcVideos(); }
+    if (svcOverlay) {
+      svcOverlay.style.opacity      = svcOp;
+      svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
+    }
     if (svcOp > 0) {
       var tSvc = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
       Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')).forEach(function (card, i) {
-        var tCol = clamp01((tSvc - i*0.10) / (1 - i*0.10 || 0.90));
+        var tCol = clamp01((tSvc - i * 0.10) / (1 - i * 0.10 || 0.90));
         card.style.opacity   = tCol;
-        card.style.transform = 'perspective(900px) translateY(' + lerp(32,0,tCol) + 'px) rotateY(' + lerp(20,0,tCol) + 'deg)';
+        card.style.transform = 'perspective(900px) translateY(' + lerp(32, 0, tCol) + 'px) rotateY(' + lerp(20, 0, tCol) + 'deg)';
       });
     } else if (svcOverlay) {
       Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')).forEach(function (c) { c.style.opacity = 0; });
@@ -272,18 +250,18 @@
   function showChapter(idx) {
     if (textTween) textTween.kill();
     var ch = CHAPTERS[idx];
-    if (chapEl)    chapEl.textContent    = ch.chapter;
-    if (titleEl)   titleEl.innerHTML     = ch.title;
-    if (subEl)     subEl.textContent     = ch.sub;
+    if (chapEl)    chapEl.textContent  = ch.chapter;
+    if (titleEl)   titleEl.innerHTML   = ch.title;
+    if (subEl)     subEl.textContent   = ch.sub;
     if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
     dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
-    gsap.set(textEls, { opacity:0, y:40, clipPath:'inset(0 0 100% 0)' });
-    textTween = gsap.to(textEls, { opacity:1, y:0, clipPath:'inset(0 0 0% 0)', duration:0.9, ease:'power4.out', stagger:0.11 });
+    gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
+    textTween = gsap.to(textEls, { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: 0.9, ease: 'power4.out', stagger: 0.11 });
   }
 
   function hideChapter(cb) {
     if (textTween) textTween.kill();
-    textTween = gsap.to(textEls, { opacity:0, y:-28, clipPath:'inset(0 0 100% 0)', duration:0.45, ease:'power3.in', onComplete: cb || null });
+    textTween = gsap.to(textEls, { opacity: 0, y: -28, clipPath: 'inset(0 0 100% 0)', duration: 0.45, ease: 'power3.in', onComplete: cb || null });
   }
 
   function updateText(f) {
@@ -298,7 +276,6 @@
   }
 
   var rafId = null;
-
   function onScroll()    { if (!rafId) rafId = requestAnimationFrame(tick); }
   function onTouchMove() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
@@ -321,8 +298,7 @@
   window.addEventListener('touchmove', onTouchMove, { passive: true });
 
   function initScroll() {
-    var w = vpWidth();
-    var h = vpHeight();
+    var w = vpWidth(), h = vpHeight();
     canvas.width  = Math.round(w * DPR);
     canvas.height = Math.round(h * DPR);
     canvas.style.width  = w + 'px';
@@ -330,7 +306,7 @@
     ctx.scale(DPR, DPR);
     updateWrapperTop();
 
-    if (loaderWrap) gsap.to(loaderWrap, { opacity:0, duration:0.4, onComplete: function () { loaderWrap.remove(); } });
+    if (loaderWrap) gsap.to(loaderWrap, { opacity: 0, duration: 0.4, onComplete: function () { loaderWrap.remove(); } });
 
     currentChapter = 0;
     if (chapEl)    chapEl.textContent    = CHAPTERS[0].chapter;
@@ -343,8 +319,8 @@
     if (adnOverlay) { adnOverlay.style.opacity = '0'; adnOverlay.style.pointerEvents = 'none'; }
     if (svcOverlay) { svcOverlay.style.opacity = '0'; svcOverlay.style.pointerEvents = 'none'; }
 
-    gsap.set(textEls, { opacity:0, y:40, clipPath:'inset(0 0 100% 0)' });
-    gsap.to(textEls,  { opacity:1, y:0,  clipPath:'inset(0 0 0% 0)', duration:1.1, ease:'power4.out', stagger:0.13, delay:0.3 });
+    gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
+    gsap.to(textEls,  { opacity: 1, y: 0,  clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.3 });
 
     dotEls.forEach(function (dot, i) {
       dot.addEventListener('click', function () {
@@ -355,7 +331,6 @@
 
     drawFrame(0);
     tick();
-
     idle(function () { loadSeq(1, function () { idle(function () { loadSeq(2, null); }); }); });
   }
 

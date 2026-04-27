@@ -1,11 +1,10 @@
 <?php
 /**
- * BUUR Digital — Scroll Frames v9.0
- * Overlay Notre ADN + Overlay Nos Services + Overlay CTA ch07
+ * BUUR Digital — Scroll Frames v9.1
+ * Overlay Notre ADN + Overlay Nos Services + Overlay CTA ch07 + Stat centrale
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-/* ---- données services depuis le customizer ---- */
 $svc_eyebrow = get_theme_mod( 'buur_services_eyebrow', 'NOS SERVICES' );
 $svc_title   = get_theme_mod( 'buur_services_title',   'Choisissez votre univers digital' );
 
@@ -39,21 +38,18 @@ $svc_defaults = array(
 $sf_services = array();
 for ( $i = 1; $i <= 3; $i++ ) :
     $d = $svc_defaults[ $i ];
-
     $img_id  = (int) get_theme_mod( "buur_service{$i}_bg_image", 0 );
     $img_url = '';
     if ( $img_id ) {
         $src = wp_get_attachment_image_src( $img_id, 'large' );
         if ( $src ) $img_url = $src[0];
     }
-
     $features = array();
     for ( $f = 1; $f <= 4; $f++ ) :
         $feat = get_theme_mod( "buur_service{$i}_feat{$f}", '' );
         if ( $feat ) $features[] = $feat;
     endfor;
     if ( empty( $features ) ) $features = $d['features'];
-
     $sf_services[ $i ] = array(
         'title'    => get_theme_mod( "buur_service{$i}_title",    $d['title'] ),
         'desc'     => get_theme_mod( "buur_service{$i}_desc",     $d['desc'] ),
@@ -72,10 +68,16 @@ endfor;
     <canvas id="scroll-main-canvas" class="scroll-canvas" aria-hidden="true"></canvas>
     <div class="scroll-frame-overlay" aria-hidden="true"></div>
 
+    <!-- ===== STAT CENTRALE ===== -->
+    <div id="sf-stat-center" class="sf-stat-center" aria-hidden="true">
+      <span class="sf-stat-rule" aria-hidden="true"></span>
+      <span class="sf-stat-number"></span>
+      <span class="sf-stat-label"></span>
+    </div>
+
     <!-- ===== OVERLAY : NOTRE ADN ===== -->
     <div id="sf-adn-overlay" class="sf-adn-overlay" aria-hidden="true">
       <div class="sf-adn-inner">
-
         <div class="sf-adn-header">
           <span class="sf-adn-eyebrow"><?php echo esc_html( get_theme_mod( 'buur_adn_eyebrow', 'NOTRE ADN' ) ); ?></span>
           <h2 class="sf-adn-title"><?php
@@ -86,10 +88,9 @@ endfor;
             );
           ?></h2>
         </div>
-
         <div class="sf-adn-grid">
           <?php
-          $adn_classes = array( 1 => 'sf-adn-valeur--excellence', 2 => 'sf-adn-valeur--accessibilite', 3 => 'sf-adn-valeur--innovation' );
+          $adn_classes  = array( 1 => 'sf-adn-valeur--excellence', 2 => 'sf-adn-valeur--accessibilite', 3 => 'sf-adn-valeur--innovation' );
           $adn_defaults = array(
               1 => array( 'Excellence',    'Des sites qui rivalisent avec les meilleures agences internationales.' ),
               2 => array( 'Accessibilité', 'Prix transparents et honnêtes. Le luxe web pour tous les budgets.' ),
@@ -107,41 +108,28 @@ endfor;
           </div>
           <?php endfor; ?>
         </div>
-
       </div>
-    </div><!-- /#sf-adn-overlay -->
+    </div>
 
     <!-- ===== OVERLAY : NOS SERVICES ===== -->
     <div id="sf-services-overlay" class="sf-services-overlay" aria-hidden="true">
       <div class="sf-services-inner">
-
         <div class="services-header">
           <span class="section-eyebrow"><?php echo esc_html( $svc_eyebrow ); ?></span>
           <h2 class="section-title"><?php echo esc_html( $svc_title ); ?></h2>
         </div>
-
         <div class="services-grid">
           <?php foreach ( $sf_services as $i => $svc ) : ?>
           <article
             class="service-card <?php echo $svc['featured'] ? 'service-card--featured' : ''; ?>"
-            aria-label="Service : <?php echo esc_attr( $svc['title'] ); ?>"
-            <?php if ( $svc['img_url'] ) : ?>
-            style="--card-bg: url('<?php echo esc_url( $svc['img_url'] ); ?>');"
-            <?php endif; ?>
+            aria-label="Service : <?php echo esc_attr( $svc['title'] ); ?>"
+            <?php if ( $svc['img_url'] ) : ?>style="--card-bg: url('<?php echo esc_url( $svc['img_url'] ); ?>');"<?php endif; ?>
           >
-            <?php if ( $svc['img_url'] ) : ?>
-            <div class="card-bg" aria-hidden="true"></div>
-            <?php endif; ?>
-
+            <?php if ( $svc['img_url'] ) : ?><div class="card-bg" aria-hidden="true"></div><?php endif; ?>
             <div class="card-icon"><?php echo $svc['icon']; ?></div>
-
-            <?php if ( $svc['featured'] ) : ?>
-            <div class="service-card__badge">Populaire</div>
-            <?php endif; ?>
-
+            <?php if ( $svc['featured'] ) : ?><div class="service-card__badge">Populaire</div><?php endif; ?>
             <h3 class="card-title"><?php echo esc_html( $svc['title'] ); ?></h3>
             <p class="card-desc"><?php echo esc_html( $svc['desc'] ); ?></p>
-
             <ul class="card-features" role="list">
               <?php foreach ( $svc['features'] as $feat ) : ?>
               <li>
@@ -150,12 +138,9 @@ endfor;
               </li>
               <?php endforeach; ?>
             </ul>
-
             <div class="card-footer">
               <div class="card-price">
-                <?php if ( $svc['price'] !== 'Sur devis' ) : ?>
-                <span class="price-from">À partir de</span>
-                <?php endif; ?>
+                <?php if ( $svc['price'] !== 'Sur devis' ) : ?><span class="price-from">À partir de</span><?php endif; ?>
                 <span class="price-amount"><?php echo esc_html( $svc['price'] ); ?></span>
               </div>
               <a href="<?php echo esc_url( buur_whatsapp_url( 'fr' ) ); ?>" class="btn-card" target="_blank" rel="noopener noreferrer">En savoir plus &rarr;</a>
@@ -163,16 +148,14 @@ endfor;
           </article>
           <?php endforeach; ?>
         </div>
-
       </div>
-    </div><!-- /#sf-services-overlay -->
+    </div>
 
     <!-- ===== OVERLAY : CTA CH07 ===== -->
     <div id="sf-cta-overlay" class="sf-cta-overlay" aria-hidden="true">
       <div class="sf-cta-inner">
-
         <div class="sf-cta-content">
-          <span class="sf-cta-eyebrow">PASSEZ À L'ACTION</span>
+          <span class="sf-cta-eyebrow">PASSEZ À L’ACTION</span>
           <h2 class="sf-cta-title">Démarrons votre<br><em>projet ensemble.</em></h2>
           <p class="sf-cta-sub">Une équipe prête à vous accompagner. Premier échange offert, sans engagement.</p>
           <div class="sf-cta-buttons">
@@ -186,7 +169,6 @@ endfor;
             </a>
           </div>
         </div>
-
         <div class="sf-cta-stats">
           <div class="sf-cta-stat">
             <span class="sf-cta-stat-number">+50</span>
@@ -201,9 +183,8 @@ endfor;
             <span class="sf-cta-stat-label">des sites livrés mobile-first</span>
           </div>
         </div>
-
       </div>
-    </div><!-- /#sf-cta-overlay -->
+    </div>
 
     <!-- Texte dynamique -->
     <div class="scroll-frame-content" role="region" aria-live="polite" aria-label="Chapitre en cours">
@@ -224,5 +205,5 @@ endfor;
       <div id="sf-loader-bar" class="seq-loader"></div>
     </div>
 
-  </div><!-- /.scroll-frames-sticky -->
-</div><!-- /.scroll-frames-wrapper -->
+  </div>
+</div>

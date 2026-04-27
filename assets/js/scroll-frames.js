@@ -1,10 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v9.0
- *
- * v9.0 STORYTELLING : textes chapitres révisés + overlay CTA ch07
- *   - Titres / sous-titres cohérents avec les visuels de chaque séquence
- *   - Ajout CTA_IN / CTA_PEAK / CTA_OUT pour overlay ch07
- *   - Mise en cache ctaOverlay + ctaStats au même pattern que ADN/Services
+ * BUUR Digital — scroll-frames.js v9.1
+ * v9.1 : stats centrales premium par chapitre
  */
 (function () {
   'use strict';
@@ -41,7 +37,6 @@
   var acc = 0;
   SEQUENCES.forEach(function (s) { offsets.push(acc); acc += s.count; });
 
-  /* ---- fenêtres d'apparition des overlays ---- */
   var ADN_IN   = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.55);
   var ADN_PEAK = offsets[4] + Math.round((offsets[5] - offsets[4]) * 0.75);
   var ADN_OUT  = offsets[5] + Math.round((offsets[6] - offsets[5]) * 0.40);
@@ -54,15 +49,21 @@
   var CTA_PEAK = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.65);
   var CTA_OUT  = TOTAL - 1;
 
-  /* ---- chapitres — textes révisés v9.0 ---- */
   var CHAPTERS = [
-    { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'L&#8217;Afrique <em>en ligne.</em>',          sub:'Votre business mérite une présence digitale de classe mondiale.' },
-    { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Un site qui <em>vous ressemble.</em>',        sub:'Design premium, conçu pour les entrepreneurs africains.' },
-    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Construit <em>pour durer.</em>',              sub:'Code propre, rapide, évolutif. Zéro compromis.' },
-    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'Premier sur <em>Google.</em>',               sub:'SEO local maîtrisé. Vos clients vous trouvent avant la concurrence.' },
-    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'Vendez <em>sans limite.</em>',               sub:'E-commerce, Wave, Orange Money. Votre boutique ouverte 24h/24.' },
-    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Une équipe <em>à vos côtés.</em>',           sub:'Support dédié, formation incluse. Vous n\'êtes jamais seul.' },
-    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'Des résultats <em>mesurables.</em>',         sub:'Chaque action optimisée. Chaque chiffre suivi.' },
+    { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'L&#8217;Afrique <em>en ligne.</em>',        sub:'Votre business m\u00e9rite une pr\u00e9sence digitale de classe mondiale.',
+      stat: '87%', statLabel: 'des acheteurs cherchent en ligne avant tout achat' },
+    { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Un site qui <em>vous ressemble.</em>',      sub:'Design premium, con\u00e7u pour les entrepreneurs africains.',
+      stat: '3\u202fsec', statLabel: 'pour convaincre un visiteur ou le perdre' },
+    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Construit <em>pour durer.</em>',            sub:'Code propre, rapide, \u00e9volutif. Z\u00e9ro compromis.',
+      stat: '100%', statLabel: 'sur mesure — aucun template, aucun compromis' },
+    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'Premier sur <em>Google.</em>',             sub:'SEO local ma\u00eetris\u00e9. Vos clients vous trouvent avant la concurrence.',
+      stat: '\u00d73', statLabel: 'de trafic organique en moyenne apr\u00e8s optimisation' },
+    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'Vendez <em>sans limite.</em>',             sub:'E-commerce, Wave, Orange Money. Votre boutique ouverte 24h/24.',
+      stat: '24h', statLabel: 'votre boutique ouverte, m\u00eame quand vous dormez' },
+    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Une \u00e9quipe <em>\u00e0 vos c\u00f4t\u00e9s.</em>',         sub:'Support d\u00e9di\u00e9, formation incluse. Vous n\'\u00eates jamais seul.',
+      stat: '7j', statLabel: 'd\u00e9lai moyen de livraison, chrono en main' },
+    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'Des r\u00e9sultats <em>mesurables.</em>',       sub:'Chaque action optimis\u00e9e. Chaque chiffre suivi.',
+      stat: '+50', statLabel: 'entrepreneurs accompagn\u00e9s avec succ\u00e8s' },
   ];
 
   var wrapper     = document.getElementById('scroll-frames');
@@ -78,24 +79,24 @@
   var progressNav = document.getElementById('sf-progress');
   var dotEls      = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
-  /* ADN overlay */
   var adnOverlay = document.getElementById('sf-adn-overlay');
   var adnEyebrow = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow') : null;
   var adnTitleEl = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')   : null;
   var adnValeurs = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
 
-  /* Services overlay */
   var svcOverlay = document.getElementById('sf-services-overlay');
-  var svcCards   = svcOverlay
-    ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card'))
-    : [];
+  var svcCards   = svcOverlay ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')) : [];
 
-  /* CTA overlay */
   var ctaOverlay = document.getElementById('sf-cta-overlay');
-  var ctaStats   = ctaOverlay
-    ? Array.prototype.slice.call(ctaOverlay.querySelectorAll('.sf-cta-stat'))
-    : [];
+  var ctaStats   = ctaOverlay ? Array.prototype.slice.call(ctaOverlay.querySelectorAll('.sf-cta-stat')) : [];
   var ctaContent = ctaOverlay ? ctaOverlay.querySelector('.sf-cta-content') : null;
+
+  /* Stat centrale */
+  var statWrap  = document.getElementById('sf-stat-center');
+  var statNum   = statWrap ? statWrap.querySelector('.sf-stat-number')  : null;
+  var statLbl   = statWrap ? statWrap.querySelector('.sf-stat-label')   : null;
+  var statTween = null;
+  var currentStatChapter = -1;
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
@@ -111,8 +112,7 @@
   function vpHeight() { return (window.visualViewport ? window.visualViewport.height : window.innerHeight); }
 
   function resize() {
-    var w = vpWidth();
-    var h = vpHeight();
+    var w = vpWidth(), h = vpHeight();
     canvas.width  = Math.round(w * DPR);
     canvas.height = Math.round(h * DPR);
     canvas.style.width  = w + 'px';
@@ -217,11 +217,44 @@
     if (f <= fs) return 1;
     return 1 - (f - fs) / (outF - fs);
   }
-  function lerp(a, b, t)  { return a + (b - a) * t; }
-  function clamp01(v)      { return Math.max(0, Math.min(1, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp01(v)     { return Math.max(0, Math.min(1, v)); }
+
+  /* masque la stat centrale pendant les overlays ADN/SVC/CTA */
+  function statShouldHide(f) {
+    return (f >= ADN_IN && f <= ADN_OUT) ||
+           (f >= SVC_IN && f <= SVC_OUT) ||
+           (f >= CTA_IN);
+  }
+
+  function updateStat(chIdx, f) {
+    if (!statWrap) return;
+    if (statShouldHide(f)) {
+      gsap.to(statWrap, { opacity: 0, y: 16, duration: 0.35, ease: 'power2.in', overwrite: true });
+      currentStatChapter = -1;
+      return;
+    }
+    if (chIdx === currentStatChapter) return;
+    currentStatChapter = chIdx;
+    if (chIdx < 0) {
+      gsap.to(statWrap, { opacity: 0, y: 16, duration: 0.35, ease: 'power2.in', overwrite: true });
+      return;
+    }
+    var ch = CHAPTERS[chIdx];
+    gsap.to(statWrap, { opacity: 0, y: 16, duration: 0.28, ease: 'power2.in', overwrite: true,
+      onComplete: function () {
+        if (statNum) statNum.textContent = ch.stat;
+        if (statLbl) statLbl.textContent = ch.statLabel;
+        gsap.fromTo(statWrap,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, duration: 0.85, ease: 'power4.out' }
+        );
+      }
+    });
+  }
 
   function updateOverlays(f) {
-    /* —— ADN —— */
+    /* ADN */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
       adnOverlay.style.opacity       = adnOp;
@@ -242,7 +275,7 @@
       adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
 
-    /* —— SERVICES —— */
+    /* SERVICES */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
       svcOverlay.style.opacity       = svcOp;
@@ -259,7 +292,7 @@
       svcCards.forEach(function (c) { c.style.opacity = 0; });
     }
 
-    /* —— CTA ch07 —— */
+    /* CTA ch07 */
     var ctaOp = scrubOpacity(f, CTA_IN, CTA_PEAK, CTA_OUT);
     if (ctaOverlay) {
       ctaOverlay.style.opacity       = ctaOp;
@@ -287,9 +320,9 @@
   function showChapter(idx) {
     if (textTween) textTween.kill();
     var ch = CHAPTERS[idx];
-    if (chapEl)    chapEl.textContent  = ch.chapter;
-    if (titleEl)   titleEl.innerHTML   = ch.title;
-    if (subEl)     subEl.textContent   = ch.sub;
+    if (chapEl)    chapEl.textContent    = ch.chapter;
+    if (titleEl)   titleEl.innerHTML     = ch.title;
+    if (subEl)     subEl.textContent     = ch.sub;
     if (counterEl) counterEl.textContent = '0' + (idx + 1) + ' / 07';
     dotEls.forEach(function (d, j) { d.classList.toggle('is-active', j === idx); });
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
@@ -306,10 +339,12 @@
     for (var i = 0; i < CHAPTERS.length; i++) {
       if (f >= CHAPTERS[i].frameIn && f <= CHAPTERS[i].frameOut) { chIdx = i; break; }
     }
-    if (chIdx === currentChapter) return;
-    currentChapter = chIdx;
-    if (chIdx < 0) { hideChapter(); return; }
-    hideChapter(function () { showChapter(chIdx); });
+    if (chIdx !== currentChapter) {
+      currentChapter = chIdx;
+      if (chIdx < 0) { hideChapter(); }
+      else { hideChapter(function () { showChapter(chIdx); }); }
+    }
+    updateStat(chIdx, f);
   }
 
   var rafId = null;
@@ -356,9 +391,14 @@
     if (adnOverlay) { adnOverlay.style.opacity = '0'; adnOverlay.style.pointerEvents = 'none'; }
     if (svcOverlay) { svcOverlay.style.opacity = '0'; svcOverlay.style.pointerEvents = 'none'; }
     if (ctaOverlay) { ctaOverlay.style.opacity = '0'; ctaOverlay.style.pointerEvents = 'none'; }
+    if (statWrap)   { statWrap.style.opacity   = '0'; }
 
     gsap.set(textEls, { opacity: 0, y: 40, clipPath: 'inset(0 0 100% 0)' });
     gsap.to(textEls,  { opacity: 1, y: 0,  clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.out', stagger: 0.13, delay: 0.3 });
+
+    if (statNum) statNum.textContent = CHAPTERS[0].stat;
+    if (statLbl) statLbl.textContent = CHAPTERS[0].statLabel;
+    gsap.fromTo(statWrap, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 1.1, ease: 'power4.out', delay: 0.5 });
 
     dotEls.forEach(function (dot, i) {
       dot.addEventListener('click', function () {

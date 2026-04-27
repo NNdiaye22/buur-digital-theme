@@ -1,4 +1,4 @@
-/* ── Scroll Frames v9.2 ── */
+/* ── Scroll Frames v9.3 ── */
 
 .scroll-frames-wrapper {
   position: relative;
@@ -9,6 +9,7 @@
   top: 0;
   width: 100%;
   height: 100vh;
+  /* overflow: hidden supprimé sur mobile pour permettre le swipe horizontal */
   overflow: hidden;
   background: #000;
   contain: layout paint;
@@ -187,7 +188,6 @@
   padding: 0 clamp(2rem, 6vw, 6rem) clamp(4rem, 10vh, 7rem);
   opacity: 0;
   pointer-events: none;
-  /* Fond opaque couvrant tout l'écran pour masquer les textes dynamiques */
   background: rgba(4,4,12,0.92);
 }
 .sf-adn-overlay.is-visible { pointer-events: auto; }
@@ -238,7 +238,7 @@
 }
 .sf-adn-valeur p {
   font-size: clamp(0.8rem, 1.1vw, 0.92rem);
-  line-height: 1.7; color: rgba(245,244,240,0.72);
+  line-height: 1.7; color: #f5f4f0;
   margin: 0; max-width: 26ch;
 }
 
@@ -296,9 +296,10 @@
   border-radius: 100px; padding: 0.2rem 0.6rem; width: fit-content;
 }
 .card-title { font-size: clamp(0.95rem, 1.4vw, 1.15rem); font-weight: 700; letter-spacing: -0.02em; color: #f5f4f0; margin: 0; line-height: 1.2; }
-.card-desc  { font-size: 0.82rem; line-height: 1.65; color: rgba(245,244,240,0.5); margin: 0; }
+/* Descriptions des cartes en blanc */
+.card-desc  { font-size: 0.82rem; line-height: 1.65; color: #f5f4f0; margin: 0; }
 .card-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
-.card-features li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: rgba(245,244,240,0.55); }
+.card-features li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: rgba(245,244,240,0.75); }
 .card-features li svg { color: var(--orange, #ea5b13); flex-shrink: 0; width: 12px; height: 12px; }
 .card-footer {
   display: flex; align-items: center; justify-content: space-between;
@@ -408,7 +409,6 @@
   .sf-adn-overlay  {
     padding: 0 1.25rem 3rem;
     align-items: center;
-    /* fond encore plus opaque sur mobile pour bien masquer */
     background: rgba(4,4,12,0.96);
   }
   .sf-adn-header   { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1.5rem; padding-bottom: 1.2rem; }
@@ -417,21 +417,51 @@
   .sf-adn-valeur   { padding: 1.2rem 0; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
   .sf-adn-valeur:last-child { padding-left: 0; border-bottom: none; }
   .sf-adn-valeur:not(:first-child):not(:last-child) { padding-left: 0; }
-  .sf-adn-valeur p { max-width: 100%; color: rgba(245,244,240,0.80); }
+  .sf-adn-valeur p { max-width: 100%; color: #f5f4f0; }
 
-  .sf-services-overlay { padding: 1.5rem 0 1rem; align-items: flex-start; }
-  .sf-services-inner   { display: flex; flex-direction: column; gap: 0.75rem; overflow: hidden; }
+  /* ---- SERVICES mobile : swipe fix ---- */
+  .sf-services-overlay {
+    padding: 1.5rem 0 1rem;
+    align-items: flex-start;
+    /* overflow visible pour que les cartes débordent hors du conteneur */
+    overflow: visible;
+  }
+  .sf-services-inner   {
+    display: flex; flex-direction: column; gap: 0.75rem;
+    overflow: visible;
+  }
   .services-header     { padding: 0 1.25rem; margin-bottom: 0.75rem; }
   .services-grid {
-    display: flex; flex-direction: row; flex-wrap: nowrap; gap: 0.75rem;
-    overflow-x: auto; overflow-y: visible;
-    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth; touch-action: pan-x;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    /* overflow-x sur la grille uniquement — pas clipé par le parent */
+    overflow-x: scroll;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    touch-action: pan-x;
+    /* padding-right = largeur d'une carte pour que la 3e soit entièrement scrollable */
     padding: 0.25rem 1.25rem 0.75rem;
-    scrollbar-width: none; -ms-overflow-style: none;
+    padding-right: calc(100vw - 82vw + 1.25rem);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* Évite que le clip du parent overlay ne tronque le scroll */
+    position: relative;
+    z-index: 1;
+    width: 100vw;
+    margin-left: -1.25rem;
+    box-sizing: content-box;
   }
   .services-grid::-webkit-scrollbar { display: none; }
-  .services-grid .service-card { flex: 0 0 82vw; max-width: 82vw; scroll-snap-align: start; opacity: 0; }
+  .services-grid .service-card {
+    flex: 0 0 82vw;
+    max-width: 82vw;
+    scroll-snap-align: start;
+    opacity: 0;
+  }
 
   .sf-cta-inner    { grid-template-columns: 1fr; gap: 2rem; }
   .sf-cta-stats    { flex-direction: row; flex-wrap: wrap; gap: 1.25rem; padding-left: 0; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem; }

@@ -96,8 +96,29 @@
   /* ======================================================
      4. STATS — compteurs animés
      ====================================================== */
+  var countersTriggered = false;
+
+  function animateCounters() {
+    if (countersTriggered) return;
+    countersTriggered = true;
+    document.querySelectorAll('.stat-value').forEach(el => {
+      const raw    = el.dataset.value || el.textContent;
+      const num    = parseFloat(raw.replace(/[^0-9.]/g, ''));
+      if (!num) return;
+      const suffix = raw.replace(/[0-9.,\s]/g, '');
+      const obj    = { val: 0 };
+      gsap.to(obj, {
+        val: num, duration: 1.8, ease: 'power2.out',
+        onUpdate() {
+          el.textContent = Math.round(obj.val).toLocaleString('fr-FR') + suffix;
+        },
+      });
+    });
+  }
+
   const statItems = document.querySelectorAll('.stat-item');
   if (statItems.length) {
+    // Animation fade-in via ScrollTrigger
     gsap.fromTo(statItems,
       { opacity: 0, y: 30 },
       {
@@ -113,22 +134,22 @@
         },
       }
     );
-  }
 
-  function animateCounters() {
-    document.querySelectorAll('.stat-value').forEach(el => {
-      const raw    = el.dataset.value || el.textContent;
-      const num    = parseFloat(raw.replace(/[^0-9.]/g, ''));
-      if (!num) return;
-      const suffix = raw.replace(/[0-9.,\s]/g, '');
-      const obj    = { val: 0 };
-      gsap.to(obj, {
-        val: num, duration: 1.8, ease: 'power2.out',
-        onUpdate() {
-          el.textContent = Math.round(obj.val).toLocaleString('fr-FR') + suffix;
-        },
-      });
-    });
+    // Fallback IntersectionObserver pour mobile (indépendant de ScrollTrigger)
+    if (window.IntersectionObserver) {
+      const statsSection = document.querySelector('.stats-section');
+      if (statsSection) {
+        const io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              animateCounters();
+              io.disconnect();
+            }
+          });
+        }, { threshold: 0.2 });
+        io.observe(statsSection);
+      }
+    }
   }
 
   /* ======================================================

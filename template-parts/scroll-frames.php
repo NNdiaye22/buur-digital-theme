@@ -1,8 +1,7 @@
 <?php
 /**
- * BUUR Digital — Scroll Frames v6.9
- * Sticky canvas + overlay Notre ADN (ch05→ch06)
- * + overlay Nos Services RÉEL avec vidéos et boutons (ch06→ch07)
+ * BUUR Digital — Scroll Frames v7.0
+ * Sticky canvas + overlay Notre ADN éditorial + overlay Nos Services
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -11,7 +10,6 @@ $sf_services = array(
         'id'       => 'vitrine',
         'title'    => 'Site Vitrine',
         'desc'     => 'Une présence professionnelle en ligne qui inspire confiance et convertit vos visiteurs en clients.',
-        'video'    => 'city-aerial.mp4',
         'price'    => '150 000 FCFA',
         'featured' => false,
         'features' => array( 'Design premium sur mesure', 'Optimisé mobile & desktop', 'SEO local inclus', 'Livraison en 7 jours' ),
@@ -21,7 +19,6 @@ $sf_services = array(
         'id'       => 'ecommerce',
         'title'    => 'Site E-commerce',
         'desc'     => 'Vendez vos produits partout au Sénégal et en Afrique. Paiement mobile money, livraison, gestion de stock.',
-        'video'    => 'market-loop.mp4',
         'price'    => '250 000 FCFA',
         'featured' => true,
         'features' => array( 'Boutique WooCommerce', 'Wave & Orange Money', 'Gestion des commandes', 'Formation incluse' ),
@@ -31,7 +28,6 @@ $sf_services = array(
         'id'       => 'campagnes',
         'title'    => 'Campagnes Meta',
         'desc'     => 'Publicités Facebook & Instagram ciblées. Plus de clients garantis en 2 semaines ou on continue gratuitement.',
-        'video'    => 'control-room-loop.mp4',
         'price'    => 'Sur devis',
         'featured' => false,
         'features' => array( 'Ciblage hyper-local', 'Création des visuels', 'Suivi en temps réel', 'Rapport mensuel' ),
@@ -46,57 +42,54 @@ $sf_services = array(
     <canvas id="scroll-main-canvas" class="scroll-canvas" aria-hidden="true"></canvas>
     <div class="scroll-frame-overlay" aria-hidden="true"></div>
 
-    <!-- ===== OVERLAY : NOTRE ADN (fin ch05 → début ch06) ===== -->
+    <!-- ===== OVERLAY : NOTRE ADN — layout éditorial bas de page ===== -->
     <div id="sf-adn-overlay" class="sf-adn-overlay" aria-hidden="true">
+      <div class="sf-adn-inner">
 
-      <div class="sf-adn-header">
-        <span class="sf-adn-eyebrow">NOTRE ADN</span>
-        <h2 class="sf-adn-title">Pourquoi choisir <em>BUUR&nbsp;?</em></h2>
-      </div>
+        <!-- En-tête : eyebrow + titre -->  
+        <div class="sf-adn-header">
+          <span class="sf-adn-eyebrow">NOTRE ADN</span>
+          <h2 class="sf-adn-title">Pourquoi choisir <em>BUUR&nbsp;?</em></h2>
+        </div>
 
-      <div class="sf-adn-orbital">
-        <div class="sf-adn-halo" aria-hidden="true"></div>
+        <!-- Grille 3 valeurs -->
+        <div class="sf-adn-grid">
 
-        <svg class="sf-adn-connectors" aria-hidden="true" viewBox="0 0 1000 620" preserveAspectRatio="none">
-          <line class="sf-adn-line" x1="235" y1="145" x2="500" y2="310" />
-          <line class="sf-adn-line" x1="235" y1="485" x2="500" y2="310" />
-          <line class="sf-adn-line" x1="770" y1="310" x2="500" y2="310" />
-        </svg>
-
-        <div class="sf-adn-valeur sf-adn-valeur--excellence">
-          <div class="sf-adn-valeur-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div>
+          <div class="sf-adn-valeur sf-adn-valeur--excellence">
+            <span class="sf-adn-valeur-num">01</span>
+            <div class="sf-adn-valeur-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
             <h3>Excellence</h3>
+            <span class="sf-adn-valeur-rule" aria-hidden="true"></span>
             <p>Des sites qui rivalisent avec les meilleures agences internationales.</p>
           </div>
-        </div>
 
-        <div class="sf-adn-valeur sf-adn-valeur--accessibilite">
-          <div class="sf-adn-valeur-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-          </div>
-          <div>
+          <div class="sf-adn-valeur sf-adn-valeur--accessibilite">
+            <span class="sf-adn-valeur-num">02</span>
+            <div class="sf-adn-valeur-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
             <h3>Accessibilité</h3>
+            <span class="sf-adn-valeur-rule" aria-hidden="true"></span>
             <p>Prix transparents et honnêtes. Le luxe web pour tous les budgets.</p>
           </div>
-        </div>
 
-        <div class="sf-adn-valeur sf-adn-valeur--innovation">
-          <div class="sf-adn-valeur-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          </div>
-          <div>
+          <div class="sf-adn-valeur sf-adn-valeur--innovation">
+            <span class="sf-adn-valeur-num">03</span>
+            <div class="sf-adn-valeur-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
             <h3>Innovation</h3>
+            <span class="sf-adn-valeur-rule" aria-hidden="true"></span>
             <p>Technologies de pointe : IA, animations 3D, vidéos génératives.</p>
           </div>
-        </div>
-      </div>
 
+        </div><!-- /.sf-adn-grid -->
+      </div><!-- /.sf-adn-inner -->
     </div><!-- /#sf-adn-overlay -->
 
-    <!-- ===== OVERLAY : NOS SERVICES RÉEL (fin ch06 → début ch07) ===== -->
+    <!-- ===== OVERLAY : NOS SERVICES ===== -->
     <div id="sf-services-overlay" class="sf-services-overlay" aria-hidden="true">
       <div class="sf-services-inner">
 
@@ -112,48 +105,37 @@ $sf_services = array(
             id="sf-service-<?php echo esc_attr( $service['id'] ); ?>"
             aria-label="Service : <?php echo esc_attr( $service['title'] ); ?>"
           >
-            <!-- Fond vidéo -->
-            <div class="card-video-wrap" aria-hidden="true">
-              <video
-                class="card-video"
-                data-src="<?php echo esc_url( BUUR_URI . '/assets/videos/' . $service['video'] ); ?>"
-                autoplay muted loop playsinline preload="none"
-              ></video>
-              <div class="card-video-overlay"></div>
-              <div class="card-icon"><?php echo $service['icon']; ?></div>
-            </div>
+            <div class="card-icon"><?php echo $service['icon']; ?></div>
 
-            <!-- Contenu -->
-            <div class="card-body">
-              <?php if ( $service['featured'] ) : ?>
-              <div class="service-card__badge">Populaire</div>
-              <?php endif; ?>
-              <h3 class="card-title"><?php echo esc_html( $service['title'] ); ?></h3>
-              <p class="card-desc"><?php echo esc_html( $service['desc'] ); ?></p>
+            <?php if ( $service['featured'] ) : ?>
+            <div class="service-card__badge">Populaire</div>
+            <?php endif; ?>
 
-              <ul class="card-features" role="list">
-                <?php foreach ( $service['features'] as $feat ) : ?>
-                <li>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                  <?php echo esc_html( $feat ); ?>
-                </li>
-                <?php endforeach; ?>
-              </ul>
+            <h3 class="card-title"><?php echo esc_html( $service['title'] ); ?></h3>
+            <p class="card-desc"><?php echo esc_html( $service['desc'] ); ?></p>
 
-              <div class="card-footer">
-                <div class="card-price">
-                  <?php if ( $service['price'] !== 'Sur devis' ) : ?>
-                  <span class="price-from">À partir de</span>
-                  <?php endif; ?>
-                  <span class="price-amount"><?php echo esc_html( $service['price'] ); ?></span>
-                </div>
-                <a
-                  href="<?php echo esc_url( buur_whatsapp_url( 'sn' ) ); ?>"
-                  class="btn-card"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >En savoir plus &rarr;</a>
+            <ul class="card-features" role="list">
+              <?php foreach ( $service['features'] as $feat ) : ?>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                <?php echo esc_html( $feat ); ?>
+              </li>
+              <?php endforeach; ?>
+            </ul>
+
+            <div class="card-footer">
+              <div class="card-price">
+                <?php if ( $service['price'] !== 'Sur devis' ) : ?>
+                <span class="price-from">À partir de</span>
+                <?php endif; ?>
+                <span class="price-amount"><?php echo esc_html( $service['price'] ); ?></span>
               </div>
+              <a
+                href="<?php echo esc_url( buur_whatsapp_url( 'sn' ) ); ?>"
+                class="btn-card"
+                target="_blank"
+                rel="noopener noreferrer"
+              >En savoir plus &rarr;</a>
             </div>
           </article>
           <?php endforeach; ?>

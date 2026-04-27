@@ -1,4 +1,4 @@
-/* ── Scroll Frames v6.6 ── */
+/* ── Scroll Frames v7.0 ── */
 
 .scroll-frames-wrapper {
   position: relative;
@@ -19,7 +19,6 @@
   height: 100%;
   display: block;
   z-index: 0;
-  /* Aide le moteur graphique à préparer un layer dédié pour les redraws fréquents */
   will-change: transform;
 }
 .scroll-frame-overlay {
@@ -116,7 +115,7 @@
 }
 
 /* ===========================================
-   OVERLAY NOTRE ADN — HUD ORBITAL
+   OVERLAY NOTRE ADN — LAYOUT ÉDITORIAL v2
 =========================================== */
 
 .sf-adn-overlay {
@@ -124,21 +123,369 @@
   inset: 0;
   z-index: 10;
   display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 clamp(2rem, 6vw, 6rem) clamp(4rem, 10vh, 7rem);
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 100%, rgba(4,4,12,0.92) 0%, rgba(4,4,12,0.55) 55%, transparent 100%),
+    linear-gradient(to top, rgba(4,4,12,0.85) 0%, transparent 45%);
+}
+.sf-adn-overlay.is-visible { pointer-events: auto; }
+
+/* Halo décoratif — supprimé, remplacé par ligne horizontale */
+.sf-adn-halo { display: none; }
+.sf-adn-connectors { display: none; }
+
+/* Container intérieur */
+.sf-adn-inner {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
   flex-direction: column;
+  gap: 0;
+}
+
+/* Header : eyebrow + titre sur une ligne */
+.sf-adn-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.sf-adn-eyebrow {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--orange, #ea5b13);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.sf-adn-title {
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: #f5f4f0;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(-14px);
+}
+.sf-adn-title em {
+  font-style: italic;
+  color: var(--orange, #ea5b13);
+}
+
+/* Grille 3 colonnes */
+.sf-adn-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+/* Carte valeur */
+.sf-adn-valeur {
+  padding: 1.6rem 2rem 1.6rem 0;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  opacity: 0;
+  transform: translateY(24px);
+}
+.sf-adn-valeur:last-child {
+  border-right: none;
+  padding-right: 0;
+  padding-left: 2rem;
+}
+.sf-adn-valeur:not(:first-child):not(:last-child) {
+  padding-left: 2rem;
+}
+
+/* Numéro de rang */
+.sf-adn-valeur-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(234,91,19,0.55);
+  margin-bottom: 0.3rem;
+}
+
+/* Icône — fine, ligne */
+.sf-adn-valeur-icon {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: rgba(245,244,240,0.35);
+  margin-bottom: 0.4rem;
+}
+.sf-adn-valeur-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.2;
+}
+
+/* Titre de la valeur */
+.sf-adn-valeur h3 {
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #f5f4f0;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* Trait orange sous le titre */
+.sf-adn-valeur-rule {
+  display: block;
+  width: 28px;
+  height: 1.5px;
+  background: var(--orange, #ea5b13);
+  border-radius: 2px;
+  opacity: 0.7;
+  margin: 0.1rem 0 0.5rem;
+}
+
+/* Description */
+.sf-adn-valeur p {
+  font-size: clamp(0.8rem, 1.1vw, 0.92rem);
+  line-height: 1.7;
+  color: rgba(245,244,240,0.52);
+  margin: 0;
+  max-width: 26ch;
+}
+
+/* ===========================================
+   OVERLAY SERVICES
+=========================================== */
+
+.sf-services-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: clamp(2rem, 5vh, 4rem) clamp(1.5rem, 4vw, 4rem);
   opacity: 0;
   pointer-events: none;
-  perspective: 900px;
-  transform-style: preserve-3d;
   background: radial-gradient(
     ellipse 90% 80% at 50% 50%,
-    rgba(4,4,12,0.70) 0%,
-    rgba(4,4,12,0.82) 60%,
-    rgba(4,4,12,0.90) 100%
+    rgba(4,4,12,0.72) 0%,
+    rgba(4,4,12,0.85) 60%,
+    rgba(4,4,12,0.92) 100%
   );
 }
-.sf-adn-overlay.is-visible { pointer-events: auto; }
+.sf-services-overlay.is-visible { pointer-events: auto; }
 
-/* ... reste du fichier inchangé ... */
+.sf-services-inner {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.services-header {
+  text-align: center;
+  margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
+}
+.services-header .section-eyebrow {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--orange, #ea5b13);
+  margin-bottom: 0.6rem;
+  opacity: 0.8;
+}
+.services-header .section-title {
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #f5f4f0;
+  margin: 0;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.service-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  transition: border-color 0.3s ease, background 0.3s ease;
+  opacity: 0;
+}
+.service-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(234,91,19,0.3);
+}
+.service-card--featured {
+  border-color: rgba(234,91,19,0.35);
+  background: rgba(234,91,19,0.06);
+}
+
+.card-icon svg {
+  width: 28px; height: 28px;
+  color: var(--orange, #ea5b13);
+  stroke-width: 1.4;
+}
+
+.service-card__badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--orange, #ea5b13);
+  background: rgba(234,91,19,0.12);
+  border: 1px solid rgba(234,91,19,0.25);
+  border-radius: 100px;
+  padding: 0.2rem 0.6rem;
+  width: fit-content;
+}
+
+.card-title {
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #f5f4f0;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.card-desc {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: rgba(245,244,240,0.5);
+  margin: 0;
+}
+
+.card-features {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.card-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: rgba(245,244,240,0.55);
+}
+.card-features li svg {
+  color: var(--orange, #ea5b13);
+  flex-shrink: 0;
+  width: 12px; height: 12px;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.card-price { display: flex; flex-direction: column; gap: 0.1rem; }
+.price-from { font-size: 0.62rem; color: rgba(245,244,240,0.35); letter-spacing: 0.06em; }
+.price-amount { font-size: 0.9rem; font-weight: 800; color: #f5f4f0; letter-spacing: -0.01em; }
+
+.btn-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--orange, #ea5b13);
+  text-decoration: none;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(234,91,19,0.35);
+  border-radius: 100px;
+  transition: background 0.22s ease, color 0.22s ease;
+  white-space: nowrap;
+}
+.btn-card:hover {
+  background: var(--orange, #ea5b13);
+  color: #fff;
+}
+
+/* ===========================================
+   RESPONSIVE MOBILE
+=========================================== */
+
+@media (max-width: 768px) {
+
+  .sf-adn-overlay {
+    padding: 0 1.25rem 4rem;
+    align-items: flex-end;
+  }
+
+  .sf-adn-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.2rem;
+  }
+
+  .sf-adn-title {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+  }
+
+  .sf-adn-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .sf-adn-valeur {
+    padding: 1.2rem 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sf-adn-valeur:last-child {
+    padding-left: 0;
+    border-bottom: none;
+  }
+  .sf-adn-valeur:not(:first-child):not(:last-child) {
+    padding-left: 0;
+  }
+
+  .sf-adn-valeur p { max-width: 100%; }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    overflow-y: auto;
+    max-height: 65vh;
+    padding-right: 0.25rem;
+  }
+}

@@ -1,6 +1,6 @@
 /**
- * BUUR Digital — scroll-frames.js v9.1
- * v9.1 : stats centrales premium par chapitre
+ * BUUR Digital — scroll-frames.js v9.2
+ * Chapitres (stats + textes) lus depuis buurTheme.chapters (customizer WordPress)
  */
 (function () {
   'use strict';
@@ -49,22 +49,31 @@
   var CTA_PEAK = offsets[6] + Math.round((TOTAL - offsets[6]) * 0.65);
   var CTA_OUT  = TOTAL - 1;
 
-  var CHAPTERS = [
-    { frameIn: offsets[0], frameOut: offsets[1]-1, chapter:'01', title:'L&#8217;Afrique <em>en ligne.</em>',        sub:'Votre business m\u00e9rite une pr\u00e9sence digitale de classe mondiale.',
-      stat: '87%', statLabel: 'des acheteurs cherchent en ligne avant tout achat' },
-    { frameIn: offsets[1], frameOut: offsets[2]-1, chapter:'02', title:'Un site qui <em>vous ressemble.</em>',      sub:'Design premium, con\u00e7u pour les entrepreneurs africains.',
-      stat: '3\u202fsec', statLabel: 'pour convaincre un visiteur ou le perdre' },
-    { frameIn: offsets[2], frameOut: offsets[3]-1, chapter:'03', title:'Construit <em>pour durer.</em>',            sub:'Code propre, rapide, \u00e9volutif. Z\u00e9ro compromis.',
-      stat: '100%', statLabel: 'sur mesure — aucun template, aucun compromis' },
-    { frameIn: offsets[3], frameOut: offsets[4]-1, chapter:'04', title:'Premier sur <em>Google.</em>',             sub:'SEO local ma\u00eetris\u00e9. Vos clients vous trouvent avant la concurrence.',
-      stat: '\u00d73', statLabel: 'de trafic organique en moyenne apr\u00e8s optimisation' },
-    { frameIn: offsets[4], frameOut: offsets[5]-1, chapter:'05', title:'Vendez <em>sans limite.</em>',             sub:'E-commerce, Wave, Orange Money. Votre boutique ouverte 24h/24.',
-      stat: '24h', statLabel: 'votre boutique ouverte, m\u00eame quand vous dormez' },
-    { frameIn: offsets[5], frameOut: offsets[6]-1, chapter:'06', title:'Une \u00e9quipe <em>\u00e0 vos c\u00f4t\u00e9s.</em>',         sub:'Support d\u00e9di\u00e9, formation incluse. Vous n\'\u00eates jamais seul.',
-      stat: '7j', statLabel: 'd\u00e9lai moyen de livraison, chrono en main' },
-    { frameIn: offsets[6], frameOut: TOTAL-1,      chapter:'07', title:'Des r\u00e9sultats <em>mesurables.</em>',       sub:'Chaque action optimis\u00e9e. Chaque chiffre suivi.',
-      stat: '+50', statLabel: 'entrepreneurs accompagn\u00e9s avec succ\u00e8s' },
+  /* ---------- Chapitres depuis le customizer ---------- */
+  var cData = (window.buurTheme && window.buurTheme.chapters) ? window.buurTheme.chapters : [];
+
+  var CHAPTER_DEFAULTS = [
+    { stat: '87%',   statLabel: 'des acheteurs cherchent en ligne avant tout achat',      title: 'L&#8217;Afrique <em>en ligne.</em>',         sub: 'Votre business m\u00e9rite une pr\u00e9sence digitale de classe mondiale.' },
+    { stat: '3\u202fsec', statLabel: 'pour convaincre un visiteur ou le perdre',          title: 'Un site qui <em>vous ressemble.</em>',       sub: 'Design premium, con\u00e7u pour les entrepreneurs africains.' },
+    { stat: '100%',  statLabel: 'sur mesure \u2014 aucun template, aucun compromis',      title: 'Construit <em>pour durer.</em>',             sub: 'Code propre, rapide, \u00e9volutif. Z\u00e9ro compromis.' },
+    { stat: '\u00d73',   statLabel: 'de trafic organique en moyenne apr\u00e8s optimisation', title: 'Premier sur <em>Google.</em>',              sub: 'SEO local ma\u00eetris\u00e9. Vos clients vous trouvent avant la concurrence.' },
+    { stat: '24h',   statLabel: 'votre boutique ouverte, m\u00eame quand vous dormez',     title: 'Vendez <em>sans limite.</em>',               sub: 'E-commerce, Wave, Orange Money. Votre boutique ouverte 24h/24.' },
+    { stat: '7j',    statLabel: 'd\u00e9lai moyen de livraison, chrono en main',           title: 'Une \u00e9quipe <em>\u00e0 vos c\u00f4t\u00e9s.</em>',  sub: 'Support d\u00e9di\u00e9, formation incluse. Vous n\'\u00eates jamais seul.' },
+    { stat: '+50',   statLabel: 'entrepreneurs accompagn\u00e9s avec succ\u00e8s',         title: 'Des r\u00e9sultats <em>mesurables.</em>',      sub: 'Chaque action optimis\u00e9e. Chaque chiffre suivi.' },
   ];
+
+  var CHAPTERS = CHAPTER_DEFAULTS.map(function (def, i) {
+    var c = cData[i] || {};
+    return {
+      frameIn:   offsets[i],
+      frameOut:  i < SEQUENCES.length - 1 ? offsets[i + 1] - 1 : TOTAL - 1,
+      chapter:   '0' + (i + 1),
+      title:     c.title  || def.title,
+      sub:       c.sub    || def.sub,
+      stat:      c.stat   || def.stat,
+      statLabel: c.label  || def.statLabel,
+    };
+  });
 
   var wrapper     = document.getElementById('scroll-frames');
   var canvas      = document.getElementById('scroll-main-canvas');
@@ -91,11 +100,9 @@
   var ctaStats   = ctaOverlay ? Array.prototype.slice.call(ctaOverlay.querySelectorAll('.sf-cta-stat')) : [];
   var ctaContent = ctaOverlay ? ctaOverlay.querySelector('.sf-cta-content') : null;
 
-  /* Stat centrale */
   var statWrap  = document.getElementById('sf-stat-center');
   var statNum   = statWrap ? statWrap.querySelector('.sf-stat-number')  : null;
   var statLbl   = statWrap ? statWrap.querySelector('.sf-stat-label')   : null;
-  var statTween = null;
   var currentStatChapter = -1;
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
@@ -220,7 +227,6 @@
   function lerp(a, b, t) { return a + (b - a) * t; }
   function clamp01(v)     { return Math.max(0, Math.min(1, v)); }
 
-  /* masque la stat centrale pendant les overlays ADN/SVC/CTA */
   function statShouldHide(f) {
     return (f >= ADN_IN && f <= ADN_OUT) ||
            (f >= SVC_IN && f <= SVC_OUT) ||
@@ -254,7 +260,6 @@
   }
 
   function updateOverlays(f) {
-    /* ADN */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
       adnOverlay.style.opacity       = adnOp;
@@ -275,7 +280,6 @@
       adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
 
-    /* SERVICES */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
       svcOverlay.style.opacity       = svcOp;
@@ -292,7 +296,6 @@
       svcCards.forEach(function (c) { c.style.opacity = 0; });
     }
 
-    /* CTA ch07 */
     var ctaOp = scrubOpacity(f, CTA_IN, CTA_PEAK, CTA_OUT);
     if (ctaOverlay) {
       ctaOverlay.style.opacity       = ctaOp;

@@ -46,6 +46,7 @@ function buur_enqueue_assets() {
         wp_enqueue_script( 'buur-hero-tunnel',     BUUR_URI . '/assets/js/hero-tunnel.js',     array( 'threejs', 'gsap-scrolltrigger' ),             BUUR_VERSION, true );
         wp_enqueue_script( 'buur-gsap-animations', BUUR_URI . '/assets/js/gsap-animations.js', array( 'gsap-scrolltrigger', 'gsap-splittext' ),      BUUR_VERSION, true );
         wp_enqueue_script( 'buur-scroll-frames',   BUUR_URI . '/assets/js/scroll-frames.js',   array( 'gsap-scrolltrigger' ),                        BUUR_VERSION, true );
+        wp_enqueue_script( 'buur-svc-swiper',      BUUR_URI . '/assets/js/svc-swiper.js',      array( 'buur-scroll-frames' ),                        BUUR_VERSION, true );
         wp_enqueue_script( 'buur-interactions',    BUUR_URI . '/assets/js/interactions.js',    array( 'buur-gsap-animations' ),                      BUUR_VERSION, true );
     }
 

@@ -1,9 +1,9 @@
 /**
- * BUUR Digital — scroll-frames.js v8.1
+ * BUUR Digital — scroll-frames.js v8.2
  *
- * v8.1 FIX :
- *  - Extension corrigée : .webp (les fichiers réels sont frame_001.webp)
- *  → URL finale : /assets/v1/frame_001.webp  ✅
+ * v8.2 PERF :
+ *  - updateWrapperTop() supprimé du tick() mobile
+ *  - Remplacé par ResizeObserver sur le wrapper (recalcul uniquement si layout change)
  */
 (function () {
   'use strict';
@@ -83,6 +83,11 @@
   var wrapperTop = 0;
   function updateWrapperTop() {
     wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
+  }
+
+  // ResizeObserver : recalcule wrapperTop uniquement si le layout change réellement
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () { updateWrapperTop(); }).observe(wrapper);
   }
 
   function vpWidth()  { return (window.visualViewport ? window.visualViewport.width  : window.innerWidth);  }
@@ -285,7 +290,7 @@
 
   function tick() {
     rafId = null;
-    if (IS_MOBILE) updateWrapperTop();
+    // updateWrapperTop() retiré du tick — géré par ResizeObserver
     var scrolled = window.scrollY - wrapperTop;
     var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
     var frame    = progress * (TOTAL - 1);

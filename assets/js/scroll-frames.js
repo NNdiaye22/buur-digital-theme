@@ -1,9 +1,11 @@
 /**
- * BUUR Digital — scroll-frames.js v8.2
+ * BUUR Digital — scroll-frames.js v8.3
  *
+ * v8.3 PERF :
+ *  - DPR plafonné à 1.5 sur mobile (réduction charge GPU, qualité visuellement identique)
  * v8.2 PERF :
  *  - updateWrapperTop() supprimé du tick() mobile
- *  - Remplacé par ResizeObserver sur le wrapper (recalcul uniquement si layout change)
+ *  - Remplacé par ResizeObserver sur le wrapper
  */
 (function () {
   'use strict';
@@ -18,6 +20,9 @@
   var BATCH_SIZE   = IS_MOBILE ? 4  : 8;
   var BATCH_DELAY  = IS_MOBILE ? 64 : 32;
   var AHEAD_FRAMES = IS_MOBILE ? 20 : 40;
+
+  // DPR plafonné à 1.5 sur mobile pour alléger le GPU
+  var DPR = IS_MOBILE ? Math.min(window.devicePixelRatio || 1, 1.5) : (window.devicePixelRatio || 1);
 
   var SEQUENCES = [
     { id: 'v1', count: 192 },
@@ -94,8 +99,13 @@
   function vpHeight() { return (window.visualViewport ? window.visualViewport.height : window.innerHeight); }
 
   function resize() {
-    canvas.width  = vpWidth();
-    canvas.height = vpHeight();
+    var w = vpWidth();
+    var h = vpHeight();
+    canvas.width  = Math.round(w * DPR);
+    canvas.height = Math.round(h * DPR);
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(DPR, DPR);
     updateWrapperTop();
     if (allImages[currentFrame]) drawFrame(currentFrame);
   }
@@ -172,11 +182,13 @@
 
   function drawCover(img) {
     if (!img || !img.naturalWidth) return;
-    var s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var cw = canvas.width  / DPR;
+    var ch = canvas.height / DPR;
+    var s  = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    ctx.clearRect(0, 0, cw, ch);
     ctx.drawImage(img,
-      (canvas.width  - img.naturalWidth  * s) / 2,
-      (canvas.height - img.naturalHeight * s) / 2,
+      (cw - img.naturalWidth  * s) / 2,
+      (ch - img.naturalHeight * s) / 2,
       img.naturalWidth * s, img.naturalHeight * s
     );
   }
@@ -290,7 +302,6 @@
 
   function tick() {
     rafId = null;
-    // updateWrapperTop() retiré du tick — géré par ResizeObserver
     var scrolled = window.scrollY - wrapperTop;
     var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
     var frame    = progress * (TOTAL - 1);
@@ -308,8 +319,13 @@
   window.addEventListener('touchmove', onTouchMove, { passive: true });
 
   function initScroll() {
-    canvas.width  = vpWidth();
-    canvas.height = vpHeight();
+    var w = vpWidth();
+    var h = vpHeight();
+    canvas.width  = Math.round(w * DPR);
+    canvas.height = Math.round(h * DPR);
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(DPR, DPR);
     updateWrapperTop();
 
     if (loaderWrap) gsap.to(loaderWrap, { opacity:0, duration:0.4, onComplete: function () { loaderWrap.remove(); } });

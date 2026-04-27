@@ -1,9 +1,12 @@
 /**
- * BUUR — svc-swiper.js v1.0
- * Swiper horizontal natif pour les cartes services dans l'overlay scroll-frames.
+ * BUUR — svc-swiper.js v1.1
+ * Swiper horizontal natif pour les cartes services dans l’overlay scroll-frames.
  * - Swipe horizontal → cartes (le scroll vertical de page est préservé).
  * - Les dots de pagination sont injectés automatiquement.
  * - Aucune librairie externe requise.
+ *
+ * v1.1 FIX : touchmove passé en passive:false pour que stopPropagation()
+ *            soit honoré sur iOS/Android et permette d’atteindre la carte 3.
  */
 (function () {
   'use strict';
@@ -51,10 +54,11 @@
 
     /*
      * Gestion du conflit scroll horizontal/vertical.
-     * Sur mobile, quand le swipe est majoritairement horizontal (δx > δy),
-     * on bloque le scroll vertical de la page LE TEMPS du swipe.
-     * Quand c'est vertical (δy > δx), on ne fait rien — le scroll de page se
-     * déclenche normalement via le mécanisme du wrapper sticky.
+     * passive:false est nécessaire pour que stopPropagation() soit honoré
+     * sur iOS et Android — sans ça le navigateur ignore le stopPropagation
+     * et intercepte le geste comme un scroll vertical de page.
+     * Quand le geste est vertical, on n’appelle jamais preventDefault()
+     * pour laisser le scroll de page fonctionner normalement.
      */
     var startX = 0, startY = 0, isHorizontal = null;
 
@@ -70,12 +74,10 @@
         var dy = Math.abs(e.touches[0].clientY - startY);
         if (dx > 6 || dy > 6) isHorizontal = dx > dy;
       }
-      /* Si horizontal, on consomme l'event pour éviter que le scroll de page
-         n'intercepte le geste — mais scroll-snap natif gère le défilement. */
+      /* Si horizontal : bloque le scroll vertical de page pendant le swipe */
       if (isHorizontal) e.stopPropagation();
-      /* Si vertical, on n'appelle PAS preventDefault()
-         pour laisser le scroll de page fonctionner. */
-    }, { passive: true });
+      /* Si vertical : on ne fait rien — le scroll de page prend la main */
+    }, { passive: false }); /* v1.1 : passive:false requis pour stopPropagation */
   }
 
   if (document.readyState === 'loading') {

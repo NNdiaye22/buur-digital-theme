@@ -1,4 +1,4 @@
-/* ── Scroll Frames v7.1 ── */
+/* ── Scroll Frames v7.2 ── */
 
 .scroll-frames-wrapper {
   position: relative;
@@ -288,6 +288,7 @@
   color: #f5f4f0; margin: 0;
 }
 
+/* ---- grille desktop ---- */
 .services-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -317,7 +318,7 @@
   background: rgba(234,91,19,0.06);
 }
 
-/* Image de fond (optionnelle) — lit --card-bg injecté par PHP */
+/* Image de fond optionnelle — lit --card-bg injecté par PHP */
 .card-bg {
   position: absolute;
   inset: 0;
@@ -386,11 +387,12 @@
 .btn-card:hover { background: var(--orange, #ea5b13); color: #fff; }
 
 /* ===========================================
-   RESPONSIVE MOBILE
+   SWIPER HORIZONTAL MOBILE (≤ 768px)
 =========================================== */
 
 @media (max-width: 768px) {
 
+  /* --- ADN overlay --- */
   .sf-adn-overlay {
     padding: 0 1.25rem 4rem;
   }
@@ -412,11 +414,73 @@
   .sf-adn-valeur:not(:first-child):not(:last-child) { padding-left: 0; }
   .sf-adn-valeur p { max-width: 100%; }
 
-  .services-grid {
-    grid-template-columns: 1fr;
+  /* --- Services overlay : on réduit le padding pour laisser de la place --- */
+  .sf-services-overlay {
+    padding: 1.5rem 0 1rem;
+    align-items: flex-start;
+  }
+  .sf-services-inner {
+    display: flex;
+    flex-direction: column;
     gap: 0.75rem;
-    overflow-y: auto;
-    max-height: 65vh;
-    padding-right: 0.25rem;
+    overflow: hidden;       /* masque le débordement latéral */
+  }
+  .services-header {
+    padding: 0 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /*
+   * SWIPER HORIZONTAL
+   * flex + overflow-x:auto + scroll-snap-type:x mandatory
+   * touch-action:pan-x permet le scroll horizontal sans déclencher
+   * le scroll vertical de la page.
+   * Le padding-inline expose l'amorce de la carte suivante (peek).
+   */
+  .services-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    touch-action: pan-x;      /* autorise uniquement le swipe horizontal ici */
+    padding: 0.25rem 1.25rem 0.75rem;
+    /* scrollbar invisible */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .services-grid::-webkit-scrollbar { display: none; }
+
+  /* Chaque carte prend ~82 % de la largeur → peek de la suivante */
+  .services-grid .service-card {
+    flex: 0 0 82vw;
+    max-width: 82vw;
+    scroll-snap-align: start;
+    /* on ré-active l'opacité pour que l'animation JS reste possible */
+    opacity: 0;
+  }
+
+  /* Dots swiper */
+  .svc-swiper-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.25rem 0 0;
+    margin-top: 0.25rem;
+  }
+  .svc-swiper-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none; padding: 0; cursor: pointer;
+    transition: background 0.25s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .svc-swiper-dot.is-active {
+    background: var(--orange, #ea5b13);
+    transform: scale(1.8);
   }
 }

@@ -1,4 +1,4 @@
-/* ── Hero — Image de fond ── */
+/* ── Hero — Plein écran sans conteneur ── */
 .hero-section {
   position: relative;
   width: 100%;
@@ -10,7 +10,7 @@
   background: var(--black);
 }
 
-/* Fond image */
+/* Fond : pleine largeur absolue */
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -20,43 +20,49 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  opacity: 0.55;
+  object-position: center top;
+  opacity: 0.72;
+  transform-origin: center;
+  will-change: transform;
 }
+
+/* Overlay directionnel — texte lisible en bas-gauche */
 .hero-overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to right, rgba(8,8,16,0.88) 0%, rgba(8,8,16,0.25) 60%, transparent 100%),
-    linear-gradient(to top,   rgba(8,8,16,1)    0%, rgba(8,8,16,0.1)  40%, transparent 70%);
+    linear-gradient(to right,  rgba(8,8,16,0.82) 0%, rgba(8,8,16,0.18) 55%, transparent 100%),
+    linear-gradient(to top,    rgba(8,8,16,1)    0%, rgba(8,8,16,0.08) 45%, transparent 72%);
 }
 
-/* Fondu bas */
+/* Fondu bas vers la section suivante */
 .hero-section::after {
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 28vh;
+  height: 22vh;
   background: linear-gradient(to bottom, transparent, #080810);
   z-index: 4;
   pointer-events: none;
 }
 
-/* Contenu texte */
+/* Contenu texte — aligné à gauche, collé aux bords */
 .hero-content {
   position: relative;
   z-index: 3;
-  padding: 0 var(--container-pad) clamp(4rem, 12vh, 8rem);
-  max-width: 760px;
+  width: 100%;
+  padding: 0 clamp(1.25rem, 5vw, 5rem) clamp(4rem, 12vh, 8rem);
+  max-width: 820px;
 }
 
+/* Badge */
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.3rem 0.9rem;
-  background: rgba(234,91,19,0.1);
-  border: 1px solid rgba(234,91,19,0.25);
+  background: rgba(234,91,19,0.08);
+  border: 1px solid rgba(234,91,19,0.22);
   border-radius: var(--radius-full);
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -78,8 +84,9 @@
   50%      { opacity:0.25; transform:scale(0.4); }
 }
 
+/* Titre */
 .hero-title {
-  font-size: clamp(3rem, 7.5vw, 6rem);
+  font-size: clamp(3rem, 7.5vw, 6.5rem);
   font-weight: 800;
   line-height: 1.0;
   letter-spacing: -0.045em;
@@ -94,6 +101,7 @@
   display: block;
 }
 
+/* Tagline */
 .hero-tagline {
   font-size: clamp(1rem, 1.8vw, 1.2rem);
   color: rgba(245,244,240,0.6);
@@ -104,6 +112,7 @@
   animation: hero-up 0.9s var(--ease-out-expo) 0.52s forwards;
 }
 
+/* CTA */
 .hero-cta {
   display: flex;
   align-items: center;
@@ -117,7 +126,7 @@
 .hero-scroll-indicator {
   position: absolute;
   bottom: clamp(1.5rem, 4vh, 3.5rem);
-  right: var(--container-pad);
+  right: clamp(1.25rem, 5vw, 5rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -152,7 +161,8 @@
 }
 
 @media (max-width: 600px) {
+  .hero-bg-img { object-position: 65% top; }
   .hero-cta { flex-direction: column; align-items: stretch; }
-  .hero-cta .btn-primary, .hero-cta .btn-outline { justify-content: center; }
+  .hero-cta .btn-primary { justify-content: center; }
   .hero-scroll-indicator { display: none; }
 }

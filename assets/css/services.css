@@ -1,4 +1,4 @@
-/* ── Services — Grille desktop / Swiper mobile ── */
+/* ── Services — Grille desktop / Swiper mobile (sans vidéo) ── */
 .services-section {
   padding: clamp(5rem, 10vh, 8rem) 0;
   background: var(--black);
@@ -52,7 +52,7 @@
   padding: 2.5rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
   transition: background 300ms;
   overflow: hidden;
 }
@@ -68,7 +68,7 @@
   }
 }
 
-/* Badge « populaire » */
+/* Badge populaire */
 .service-card--featured::before {
   content: 'Le plus populaire';
   position: absolute;
@@ -86,49 +86,23 @@
   z-index: 2;
 }
 
-/* ── Image de fond ── */
-.card-img-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-2);
-  margin-bottom: 0.25rem;
-}
-.card-bg-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0.55;
-  transition: opacity 400ms, transform 500ms var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1));
-  display: block;
-}
-.service-card:hover .card-bg-img { opacity: 0.75; transform: scale(1.04); }
-.card-bg-fallback {
-  width: 100%; height: 100%;
-  background: linear-gradient(135deg, var(--surface-2) 0%, #1a1a2a 100%);
-}
-.card-img-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(8,8,16,0.7), transparent 50%);
-  pointer-events: none;
-}
-.card-icon {
-  position: absolute;
-  bottom: 1rem; left: 1rem;
-  color: var(--orange);
-  opacity: 0.9;
-  z-index: 1;
-}
-
 /* ── Corps ── */
 .card-body { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
-.card-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--white); }
-.card-desc  { font-size: 0.875rem; line-height: 1.65; color: rgba(245,244,240,0.6); }
+
+/* Icône de service — grande, sobre */
+.card-service-icon {
+  color: var(--orange);
+  opacity: 0.85;
+  margin-bottom: 0.25rem;
+  transition: opacity 300ms;
+}
+.service-card:hover .card-service-icon { opacity: 1; }
+
+.card-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; color: var(--white); }
+.card-desc  { font-size: 0.875rem; line-height: 1.65; color: rgba(245,244,240,0.55); }
+
 .card-features { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem; flex: 1; }
-.card-features li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: rgba(245,244,240,0.75); }
+.card-features li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: rgba(245,244,240,0.7); }
 .card-features li svg { color: var(--orange); flex-shrink: 0; }
 
 .card-footer {
@@ -157,7 +131,6 @@
     padding-inline: var(--container-pad);
   }
 
-  /* Flèches */
   .services-arrow {
     display: flex;
     align-items: center;
@@ -176,24 +149,14 @@
   .services-arrow:active { background: rgba(234,91,19,0.1); }
   .services-arrow:disabled { opacity: 0.25; pointer-events: none; }
 
-  /* Points */
-  .services-dots {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  .services-dots { display: flex; align-items: center; gap: 0.5rem; }
   .services-dot {
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 9999px;
     background: var(--border);
-    border: none;
-    padding: 0;
+    border: none; padding: 0;
     cursor: pointer;
     transition: background 250ms, width 250ms;
   }
-  .services-dot.is-active {
-    background: var(--orange);
-    width: 20px;
-  }
+  .services-dot.is-active { background: var(--orange); width: 20px; }
 }

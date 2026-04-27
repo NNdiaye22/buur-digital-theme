@@ -1,177 +1,159 @@
-/* ─────────────────────────────────────────
-   BUUR Digital — Section Notre ADN
-   Identique au style de la section Services
-───────────────────────────────────────── */
-
+/* ── Notre ADN — Layout éditorial 2 colonnes ── */
 .adn-section {
-  position: relative;
-  width: 100%;
-  padding: clamp(4rem, 10vh, 7rem) var(--container-pad, 1.25rem);
   background: var(--dark, #06060e);
+  padding: clamp(5rem, 10vh, 8rem) 0;
   overflow: hidden;
 }
 
-/* ── En-tête ── */
-.adn-header {
-  text-align: center;
-  margin-bottom: clamp(2.5rem, 5vh, 4rem);
-}
-
-.adn-header .section-eyebrow {
-  display: block;
-  margin-bottom: 0.6rem;
-}
-
-.adn-header .section-title {
-  font-size: clamp(2rem, 4vw, 3.2rem);
-}
-
-/* ── Grid 3 colonnes (identique .services-grid) ── */
-.adn-grid {
+.adn-inner {
+  max-width: var(--container-max, 1280px);
+  margin-inline: auto;
+  padding-inline: var(--container-pad, 1.25rem);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  grid-template-columns: 1fr 1.6fr;
+  gap: clamp(3rem, 6vw, 8rem);
+  align-items: start;
 }
 
-@media (max-width: 900px) {
-  .adn-grid {
-    grid-template-columns: 1fr;
-    max-width: 480px;
-  }
+/* ── Colonne gauche : lead sticky ── */
+.adn-lead {
+  position: sticky;
+  top: clamp(5rem, 12vh, 8rem);
 }
 
-/* ── Card ── */
-.adn-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 2rem 1.75rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(234, 91, 19, 0.15);
-  overflow: hidden;
-  transition: border-color 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease;
-  cursor: default;
+.adn-lead .section-eyebrow {
+  display: block;
+  margin-bottom: 1rem;
 }
 
-.adn-card:hover {
-  border-color: rgba(234, 91, 19, 0.45);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(234, 91, 19, 0.12);
+.adn-lead-title {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: var(--white);
+  margin-bottom: 1.25rem;
 }
 
-/* Card mise en avant */
-.adn-card--featured {
-  border-color: rgba(234, 91, 19, 0.4);
-  background: rgba(234, 91, 19, 0.06);
-}
-
-.adn-card--featured::before {
-  content: 'Clé de voûte';
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--orange, #ea5b13);
-  background: rgba(234, 91, 19, 0.12);
-  padding: 0.25rem 0.65rem;
-  border-radius: 20px;
-  border: 1px solid rgba(234, 91, 19, 0.3);
-}
-
-/* ── Halo décoratif ── */
-.adn-card-halo {
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(234, 91, 19, 0.1) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-.adn-card--featured .adn-card-halo {
-  background: radial-gradient(
-    circle,
-    rgba(234, 91, 19, 0.2) 0%,
-    transparent 70%
-  );
-}
-
-/* ── Icône ── */
-.adn-card-icon {
-  position: relative;
-  z-index: 1;
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: rgba(234, 91, 19, 0.1);
-  border: 1px solid rgba(234, 91, 19, 0.25);
-  color: var(--orange, #ea5b13);
-  flex-shrink: 0;
-}
-
-/* ── Corps de la card ── */
-.adn-card-body {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.adn-card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--white, #f5f4f0);
-  line-height: 1.3;
-  margin: 0;
-}
-
-.adn-card-desc {
+.adn-lead-sub {
   font-size: 0.9rem;
-  color: rgba(245, 244, 240, 0.65);
-  line-height: 1.65;
-  margin: 0;
+  line-height: 1.7;
+  color: rgba(245,244,240,0.45);
+  max-width: 32ch;
+  margin-bottom: 2rem;
 }
 
-/* ── Liste des points ── */
-.adn-card-features {
+.adn-lead-line {
+  width: 40px;
+  height: 2px;
+  background: var(--orange);
+  border-radius: 2px;
+}
+
+/* ── Colonne droite : liste des valeurs ── */
+.adn-list {
   list-style: none;
-  padding: 0;
-  margin: 0.25rem 0 0;
+  padding: 0; margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0;
 }
 
-.adn-card-features li {
+/* Item */
+.adn-item {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr;
+  gap: 0 1.5rem;
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(245,244,240,0.07);
+  position: relative;
+  transition: background 300ms;
+}
+.adn-item:last-child { border-bottom: 1px solid rgba(245,244,240,0.07); }
+
+/* Barre orange sur item en vedette */
+.adn-item--featured {
+  background: rgba(234,91,19,0.04);
+  border-top-color: rgba(234,91,19,0.25);
+  border-radius: var(--radius-md);
+  padding-inline: 1.5rem;
+  margin-inline: -1.5rem;
+}
+.adn-item--featured + .adn-item {
+  border-top-color: rgba(234,91,19,0.12);
+}
+
+/* Numéro */
+.adn-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--orange);
+  opacity: 0.6;
+  padding-top: 0.35rem;
+  user-select: none;
+}
+.adn-item--featured .adn-num { opacity: 1; }
+
+/* Corps */
+.adn-item-body { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.adn-item-title {
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.adn-item-desc {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgba(245,244,240,0.5);
+  max-width: 52ch;
+}
+
+/* Features inline */
+.adn-item-features {
+  list-style: none;
+  padding: 0; margin: 0.5rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+}
+.adn-item-features li {
+  font-size: 0.78rem;
+  color: rgba(245,244,240,0.5);
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 0.82rem;
-  color: rgba(245, 244, 240, 0.75);
-  line-height: 1.4;
+  gap: 0.35rem;
 }
-
-.adn-card-features li svg {
+.adn-item-features li::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0.55;
   flex-shrink: 0;
-  color: var(--orange, #ea5b13);
+}
+.adn-item--featured .adn-item-features li { color: rgba(245,244,240,0.7); }
+.adn-item--featured .adn-item-features li::before { opacity: 1; }
+
+/* ── Mobile ── */
+@media (max-width: 860px) {
+  .adn-inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .adn-lead { position: static; }
+  .adn-lead-sub { max-width: 100%; }
+  .adn-item {
+    grid-template-columns: 2.5rem 1fr;
+    padding: 1.75rem 0;
+  }
+  .adn-item--featured {
+    padding-inline: 1rem;
+    margin-inline: -1rem;
+  }
 }

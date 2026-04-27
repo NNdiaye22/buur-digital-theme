@@ -1,11 +1,12 @@
 <?php
 /**
  * BUUR Digital — CTA Final
- * Un seul bouton WhatsApp — numéro France.
+ * Texte + bouton en haut, photo plein écran en dessous.
+ * Un seul bouton WhatsApp France.
  */
 
 $bg_img_id = absint( get_theme_mod( 'buur_cta_bg_image', 0 ) );
-$bg_img    = $bg_img_id ? wp_get_attachment_image_url( $bg_img_id, 'buur-hero' ) : '';
+$bg_img    = $bg_img_id ? wp_get_attachment_image_url( $bg_img_id, 'full' ) : '';
 $eyebrow   = get_theme_mod( 'buur_cta_eyebrow', 'REJOINS LE ROYAUME' );
 $title     = get_theme_mod( 'buur_cta_title',   "Démarrons votre projet<br><em>aujourd'hui.</em>" );
 $sub       = get_theme_mod( 'buur_cta_sub',     'Un message WhatsApp suffit. Réponse garantie en moins de 24h.' );
@@ -13,13 +14,7 @@ $btn_fr    = get_theme_mod( 'buur_cta_btn_fr',  'Nous contacter' );
 ?>
 <section class="cta-section" id="contact" aria-label="Rejoindre BUUR Digital">
 
-    <div class="cta-bg" aria-hidden="true">
-        <?php if ( $bg_img ) : ?>
-            <img class="cta-bg-img" src="<?php echo esc_url( $bg_img ); ?>" alt="" loading="lazy" decoding="async">
-        <?php endif; ?>
-        <div class="cta-overlay"></div>
-    </div>
-
+    <!-- Bloc texte en haut -->
     <div class="cta-content">
         <span class="section-eyebrow"><?php echo esc_html( $eyebrow ); ?></span>
         <h2 class="cta-title" id="cta-title">
@@ -38,5 +33,19 @@ $btn_fr    = get_theme_mod( 'buur_cta_btn_fr',  'Nous contacter' );
             </a>
         </div>
     </div>
+
+    <?php if ( $bg_img ) : ?>
+    <!-- Photo plein écran en dessous du texte -->
+    <div class="cta-photo" aria-hidden="true">
+        <img
+            src="<?php echo esc_url( $bg_img ); ?>"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            class="cta-photo-img"
+        >
+        <div class="cta-photo-fade"></div>
+    </div>
+    <?php endif; ?>
 
 </section>

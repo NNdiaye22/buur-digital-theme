@@ -2,6 +2,7 @@
 /**
  * Template Name: Contact
  * BUUR Digital — Page de contact premium
+ * @updated 2026-04-27
  */
 get_header();
 $wa_number = preg_replace( '/[^0-9]/', '', get_theme_mod( 'buur_whatsapp_fr', '+33000000000' ) );
@@ -103,7 +104,7 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
           <a href="mailto:contact@buurdigital.com" class="contact-info__link">contact@buurdigital.com</a>
         </div>
 
-        <!-- WhatsApp CTA France uniquement -->
+        <!-- WhatsApp CTA -->
         <a
           href="https://wa.me/<?php echo esc_attr( $wa_number ); ?>?text=<?php echo $wa_msg; ?>"
           class="btn-whatsapp"
@@ -115,7 +116,7 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
           Contacter sur WhatsApp
         </a>
 
-        <!-- Carte Google Maps — MPS Sénégal Hann Mariste -->
+        <!-- Carte Google Maps — Hann Mariste, Dakar -->
         <div class="contact-map">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.6!2d-17.4432!3d14.7395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sMPS+S%C3%A9n%C3%A9gal+-+Hann+Mariste!5e0!3m2!1sfr!2sfr!4v1"
@@ -125,7 +126,7 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
             allowfullscreen=""
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
-            title="Localisation MPS Sénégal — Hann Mariste, Dakar"
+            title="Localisation BUUR Digital — Hann Mariste, Dakar"
           ></iframe>
         </div>
 

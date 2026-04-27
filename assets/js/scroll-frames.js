@@ -1,6 +1,7 @@
 /**
- * BUUR Digital — scroll-frames.js v8.6
+ * BUUR Digital — scroll-frames.js v8.7
  *
+ * v8.7 PERF : DPR desktop plafonné à 2 (was uncapped — écrans Retina 3×).
  * v8.6 PERF : 3 quick wins
  *   1. svcCards mis en cache à l’init (supprime querySelectorAll dans le tick scroll).
  *   2. BATCH_SIZE mobile 4 → 6 — chargement des frames plus rapide.
@@ -20,11 +21,14 @@
   var PX_PER_FRAME = 12;
 
   var IS_MOBILE    = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
-  var BATCH_SIZE   = IS_MOBILE ? 6  : 8;   /* v8.6 : 4 → 6 sur mobile */
-  var BATCH_DELAY  = IS_MOBILE ? 32 : 32;  /* v8.6 : 64 → 32 ms sur mobile */
+  var BATCH_SIZE   = IS_MOBILE ? 6  : 8;
+  var BATCH_DELAY  = IS_MOBILE ? 32 : 32;
   var AHEAD_FRAMES = IS_MOBILE ? 20 : 40;
 
-  var DPR = IS_MOBILE ? Math.min(window.devicePixelRatio || 1, 1.5) : (window.devicePixelRatio || 1);
+  /* v8.7 : DPR plafonné à 2 sur desktop (1.5 sur mobile inchangé) */
+  var DPR = IS_MOBILE
+    ? Math.min(window.devicePixelRatio || 1, 1.5)
+    : Math.min(window.devicePixelRatio || 1, 2);
 
   var SEQUENCES = [
     { id: 'v1', count: 192 },
@@ -239,7 +243,6 @@
     }
     if (svcOp > 0) {
       var tSvc = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
-      /* v8.6 : svcCards est désormais un cache — plus de querySelectorAll ici */
       svcCards.forEach(function (card, i) {
         var tCol = clamp01((tSvc - i * 0.10) / (1 - i * 0.10 || 0.90));
         card.style.opacity   = tCol;

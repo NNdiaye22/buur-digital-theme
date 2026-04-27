@@ -1,10 +1,9 @@
 /**
- * BUUR Digital — scroll-frames.js v7.6
+ * BUUR Digital — scroll-frames.js v7.7
  *
- * v7.6 MOBILE TUNING (frames inchangées) :
- *  1. Recalcule wrapperTop à chaque tick sur mobile (< 900px) pour suivre les changements de viewport.
- *  2. BATCH_SIZE/BATCH_DELAY/AHEAD_FRAMES adoucis sur mobile pour réduire la pression CPU/RAM.
- *  3. Garde le même nombre total de frames (1 153) et le même design.
+ * v7.7 FIX CRITIQUE :
+ *  - FRAMES_PATH corrigé : assets → assets/frames
+ *    (les frames sont dans assets/frames/v1/, pas assets/v1/)
  */
 (function () {
   'use strict';
@@ -12,7 +11,7 @@
   if (!window.gsap) return;
 
   var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
-  var FRAMES_PATH  = THEME_URL + '/assets';
+  var FRAMES_PATH  = THEME_URL + '/assets/frames';
   var PX_PER_FRAME = 12;
 
   var IS_MOBILE    = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
@@ -281,31 +280,27 @@
 
   var rafId = null;
 
-  function onScroll() { if (!rafId) rafId = requestAnimationFrame(tick); }
+  function onScroll()   { if (!rafId) rafId = requestAnimationFrame(tick); }
   function onTouchMove() { if (!rafId) rafId = requestAnimationFrame(tick); }
 
   function tick() {
     rafId = null;
-
     if (IS_MOBILE) updateWrapperTop();
-
     var scrolled = window.scrollY - wrapperTop;
     var progress = Math.max(0, Math.min(scrolled / TOTAL_HEIGHT, 1));
     var frame    = progress * (TOTAL - 1);
     var inside   = scrolled >= 0 && scrolled < TOTAL_HEIGHT;
     if (progressNav) progressNav.classList.toggle('is-visible', inside);
-
     for (var s = 0; s < SEQUENCES.length; s++) {
       if (!seqStarted[s] && frame >= offsets[s] - AHEAD_FRAMES) loadSeq(s, null);
     }
-
     drawFrame(frame);
     updateOverlays(frame);
     updateText(frame);
   }
 
-  window.addEventListener('scroll',    onScroll,   { passive: true });
-  window.addEventListener('touchmove', onTouchMove,{ passive: true });
+  window.addEventListener('scroll',    onScroll,    { passive: true });
+  window.addEventListener('touchmove', onTouchMove, { passive: true });
 
   function initScroll() {
     canvas.width  = vpWidth();

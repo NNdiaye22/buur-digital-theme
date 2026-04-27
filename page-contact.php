@@ -4,6 +4,8 @@
  * BUUR Digital — Page de contact premium
  */
 get_header();
+$wa_number = preg_replace( '/[^0-9]/', '', get_theme_mod( 'buur_whatsapp_fr', '+33000000000' ) );
+$wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhaite en savoir plus sur vos services BUUR Digital.' ) );
 ?>
 
 <main id="main-content" class="contact-page">
@@ -13,8 +15,8 @@ get_header();
     <div class="container">
       <span class="section-eyebrow">Contact</span>
       <h1 class="contact-hero__title">Parlons de votre<br><em>projet digital</em></h1>
-      <p class="contact-hero__sub">Une question, un devis ou simplement envie d’échanger&nbsp;?
-Répondons-nous en moins de 48h.</p>
+      <p class="contact-hero__sub">Une question, un devis ou simplement envie d'échanger&nbsp;?
+      Répondons-nous en moins de 48h.</p>
     </div>
   </section>
 
@@ -86,7 +88,7 @@ Répondons-nous en moins de 48h.</p>
           <span class="contact-info__label">Adresse</span>
           <address class="contact-info__value">
             Hann Mariste, Lot P53<br>
-            Crois. Cambérène<br>
+            Croisement Cambérène<br>
             Dakar — Sénégal
           </address>
         </div>
@@ -101,9 +103,9 @@ Répondons-nous en moins de 48h.</p>
           <a href="mailto:contact@buurdigital.com" class="contact-info__link">contact@buurdigital.com</a>
         </div>
 
-        <!-- WhatsApp CTA -->
+        <!-- WhatsApp CTA France uniquement -->
         <a
-          href="https://wa.me/33XXXXXXXXX?text=Bonjour%2C%20je%20souhaite%20en%20savoir%20plus%20sur%20vos%20services."
+          href="https://wa.me/<?php echo esc_attr( $wa_number ); ?>?text=<?php echo $wa_msg; ?>"
           class="btn-whatsapp"
           target="_blank"
           rel="noopener noreferrer"
@@ -113,7 +115,7 @@ Répondons-nous en moins de 48h.</p>
           Contacter sur WhatsApp
         </a>
 
-        <!-- Carte / iframe Maps -->
+        <!-- Carte Google Maps — MPS Sénégal Hann Mariste -->
         <div class="contact-map">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.6!2d-17.4432!3d14.7395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sMPS+S%C3%A9n%C3%A9gal+-+Hann+Mariste!5e0!3m2!1sfr!2sfr!4v1"

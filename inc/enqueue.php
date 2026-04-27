@@ -1,6 +1,7 @@
 <?php
 /**
  * BUUR Digital — Chargement des assets CSS et JS.
+ * Les vidéos ont été supprimées — plus de video-manager.js.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -8,18 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 function buur_enqueue_assets() {
 
     // --- CSS de base (toutes les pages) ---
-    wp_enqueue_style(
-        'buur-main',
-        BUUR_URI . '/assets/css/main.css',
-        array(),
-        BUUR_VERSION
-    );
-    wp_enqueue_style(
-        'buur-footer',
-        BUUR_URI . '/assets/css/footer.css',
-        array( 'buur-main' ),
-        BUUR_VERSION
-    );
+    wp_enqueue_style( 'buur-main',   BUUR_URI . '/assets/css/main.css',   array(),              BUUR_VERSION );
+    wp_enqueue_style( 'buur-footer', BUUR_URI . '/assets/css/footer.css', array( 'buur-main' ), BUUR_VERSION );
 
     // --- CSS homepage uniquement ---
     if ( is_front_page() ) {
@@ -50,32 +41,24 @@ function buur_enqueue_assets() {
         // Three.js CDN
         wp_enqueue_script( 'threejs', 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', array(), 'r128', true );
 
-        // JS internes — ordre important
-        wp_enqueue_script( 'buur-preloader',        BUUR_URI . '/assets/js/preloader.js',       array(),                                                                   BUUR_VERSION, true );
-        wp_enqueue_script( 'buur-video-manager',    BUUR_URI . '/assets/js/video-manager.js',   array(),                                                                   BUUR_VERSION, true );
-        wp_enqueue_script( 'buur-hero-tunnel',      BUUR_URI . '/assets/js/hero-tunnel.js',     array( 'threejs', 'gsap-scrolltrigger' ),                                  BUUR_VERSION, true );
-        wp_enqueue_script( 'buur-gsap-animations',  BUUR_URI . '/assets/js/gsap-animations.js', array( 'gsap-scrolltrigger', 'gsap-splittext', 'buur-video-manager' ),    BUUR_VERSION, true );
-        wp_enqueue_script( 'buur-scroll-frames',    BUUR_URI . '/assets/js/scroll-frames.js',   array( 'gsap-scrolltrigger' ),                                             BUUR_VERSION, true );
-        wp_enqueue_script( 'buur-interactions',     BUUR_URI . '/assets/js/interactions.js',    array( 'buur-gsap-animations' ),                                           BUUR_VERSION, true );
+        // JS internes — video-manager supprimé
+        wp_enqueue_script( 'buur-preloader',       BUUR_URI . '/assets/js/preloader.js',       array(),                                              BUUR_VERSION, true );
+        wp_enqueue_script( 'buur-hero-tunnel',     BUUR_URI . '/assets/js/hero-tunnel.js',     array( 'threejs', 'gsap-scrolltrigger' ),             BUUR_VERSION, true );
+        wp_enqueue_script( 'buur-gsap-animations', BUUR_URI . '/assets/js/gsap-animations.js', array( 'gsap-scrolltrigger', 'gsap-splittext' ),      BUUR_VERSION, true );
+        wp_enqueue_script( 'buur-scroll-frames',   BUUR_URI . '/assets/js/scroll-frames.js',   array( 'gsap-scrolltrigger' ),                        BUUR_VERSION, true );
+        wp_enqueue_script( 'buur-interactions',    BUUR_URI . '/assets/js/interactions.js',    array( 'buur-gsap-animations' ),                      BUUR_VERSION, true );
     }
 
     // --- JS principal (toutes les pages) ---
-    wp_enqueue_script(
-        'buur-main',
-        BUUR_URI . '/assets/js/main.js',
-        array(),
-        BUUR_VERSION,
-        true
-    );
+    wp_enqueue_script( 'buur-main', BUUR_URI . '/assets/js/main.js', array(), BUUR_VERSION, true );
 
     // Données JS globales
     wp_localize_script( 'buur-main', 'buurData', array(
-        'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
-        'nonce'     => wp_create_nonce( 'buur-nonce' ),
-        'themeUri'  => BUUR_URI,
-        'whatsappSN'=> buur_whatsapp_url( 'sn' ),
-        'whatsappFR'=> buur_whatsapp_url( 'fr' ),
-        'videosUri' => BUUR_URI . '/assets/videos/',
+        'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+        'nonce'      => wp_create_nonce( 'buur-nonce' ),
+        'themeUri'   => BUUR_URI,
+        'whatsappSN' => buur_whatsapp_url( 'sn' ),
+        'whatsappFR' => buur_whatsapp_url( 'fr' ),
     ) );
 
     // Variable JS pour scroll-frames.js

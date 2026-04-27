@@ -1,4 +1,4 @@
-/* ── Services v2 Premium ── */
+/* ── Services — Image de fond ── */
 .services-section {
   padding: clamp(5rem, 10vh, 8rem) 0;
   background: var(--black);
@@ -51,9 +51,11 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   border-radius: var(--radius-full);
+  z-index: 2;
 }
 
-.card-video-wrap {
+/* Bloc image de fond */
+.card-img-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
@@ -62,25 +64,45 @@
   background: var(--surface-2);
   margin-bottom: 0.25rem;
 }
-.card-video {
-  width: 100%; height: 100%;
+
+.card-bg-img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  object-position: center;
   opacity: 0.55;
-  transition: opacity 400ms;
+  transition: opacity 400ms, transform 500ms var(--ease-out-expo);
+  display: block;
 }
-.service-card:hover .card-video { opacity: 0.75; }
-.card-video-overlay {
+.service-card:hover .card-bg-img {
+  opacity: 0.75;
+  transform: scale(1.04);
+}
+
+/* Fallback si pas d'image */
+.card-bg-fallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3, #1a1a2a) 100%);
+}
+
+.card-img-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(to top, rgba(8,8,16,0.7), transparent 50%);
-}
-.card-icon {
-  position: absolute;
-  bottom: 1rem; left: 1rem;
-  color: var(--orange);
-  opacity: 0.9;
+  pointer-events: none;
 }
 
+.card-icon {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  color: var(--orange);
+  opacity: 0.9;
+  z-index: 1;
+}
+
+/* Corps de carte */
 .card-body { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
 
 .card-title {
@@ -122,10 +144,10 @@
   margin-top: auto;
 }
 .card-price { display: flex; flex-direction: column; gap: 0.1rem; }
-.price-from { font-size: 0.7rem; color: var(--grey-400); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+.price-from   { font-size: 0.7rem; color: var(--grey-400); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
 .price-amount { font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
 
 @media (max-width: 900px) {
   .services-grid { grid-template-columns: 1fr; gap: 0; }
-  .card-video-wrap { aspect-ratio: 21/9; }
+  .card-img-wrap { aspect-ratio: 21/9; }
 }

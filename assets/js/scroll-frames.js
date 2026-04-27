@@ -1,10 +1,11 @@
 /**
- * BUUR Digital — scroll-frames.js v8.5
+ * BUUR Digital — scroll-frames.js v8.6
  *
- * v8.5 FIX : suppression complète du système lazy-load vidéo
- *            (svcVideos, svcVideosLoaded, lazyLoadSvcVideos).
- *            Les cartes services utilisent désormais des images CSS
- *            injectées côté serveur via le customizer WordPress.
+ * v8.6 PERF : 3 quick wins
+ *   1. svcCards mis en cache à l’init (supprime querySelectorAll dans le tick scroll).
+ *   2. BATCH_SIZE mobile 4 → 6 — chargement des frames plus rapide.
+ *   3. BATCH_DELAY mobile 64ms → 32ms — réduction de l’attente inter-lots.
+ * v8.5 FIX : suppression complète du système lazy-load vidéo.
  * v8.4 FIX : FRAMES_PATH corrigé : assets/frames/
  * v8.3 PERF : DPR plafonné à 1.5 sur mobile
  * v8.2 PERF : updateWrapperTop() dans ResizeObserver uniquement
@@ -19,8 +20,8 @@
   var PX_PER_FRAME = 12;
 
   var IS_MOBILE    = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
-  var BATCH_SIZE   = IS_MOBILE ? 4  : 8;
-  var BATCH_DELAY  = IS_MOBILE ? 64 : 32;
+  var BATCH_SIZE   = IS_MOBILE ? 6  : 8;   /* v8.6 : 4 → 6 sur mobile */
+  var BATCH_DELAY  = IS_MOBILE ? 32 : 32;  /* v8.6 : 64 → 32 ms sur mobile */
   var AHEAD_FRAMES = IS_MOBILE ? 20 : 40;
 
   var DPR = IS_MOBILE ? Math.min(window.devicePixelRatio || 1, 1.5) : (window.devicePixelRatio || 1);
@@ -74,13 +75,16 @@
   var dotEls      = progressNav ? Array.prototype.slice.call(progressNav.querySelectorAll('.sf-dot')) : [];
 
   /* ADN overlay */
-  var adnOverlay    = document.getElementById('sf-adn-overlay');
-  var adnEyebrow    = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow') : null;
-  var adnTitleEl    = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')   : null;
-  var adnValeurs    = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
+  var adnOverlay = document.getElementById('sf-adn-overlay');
+  var adnEyebrow = adnOverlay ? adnOverlay.querySelector('.sf-adn-eyebrow') : null;
+  var adnTitleEl = adnOverlay ? adnOverlay.querySelector('.sf-adn-title')   : null;
+  var adnValeurs = adnOverlay ? Array.prototype.slice.call(adnOverlay.querySelectorAll('.sf-adn-valeur')) : [];
 
-  /* Services overlay — plus de vidéos, images CSS uniquement */
+  /* Services overlay — cartes mises en cache une seule fois (v8.6) */
   var svcOverlay = document.getElementById('sf-services-overlay');
+  var svcCards   = svcOverlay
+    ? Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card'))
+    : [];
 
   wrapper.style.height = TOTAL_HEIGHT + 'px';
 
@@ -209,13 +213,13 @@
     /* —— ADN —— */
     var adnOp = scrubOpacity(f, ADN_IN, ADN_PEAK, ADN_OUT);
     if (adnOverlay) {
-      adnOverlay.style.opacity      = adnOp;
+      adnOverlay.style.opacity       = adnOp;
       adnOverlay.style.pointerEvents = adnOp > 0.05 ? 'auto' : 'none';
     }
     if (adnOp > 0) {
       var tIn = clamp01(zoneT(f, ADN_IN, ADN_PEAK));
       if (adnEyebrow) { adnEyebrow.style.opacity = tIn; adnEyebrow.style.transform = 'translateY(' + lerp(-20, 0, tIn) + 'px)'; }
-      if (adnTitleEl) { adnTitleEl.style.opacity = tIn; adnTitleEl.style.transform  = 'translateY(' + lerp(-12, 0, tIn) + 'px)'; }
+      if (adnTitleEl) { adnTitleEl.style.opacity  = tIn; adnTitleEl.style.transform  = 'translateY(' + lerp(-12, 0, tIn) + 'px)'; }
       adnValeurs.forEach(function (card, i) {
         var tCard = clamp01((tIn - i * 0.12) / (1 - i * 0.12 || 0.88));
         card.style.opacity   = tCard;
@@ -223,25 +227,26 @@
       });
     } else {
       if (adnEyebrow) adnEyebrow.style.opacity = 0;
-      if (adnTitleEl) adnTitleEl.style.opacity = 0;
+      if (adnTitleEl) adnTitleEl.style.opacity  = 0;
       adnValeurs.forEach(function (c) { c.style.opacity = 0; });
     }
 
     /* —— SERVICES —— */
     var svcOp = scrubOpacity(f, SVC_IN, SVC_PEAK, SVC_OUT);
     if (svcOverlay) {
-      svcOverlay.style.opacity      = svcOp;
+      svcOverlay.style.opacity       = svcOp;
       svcOverlay.style.pointerEvents = svcOp > 0.05 ? 'auto' : 'none';
     }
     if (svcOp > 0) {
       var tSvc = clamp01(zoneT(f, SVC_IN, SVC_PEAK));
-      Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')).forEach(function (card, i) {
+      /* v8.6 : svcCards est désormais un cache — plus de querySelectorAll ici */
+      svcCards.forEach(function (card, i) {
         var tCol = clamp01((tSvc - i * 0.10) / (1 - i * 0.10 || 0.90));
         card.style.opacity   = tCol;
         card.style.transform = 'perspective(900px) translateY(' + lerp(32, 0, tCol) + 'px) rotateY(' + lerp(20, 0, tCol) + 'deg)';
       });
-    } else if (svcOverlay) {
-      Array.prototype.slice.call(svcOverlay.querySelectorAll('.service-card')).forEach(function (c) { c.style.opacity = 0; });
+    } else {
+      svcCards.forEach(function (c) { c.style.opacity = 0; });
     }
   }
 

@@ -1,4 +1,4 @@
-/* ── Scroll Frames v7.2 ── */
+/* ── Scroll Frames v7.3 ── */
 
 .scroll-frames-wrapper {
   position: relative;
@@ -11,6 +11,8 @@
   height: 100vh;
   overflow: hidden;
   background: #000;
+  /* v7.3 PERF : isole le repaint du bloc sticky du reste de la page */
+  contain: layout paint;
 }
 .scroll-canvas {
   position: absolute;
@@ -414,7 +416,7 @@
   .sf-adn-valeur:not(:first-child):not(:last-child) { padding-left: 0; }
   .sf-adn-valeur p { max-width: 100%; }
 
-  /* --- Services overlay : on réduit le padding pour laisser de la place --- */
+  /* --- Services overlay --- */
   .sf-services-overlay {
     padding: 1.5rem 0 1rem;
     align-items: flex-start;
@@ -423,20 +425,14 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    overflow: hidden;       /* masque le débordement latéral */
+    overflow: hidden;
   }
   .services-header {
     padding: 0 1.25rem;
     margin-bottom: 0.75rem;
   }
 
-  /*
-   * SWIPER HORIZONTAL
-   * flex + overflow-x:auto + scroll-snap-type:x mandatory
-   * touch-action:pan-x permet le scroll horizontal sans déclencher
-   * le scroll vertical de la page.
-   * Le padding-inline expose l'amorce de la carte suivante (peek).
-   */
+  /* SWIPER HORIZONTAL */
   .services-grid {
     display: flex;
     flex-direction: row;
@@ -447,20 +443,17 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    touch-action: pan-x;      /* autorise uniquement le swipe horizontal ici */
+    touch-action: pan-x;
     padding: 0.25rem 1.25rem 0.75rem;
-    /* scrollbar invisible */
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
   .services-grid::-webkit-scrollbar { display: none; }
 
-  /* Chaque carte prend ~82 % de la largeur → peek de la suivante */
   .services-grid .service-card {
     flex: 0 0 82vw;
     max-width: 82vw;
     scroll-snap-align: start;
-    /* on ré-active l'opacité pour que l'animation JS reste possible */
     opacity: 0;
   }
 

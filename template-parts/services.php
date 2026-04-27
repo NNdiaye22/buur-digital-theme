@@ -1,7 +1,8 @@
 <?php
 /**
  * BUUR Digital — Services
- * Fond : photo uploadée via Customizer ou fond sombre par défaut.
+ * Desktop : grille 3 colonnes.
+ * Mobile  : carrousel scroll-snap avec points de pagination.
  */
 
 $eyebrow = get_theme_mod( 'buur_services_eyebrow', 'NOS SERVICES' );
@@ -33,7 +34,7 @@ $icons = array(
         <h2 class="section-title"><?php echo esc_html( $title ); ?></h2>
     </div>
 
-    <div class="services-grid">
+    <div class="services-grid" id="services-grid" role="list">
         <?php for ( $i = 1; $i <= 3; $i++ ) :
 
             $s_title    = get_theme_mod( "buur_service{$i}_title",    $default_titles[ $i ] );
@@ -41,11 +42,9 @@ $icons = array(
             $s_price    = get_theme_mod( "buur_service{$i}_price",    $default_prices[ $i ] );
             $s_featured = get_theme_mod( "buur_service{$i}_featured", $i === 2 );
 
-            // Photo de fond
             $img_id  = absint( get_theme_mod( "buur_service{$i}_bg_image", 0 ) );
             $img_url = $img_id ? wp_get_attachment_image_url( $img_id, 'large' ) : '';
 
-            // Features
             $features = array();
             for ( $f = 1; $f <= 4; $f++ ) :
                 $feat = get_theme_mod( "buur_service{$i}_feat{$f}", '' );
@@ -55,7 +54,9 @@ $icons = array(
         ?>
         <article
             class="service-card <?php echo $s_featured ? 'service-card--featured' : ''; ?>"
+            role="listitem"
             aria-label="Service : <?php echo esc_attr( $s_title ); ?>"
+            data-index="<?php echo $i - 1; ?>"
         >
             <div class="card-img-wrap" aria-hidden="true">
                 <?php if ( $img_url ) : ?>
@@ -68,7 +69,7 @@ $icons = array(
                         width="600" height="338"
                     >
                 <?php else : ?>
-                    <div class="card-bg-fallback" aria-hidden="true"></div>
+                    <div class="card-bg-fallback"></div>
                 <?php endif; ?>
                 <div class="card-img-overlay"></div>
                 <div class="card-icon"><?php echo $icons[ $i ]; ?></div>
@@ -100,6 +101,13 @@ $icons = array(
                 </div>
             </div>
         </article>
+        <?php endfor; ?>
+    </div>
+
+    <!-- Points de pagination (mobile uniquement, gérés par JS) -->
+    <div class="services-dots" id="services-dots" aria-hidden="true">
+        <?php for ( $i = 0; $i < 3; $i++ ) : ?>
+        <button class="services-dot <?php echo $i === 0 ? 'is-active' : ''; ?>" data-index="<?php echo $i; ?>" tabindex="-1"></button>
         <?php endfor; ?>
     </div>
 </section>

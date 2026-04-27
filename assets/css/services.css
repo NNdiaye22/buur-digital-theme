@@ -1,4 +1,4 @@
-/* ── Services — Image de fond ── */
+/* ── Services — Grille desktop / Carrousel mobile ── */
 .services-section {
   padding: clamp(5rem, 10vh, 8rem) 0;
   background: var(--black);
@@ -11,6 +11,7 @@
   margin-bottom: clamp(3rem, 6vh, 5rem);
 }
 
+/* ── Desktop : grille 3 colonnes ── */
 .services-grid {
   max-width: var(--container-max);
   margin-inline: auto;
@@ -24,6 +25,29 @@
   overflow: hidden;
 }
 
+/* ── Mobile : carrousel scroll-snap ── */
+@media (max-width: 900px) {
+  .services-grid {
+    /* Désactiver la grille */
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding-inline: var(--container-pad);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: var(--container-pad);
+    /* Masquer la scrollbar mais garder la fonctionnalité */
+    scrollbar-width: none;
+  }
+  .services-grid::-webkit-scrollbar { display: none; }
+}
+
+/* ── Carte ── */
 .service-card {
   position: relative;
   background: var(--surface);
@@ -36,7 +60,20 @@
 }
 .service-card:hover { background: var(--surface-2); }
 
-/* Badge "populaire" */
+@media (max-width: 900px) {
+  .service-card {
+    /* Chaque carte = 1 écran complet, s'accroche au snap */
+    flex: 0 0 calc(100vw - (var(--container-pad) * 2) - 2rem);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    border-radius: var(--radius-lg);
+    border: 1.5px solid var(--border);
+    /* Hauteur auto selon contenu */
+    min-height: 0;
+  }
+}
+
+/* Badge « populaire » */
 .service-card--featured::before {
   content: 'Le plus populaire';
   position: absolute;
@@ -54,7 +91,7 @@
   z-index: 2;
 }
 
-/* Bloc image de fond */
+/* ── Image de fond ── */
 .card-img-wrap {
   position: relative;
   width: 100%;
@@ -71,7 +108,7 @@
   object-fit: cover;
   object-position: center;
   opacity: 0.55;
-  transition: opacity 400ms, transform 500ms var(--ease-out-expo);
+  transition: opacity 400ms, transform 500ms var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1));
   display: block;
 }
 .service-card:hover .card-bg-img {
@@ -79,11 +116,10 @@
   transform: scale(1.04);
 }
 
-/* Fallback si pas d'image */
 .card-bg-fallback {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3, #1a1a2a) 100%);
+  background: linear-gradient(135deg, var(--surface-2) 0%, #1a1a2a 100%);
 }
 
 .card-img-overlay {
@@ -102,7 +138,7 @@
   z-index: 1;
 }
 
-/* Corps de carte */
+/* ── Corps de carte ── */
 .card-body { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
 
 .card-title {
@@ -147,7 +183,31 @@
 .price-from   { font-size: 0.7rem; color: var(--grey-400); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
 .price-amount { font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; }
 
+/* ── Indicateurs de pagination (points) — mobile only ── */
+.services-dots {
+  display: none;
+}
 @media (max-width: 900px) {
-  .services-grid { grid-template-columns: 1fr; gap: 0; }
-  .card-img-wrap { aspect-ratio: 21/9; }
+  .services-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding-inline: var(--container-pad);
+  }
+  .services-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--border);
+    transition: background 250ms, width 250ms;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+  .services-dot.is-active {
+    background: var(--orange);
+    width: 20px;
+  }
 }

@@ -15,11 +15,6 @@ $wa_msg    = rawurlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souh
     <div class="cp-hero__bg" aria-hidden="true"></div>
     <div class="cp-container">
 
-      <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="cp-back">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-        Retour à l'accueil
-      </a>
-
       <div class="cp-hero__inner">
         <span class="cp-eyebrow">Contact</span>
         <h1 class="cp-hero__title">Parlons de votre<br><em>projet digital</em></h1>

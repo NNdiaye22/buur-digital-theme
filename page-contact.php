@@ -6,22 +6,22 @@
  */
 get_header();
 $wa_number = preg_replace( '/[^0-9]/', '', get_theme_mod( 'buur_whatsapp_fr', '+33000000000' ) );
-$wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhaite en savoir plus sur vos services BUUR Digital.' ) );
+$wa_msg    = rawurlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhaite en savoir plus sur vos services BUUR Digital.' ) );
 ?>
 
 <main id="main-content" class="contact-page">
 
-  <!-- ── Hero contact ── -->
+  <!-- Hero contact -->
   <section class="contact-hero">
     <div class="container">
       <span class="section-eyebrow">Contact</span>
       <h1 class="contact-hero__title">Parlons de votre<br><em>projet digital</em></h1>
-      <p class="contact-hero__sub">Une question, un devis ou simplement envie d'échanger&nbsp;?
-      Répondons-nous en moins de 48h.</p>
+      <p class="contact-hero__sub">Une question, un devis ou simplement envie d'echanger&nbsp;?
+      Repondons-nous en moins de 48h.</p>
     </div>
   </section>
 
-  <!-- ── Grille principale ── -->
+  <!-- Grille principale -->
   <section class="contact-main">
     <div class="container contact-grid">
 
@@ -29,8 +29,8 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
       <div class="contact-form-wrap reveal">
         <h2 class="contact-form-wrap__title">Envoyez-nous un message</h2>
 
-        <?php if ( function_exists('wpcf7_enqueue_scripts') ) : ?>
-          <?php echo do_shortcode('[contact-form-7 id="contact-buur" title="Contact BUUR"]'); ?>
+        <?php if ( function_exists( 'wpcf7_enqueue_scripts' ) ) : ?>
+          <?php echo do_shortcode( '[contact-form-7 id="contact-buur" title="Contact BUUR"]' ); ?>
         <?php else : ?>
         <form class="buur-form" id="buur-contact-form" novalidate>
 
@@ -49,16 +49,16 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
 
           <div class="form-row">
             <div class="form-group">
-              <label for="cf-tel">Téléphone</label>
+              <label for="cf-tel">Telephone</label>
               <input type="tel" id="cf-tel" name="telephone" placeholder="+33 6 00 00 00 00" autocomplete="tel">
             </div>
             <div class="form-group">
               <label for="cf-sujet">Sujet <span aria-hidden="true">*</span></label>
               <select id="cf-sujet" name="sujet" required>
-                <option value="" disabled selected>Sélectionnez un sujet</option>
+                <option value="" disabled selected>Selectionnez un sujet</option>
                 <option value="devis">Demande de devis</option>
-                <option value="site-web">Création de site web</option>
-                <option value="reseaux-sociaux">Réseaux sociaux</option>
+                <option value="site-web">Creation de site web</option>
+                <option value="reseaux-sociaux">Reseaux sociaux</option>
                 <option value="marketing">Marketing digital</option>
                 <option value="autre">Autre</option>
               </select>
@@ -68,7 +68,7 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
 
           <div class="form-group">
             <label for="cf-message">Message <span aria-hidden="true">*</span></label>
-            <textarea id="cf-message" name="message" rows="6" placeholder="Décrivez votre projet, vos besoins…" required></textarea>
+            <textarea id="cf-message" name="message" rows="6" placeholder="Decrivez votre projet, vos besoins..." required></textarea>
             <span class="form-error" aria-live="polite"></span>
           </div>
 
@@ -89,14 +89,14 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
           <span class="contact-info__label">Adresse</span>
           <address class="contact-info__value">
             Hann Mariste, Lot P53<br>
-            Croisement Cambérène<br>
-            Dakar — Sénégal
+            Croisement Camberene<br>
+            Dakar &mdash; Senegal
           </address>
         </div>
 
         <div class="contact-info__block">
           <span class="contact-info__label">Horaires</span>
-          <p class="contact-info__value">Lun — Ven&nbsp;: 09h – 18h<br>Samedi&nbsp;: 09h – 13h</p>
+          <p class="contact-info__value">Lun &mdash; Ven&nbsp;: 09h &ndash; 18h<br>Samedi&nbsp;: 09h &ndash; 13h</p>
         </div>
 
         <div class="contact-info__block">
@@ -106,7 +106,7 @@ $wa_msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhait
 
         <!-- WhatsApp CTA -->
         <a
-          href="https://wa.me/<?php echo esc_attr( $wa_number ); ?>?text=<?php echo $wa_msg; ?>"
+          href="<?php echo esc_url( 'https://wa.me/' . $wa_number . '?text=' . $wa_msg ); ?>"
           class="btn-whatsapp"
           target="_blank"
           rel="noopener noreferrer"

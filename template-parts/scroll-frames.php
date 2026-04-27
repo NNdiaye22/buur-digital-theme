@@ -1,6 +1,6 @@
 <?php
 /**
- * BUUR Digital — Scroll Frames v7.1
+ * BUUR Digital — Scroll Frames v7.2
  * Overlay Notre ADN (layout éditorial) + Overlay Nos Services (images customizer)
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -82,7 +82,6 @@ endfor;
           <span class="sf-adn-eyebrow"><?php echo esc_html( get_theme_mod( 'buur_adn_eyebrow', 'NOTRE ADN' ) ); ?></span>
           <h2 class="sf-adn-title"><?php
             $adn_title = get_theme_mod( 'buur_adn_title', 'Pourquoi choisir BUUR ?' );
-            /* Met en italique orange le mot "BUUR" s'il est présent */
             echo wp_kses(
                 str_replace( 'BUUR', '<em>BUUR&nbsp;?</em>', esc_html( str_replace( 'BUUR ?', 'BUUR', $adn_title ) ) ),
                 array( 'em' => array() )
@@ -92,16 +91,11 @@ endfor;
 
         <div class="sf-adn-grid">
           <?php
-          $adn_icons = array(
-              1 => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
-              2 => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
-              3 => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-          );
           $adn_classes = array( 1 => 'sf-adn-valeur--excellence', 2 => 'sf-adn-valeur--accessibilite', 3 => 'sf-adn-valeur--innovation' );
           $adn_defaults = array(
               1 => array( 'Excellence',    'Des sites qui rivalisent avec les meilleures agences internationales.' ),
               2 => array( 'Accessibilité', 'Prix transparents et honnêtes. Le luxe web pour tous les budgets.' ),
-              3 => array( 'Innovation',    'Technologies de pointe : IA, animations 3D, vidéos génératives.' ),
+              3 => array( 'Innovation',    'Technologies de pointe : IA, animations 3D, vidéos génératives.' ),
           );
           for ( $n = 1; $n <= 3; $n++ ) :
               $c_title = get_theme_mod( "buur_adn_card{$n}_title", $adn_defaults[ $n ][0] );
@@ -109,7 +103,6 @@ endfor;
           ?>
           <div class="sf-adn-valeur <?php echo esc_attr( $adn_classes[ $n ] ); ?>">
             <span class="sf-adn-valeur-num">0<?php echo $n; ?></span>
-            <div class="sf-adn-valeur-icon" aria-hidden="true"><?php echo $adn_icons[ $n ]; ?></div>
             <h3><?php echo esc_html( $c_title ); ?></h3>
             <span class="sf-adn-valeur-rule" aria-hidden="true"></span>
             <p><?php echo esc_html( $c_desc ); ?></p>
@@ -133,7 +126,7 @@ endfor;
           <?php foreach ( $sf_services as $i => $svc ) : ?>
           <article
             class="service-card <?php echo $svc['featured'] ? 'service-card--featured' : ''; ?>"
-            aria-label="Service : <?php echo esc_attr( $svc['title'] ); ?>"
+            aria-label="Service : <?php echo esc_attr( $svc['title'] ); ?>"
             <?php if ( $svc['img_url'] ) : ?>
             style="--card-bg: url('<?php echo esc_url( $svc['img_url'] ); ?>');"
             <?php endif; ?>

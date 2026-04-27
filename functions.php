@@ -14,9 +14,10 @@ define( 'BUUR_URI',     get_template_directory_uri() );
 // -------------------------------------------------------
 require_once BUUR_DIR . '/inc/enqueue.php';
 require_once BUUR_DIR . '/inc/customizer.php';
+require_once BUUR_DIR . '/inc/setup-pages.php';
 
 // -------------------------------------------------------
-// Support du thème
+// Support du theme
 // -------------------------------------------------------
 function buur_theme_setup() {
     load_theme_textdomain( 'buur-digital', BUUR_DIR . '/languages' );
@@ -62,7 +63,7 @@ function buur_whatsapp_url( $country = 'sn' ) {
     $fr = get_theme_mod( 'buur_whatsapp_fr', '+33000000000' );
     $number = ( $country === 'fr' ) ? $fr : $sn;
     $number = preg_replace( '/[^0-9]/', '', $number );
-    $msg    = urlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhaite démarrer un projet web avec BUUR Digital.' ) );
+    $msg    = rawurlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhaite demarrer un projet web avec BUUR Digital.' ) );
     return 'https://wa.me/' . $number . '?text=' . $msg;
 }
 

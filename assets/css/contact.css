@@ -1,29 +1,345 @@
 /* =========================================================
-   BUUR Digital — Bouton retour accueil (page contact)
+   BUUR Digital — Page Contact v2 — Design Premium
    ========================================================= */
 
-.contact-back-btn {
+/* ── Variables locales ── */
+.contact-page {
+  --cp-bg:        #06060f;
+  --cp-card:      #0e0e1c;
+  --cp-border:    rgba(255,255,255,0.08);
+  --cp-orange:    #ea5b13;
+  --cp-white:     #f5f4f0;
+  --cp-muted:     rgba(245,244,240,0.45);
+  --cp-pad:       clamp(1.5rem, 5vw, 4rem);
+  background: var(--cp-bg);
+  color: var(--cp-white);
+  min-height: 100vh;
+}
+
+/* ── Container ── */
+.cp-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.cp-hero {
+  position: relative;
+  padding: clamp(5rem, 12vh, 9rem) 0 clamp(3rem, 6vh, 5rem);
+  overflow: hidden;
+}
+
+.cp-hero__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 40%, rgba(234,91,19,0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 85% 20%, rgba(36,58,133,0.10) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.cp-back {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.875rem;
+  margin-bottom: 2.5rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.04em;
+  color: rgba(245,244,240,0.45);
   text-decoration: none;
-  transition: color 0.2s ease, gap 0.2s ease;
+  transition: color 0.2s ease;
+}
+.cp-back:hover { color: var(--cp-white); }
+.cp-back svg { transition: transform 0.2s ease; }
+.cp-back:hover svg { transform: translateX(-3px); }
+
+.cp-hero__inner { position: relative; z-index: 1; }
+
+.cp-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--cp-orange);
+  margin-bottom: 1.2rem;
+}
+.cp-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 1px;
+  background: var(--cp-orange);
+  vertical-align: middle;
+  margin-right: 0.6rem;
+  opacity: 0.7;
 }
 
-.contact-back-btn svg {
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
+.cp-hero__title {
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--cp-white);
+  margin: 0 0 1.2rem;
+}
+.cp-hero__title em {
+  font-style: italic;
+  color: var(--cp-orange);
 }
 
-.contact-back-btn:hover {
-  color: #ffffff;
+.cp-hero__sub {
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  line-height: 1.8;
+  color: rgba(245,244,240,0.6);
+  margin: 0 0 2rem;
+  max-width: 52ch;
+}
+
+/* Badges */
+.cp-badges {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
+  margin-bottom: 2.5rem;
+}
+.cp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(245,244,240,0.75);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 100px;
+  padding: 0.35rem 0.85rem;
+}
+.cp-badge svg { color: var(--cp-orange); flex-shrink: 0; }
+
+/* Quick info */
+.cp-quickinfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.5rem;
+}
+.cp-quickinfo__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: rgba(245,244,240,0.55);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a.cp-quickinfo__item:hover { color: var(--cp-white); }
+.cp-quickinfo__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(234,91,19,0.12);
+  border: 1px solid rgba(234,91,19,0.2);
+  color: var(--cp-orange);
+  flex-shrink: 0;
 }
 
-.contact-back-btn:hover svg {
-  transform: translateX(-3px);
+/* =========================================================
+   FORMULAIRE
+   ========================================================= */
+
+.cp-form-section {
+  padding: 0 0 clamp(4rem, 10vh, 8rem);
+}
+
+.cp-form-card {
+  background: var(--cp-card);
+  border: 1px solid var(--cp-border);
+  border-radius: 20px;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+}
+
+.cp-form-card__header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--cp-border);
+}
+.cp-form-card__header h2 {
+  font-family: var(--font-sans, sans-serif);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--cp-white);
+  margin: 0 0 0.4rem;
+}
+.cp-form-card__header p {
+  font-size: 0.82rem;
+  color: var(--cp-muted);
+  margin: 0;
+}
+
+/* ── Rows ── */
+.cp-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+/* ── Champ flottant ── */
+.cp-field {
+  position: relative;
+}
+
+.cp-field input,
+.cp-field select,
+.cp-field textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  padding: 1.35rem 1rem 0.55rem;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.92rem;
+  color: var(--cp-white);
+  outline: none;
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.cp-field select {
+  cursor: pointer;
+  padding-right: 2.5rem;
+  /* flèche custom */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,244,240,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 14px;
+}
+
+.cp-field select option {
+  background: #0e0e1c;
+  color: var(--cp-white);
+}
+
+.cp-field textarea {
+  resize: vertical;
+  min-height: 130px;
+  padding-top: 1.5rem;
+}
+
+.cp-field--textarea {
+  margin-bottom: 1.2rem;
+}
+
+/* Label flottant */
+.cp-field label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.88rem;
+  color: rgba(245,244,240,0.38);
+  pointer-events: none;
+  transition: top 0.22s ease, font-size 0.22s ease, color 0.22s ease, transform 0.22s ease;
+  white-space: nowrap;
+}
+
+.cp-field--textarea label {
+  top: 1.1rem;
+  transform: none;
+}
+
+/* Flottement quand rempli ou focus */
+.cp-field input:focus ~ label,
+.cp-field input:not(:placeholder-shown) ~ label,
+.cp-field select:focus ~ label,
+.cp-field select:valid ~ label,
+.cp-field textarea:focus ~ label,
+.cp-field textarea:not(:placeholder-shown) ~ label {
+  top: 0.45rem;
+  transform: none;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--cp-orange);
+}
+
+/* Focus ring */
+.cp-field input:focus,
+.cp-field select:focus,
+.cp-field textarea:focus {
+  border-color: rgba(234,91,19,0.55);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px rgba(234,91,19,0.08);
+}
+
+/* ── Bouton submit ── */
+.cp-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--cp-orange);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 1rem 2.2rem;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.22s ease, transform 0.18s ease, box-shadow 0.22s ease;
+  box-shadow: 0 0 24px rgba(234,91,19,0.28);
+  margin-top: 0.5rem;
+}
+.cp-submit:hover {
+  background: #d44e0f;
+  transform: translateY(-2px);
+  box-shadow: 0 0 36px rgba(234,91,19,0.45);
+}
+.cp-submit:active { transform: translateY(0); }
+
+/* ── Feedback ── */
+.cp-feedback {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  min-height: 1.4em;
+}
+.cp-feedback.success { color: #4ade80; }
+.cp-feedback.error   { color: #f87171; }
+
+/* =========================================================
+   MOBILE (≤ 640px)
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .cp-form__row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .cp-form-card {
+    border-radius: 16px;
+  }
+
+  .cp-hero__title {
+    font-size: clamp(2.2rem, 9vw, 3rem);
+  }
+
+  .cp-quickinfo {
+    gap: 1rem 1.5rem;
+  }
 }

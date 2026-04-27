@@ -1,6 +1,8 @@
 /**
- * BUUR Digital — scroll-frames.js v8.3
+ * BUUR Digital — scroll-frames.js v8.4
  *
+ * v8.4 FIX :
+ *  - FRAMES_PATH corrigé : assets/frames/ (les dossiers v1-v7 sont dans assets/frames/)
  * v8.3 PERF :
  *  - DPR plafonné à 1.5 sur mobile (réduction charge GPU, qualité visuellement identique)
  * v8.2 PERF :
@@ -13,7 +15,7 @@
   if (!window.gsap) return;
 
   var THEME_URL    = (window.buurTheme && window.buurTheme.url) ? window.buurTheme.url : '';
-  var FRAMES_PATH  = THEME_URL + '/assets';
+  var FRAMES_PATH  = THEME_URL + '/assets/frames';
   var PX_PER_FRAME = 12;
 
   var IS_MOBILE    = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;

@@ -13,7 +13,7 @@ function buur_customizer_register( $wp_customize ) {
     // SECTION 1 — WhatsApp & Contacts
     // ============================================================
     $wp_customize->add_section( 'buur_whatsapp', array(
-        'title'    => __( '📱 WhatsApp — Contacts', 'buur-digital' ),
+        'title'    => __( 'WhatsApp — Contacts', 'buur-digital' ),
         'priority' => 30,
     ) );
 
@@ -54,11 +54,10 @@ function buur_customizer_register( $wp_customize ) {
     // SECTION 2 — Hero
     // ============================================================
     $wp_customize->add_section( 'buur_hero', array(
-        'title'    => __( '🎬 Hero — Fond & Textes', 'buur-digital' ),
+        'title'    => __( 'Hero — Fond & Textes', 'buur-digital' ),
         'priority' => 31,
     ) );
 
-    // --- Type de fond : vidéo ou photo ---
     $wp_customize->add_setting( 'buur_hero_bg_type', array(
         'default'           => 'video',
         'sanitize_callback' => 'sanitize_text_field',
@@ -69,12 +68,11 @@ function buur_customizer_register( $wp_customize ) {
         'section' => 'buur_hero',
         'type'    => 'select',
         'choices' => array(
-            'video' => __( 'Vidéo (hero-loop.mp4)', 'buur-digital' ),
+            'video' => __( 'Video (hero-loop.mp4)', 'buur-digital' ),
             'image' => __( 'Photo personnalisée', 'buur-digital' ),
         ),
     ) );
 
-    // --- Photo de fond (affiché si type = image) ---
     $wp_customize->add_setting( 'buur_hero_bg_image', array(
         'default'           => '',
         'sanitize_callback' => 'absint',
@@ -86,19 +84,17 @@ function buur_customizer_register( $wp_customize ) {
         'mime_type' => 'image',
     ) ) );
 
-    // --- Badge ---
     $wp_customize->add_setting( 'buur_hero_badge', array(
         'default'           => 'Dakar, Sénégal — Agence Web Premium',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'postMessage',
     ) );
     $wp_customize->add_control( 'buur_hero_badge', array(
-        'label'   => __( 'Texte du badge (ex: Dakar, Sénégal…)', 'buur-digital' ),
+        'label'   => __( 'Texte du badge', 'buur-digital' ),
         'section' => 'buur_hero',
         'type'    => 'text',
     ) );
 
-    // --- Titre ---
     $wp_customize->add_setting( 'buur_hero_title', array(
         'default'           => "L'agence web des rois du digital",
         'sanitize_callback' => 'sanitize_textarea_field',
@@ -110,9 +106,8 @@ function buur_customizer_register( $wp_customize ) {
         'type'    => 'textarea',
     ) );
 
-    // --- Tagline ---
     $wp_customize->add_setting( 'buur_hero_tagline', array(
-        'default'           => 'Des sites de classe mondiale, au prix de l'Afrique.',
+        'default'           => "Des sites de classe mondiale, au prix de l'Afrique.",
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'postMessage',
     ) );
@@ -122,7 +117,6 @@ function buur_customizer_register( $wp_customize ) {
         'type'    => 'text',
     ) );
 
-    // --- Labels boutons ---
     $wp_customize->add_setting( 'buur_hero_btn_sn', array(
         'default'           => 'WhatsApp Sénégal',
         'sanitize_callback' => 'sanitize_text_field',
@@ -149,7 +143,7 @@ function buur_customizer_register( $wp_customize ) {
     // SECTION 3 — Services
     // ============================================================
     $wp_customize->add_section( 'buur_services', array(
-        'title'    => __( '⚙️ Services', 'buur-digital' ),
+        'title'    => __( 'Services', 'buur-digital' ),
         'priority' => 32,
     ) );
 
@@ -179,7 +173,7 @@ function buur_customizer_register( $wp_customize ) {
     // SECTION 4 — Notre ADN (Pourquoi)
     // ============================================================
     $wp_customize->add_section( 'buur_adn', array(
-        'title'    => __( '🧬 Notre ADN — Pourquoi BUUR ?', 'buur-digital' ),
+        'title'    => __( 'Notre ADN — Pourquoi BUUR ?', 'buur-digital' ),
         'priority' => 33,
     ) );
 
@@ -205,7 +199,6 @@ function buur_customizer_register( $wp_customize ) {
         'type'    => 'text',
     ) );
 
-    // Carte 1 — Excellence
     $wp_customize->add_setting( 'buur_adn_card1_title', array(
         'default'           => 'Excellence',
         'sanitize_callback' => 'sanitize_text_field',
@@ -227,7 +220,6 @@ function buur_customizer_register( $wp_customize ) {
         'type'    => 'textarea',
     ) );
 
-    // Carte 2 — Accessibilité
     $wp_customize->add_setting( 'buur_adn_card2_title', array(
         'default'           => 'Accessibilité',
         'sanitize_callback' => 'sanitize_text_field',
@@ -249,7 +241,6 @@ function buur_customizer_register( $wp_customize ) {
         'type'    => 'textarea',
     ) );
 
-    // Carte 3 — Innovation
     $wp_customize->add_setting( 'buur_adn_card3_title', array(
         'default'           => 'Innovation',
         'sanitize_callback' => 'sanitize_text_field',
@@ -275,27 +266,28 @@ function buur_customizer_register( $wp_customize ) {
     // SECTION 5 — Stats
     // ============================================================
     $wp_customize->add_section( 'buur_stats', array(
-        'title'    => __( '📊 Statistiques', 'buur-digital' ),
+        'title'    => __( 'Statistiques', 'buur-digital' ),
         'priority' => 34,
     ) );
 
-    foreach ( array(
-        array( 'key' => 'buur_stat1', 'label_val' => 'Stat 1 — Valeur', 'label_txt' => 'Stat 1 — Libellé', 'def_val' => '50+',    'def_txt' => 'Sites livrés' ),
-        array( 'key' => 'buur_stat2', 'label_val' => 'Stat 2 — Valeur', 'label_txt' => 'Stat 2 — Libellé', 'def_val' => '3 ans',  'def_txt' => 'D'expérience' ),
-        array( 'key' => 'buur_stat3', 'label_val' => 'Stat 3 — Valeur', 'label_txt' => 'Stat 3 — Libellé', 'def_val' => '98%',    'def_txt' => 'Clients satisfaits' ),
-        array( 'key' => 'buur_stat4', 'label_val' => 'Stat 4 — Valeur', 'label_txt' => 'Stat 4 — Libellé', 'def_val' => '2 pays', 'def_txt' => 'Sénégal & France' ),
-    ) as $s ) :
+    $stats = array(
+        array( 'key' => 'buur_stat1', 'label_val' => 'Stat 1 - Valeur', 'label_txt' => 'Stat 1 - Libelle', 'def_val' => '50+',    'def_txt' => 'Sites livres' ),
+        array( 'key' => 'buur_stat2', 'label_val' => 'Stat 2 - Valeur', 'label_txt' => 'Stat 2 - Libelle', 'def_val' => '3 ans',  'def_txt' => "D'experience" ),
+        array( 'key' => 'buur_stat3', 'label_val' => 'Stat 3 - Valeur', 'label_txt' => 'Stat 3 - Libelle', 'def_val' => '98%',    'def_txt' => 'Clients satisfaits' ),
+        array( 'key' => 'buur_stat4', 'label_val' => 'Stat 4 - Valeur', 'label_txt' => 'Stat 4 - Libelle', 'def_val' => '2 pays', 'def_txt' => 'Senegal & France' ),
+    );
+    foreach ( $stats as $s ) {
         $wp_customize->add_setting( $s['key'] . '_value', array( 'default' => $s['def_val'], 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'postMessage' ) );
-        $wp_customize->add_control( $s['key'] . '_value', array( 'label' => __( $s['label_val'], 'buur-digital' ), 'section' => 'buur_stats', 'type' => 'text' ) );
+        $wp_customize->add_control( $s['key'] . '_value', array( 'label' => $s['label_val'], 'section' => 'buur_stats', 'type' => 'text' ) );
         $wp_customize->add_setting( $s['key'] . '_label', array( 'default' => $s['def_txt'], 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'postMessage' ) );
-        $wp_customize->add_control( $s['key'] . '_label', array( 'label' => __( $s['label_txt'], 'buur-digital' ), 'section' => 'buur_stats', 'type' => 'text' ) );
-    endforeach;
+        $wp_customize->add_control( $s['key'] . '_label', array( 'label' => $s['label_txt'], 'section' => 'buur_stats', 'type' => 'text' ) );
+    }
 
     // ============================================================
     // SECTION 6 — Témoignages
     // ============================================================
     $wp_customize->add_section( 'buur_temoignages', array(
-        'title'    => __( '💬 Témoignages', 'buur-digital' ),
+        'title'    => __( 'Témoignages', 'buur-digital' ),
         'priority' => 35,
     ) );
 
@@ -325,11 +317,10 @@ function buur_customizer_register( $wp_customize ) {
     // SECTION 7 — CTA Final
     // ============================================================
     $wp_customize->add_section( 'buur_cta', array(
-        'title'    => __( '🚀 CTA Final — Fond & Textes', 'buur-digital' ),
+        'title'    => __( 'CTA Final — Fond & Textes', 'buur-digital' ),
         'priority' => 36,
     ) );
 
-    // --- Type de fond : vidéo ou photo ---
     $wp_customize->add_setting( 'buur_cta_bg_type', array(
         'default'           => 'video',
         'sanitize_callback' => 'sanitize_text_field',
@@ -340,12 +331,11 @@ function buur_customizer_register( $wp_customize ) {
         'section' => 'buur_cta',
         'type'    => 'select',
         'choices' => array(
-            'video' => __( 'Vidéo (cta-portal.mp4)', 'buur-digital' ),
+            'video' => __( 'Video (cta-portal.mp4)', 'buur-digital' ),
             'image' => __( 'Photo personnalisée', 'buur-digital' ),
         ),
     ) );
 
-    // --- Photo de fond (affiché si type = image) ---
     $wp_customize->add_setting( 'buur_cta_bg_image', array(
         'default'           => '',
         'sanitize_callback' => 'absint',
@@ -357,7 +347,6 @@ function buur_customizer_register( $wp_customize ) {
         'mime_type' => 'image',
     ) ) );
 
-    // --- Textes CTA ---
     $wp_customize->add_setting( 'buur_cta_eyebrow', array(
         'default'           => 'REJOINS LE ROYAUME',
         'sanitize_callback' => 'sanitize_text_field',
@@ -370,7 +359,7 @@ function buur_customizer_register( $wp_customize ) {
     ) );
 
     $wp_customize->add_setting( 'buur_cta_title', array(
-        'default'           => "Démarrons votre projet aujourd'hui.",
+        'default'           => "Demarrons votre projet aujourd'hui.",
         'sanitize_callback' => 'sanitize_textarea_field',
         'transport'         => 'postMessage',
     ) );
@@ -381,7 +370,7 @@ function buur_customizer_register( $wp_customize ) {
     ) );
 
     $wp_customize->add_setting( 'buur_cta_sub', array(
-        'default'           => 'Un message WhatsApp suffit. Réponse garantie en moins de 24h.',
+        'default'           => 'Un message WhatsApp suffit. Reponse garantie en moins de 24h.',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'postMessage',
     ) );
@@ -417,7 +406,7 @@ function buur_customizer_register( $wp_customize ) {
     // SECTION 8 — Couleurs
     // ============================================================
     $wp_customize->add_section( 'buur_colors', array(
-        'title'    => __( '🎨 Couleurs BUUR', 'buur-digital' ),
+        'title'    => __( 'Couleurs BUUR', 'buur-digital' ),
         'priority' => 37,
     ) );
 

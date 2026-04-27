@@ -8,7 +8,7 @@ $bg_type  = get_theme_mod( 'buur_hero_bg_type', 'video' );
 $bg_image = get_theme_mod( 'buur_hero_bg_image', '' );
 $badge    = get_theme_mod( 'buur_hero_badge',   'Dakar, Sénégal — Agence Web Premium' );
 $title    = get_theme_mod( 'buur_hero_title',   "L'agence web<em>des rois du digital</em>" );
-$tagline  = get_theme_mod( 'buur_hero_tagline', 'Des sites de classe mondiale, au prix de l'Afrique.' );
+$tagline  = get_theme_mod( 'buur_hero_tagline', "Des sites de classe mondiale, au prix de l'Afrique." );
 $btn_sn   = get_theme_mod( 'buur_hero_btn_sn',  'WhatsApp Sénégal' );
 $btn_fr   = get_theme_mod( 'buur_hero_btn_fr',  'WhatsApp France' );
 ?>

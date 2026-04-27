@@ -14,6 +14,15 @@ $wa_msg    = rawurlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souh
   <!-- Hero contact -->
   <section class="contact-hero">
     <div class="container">
+
+      <!-- Bouton retour accueil -->
+      <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="contact-back-btn" aria-label="Retour a la page d'accueil">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retour a l'accueil
+      </a>
+
       <span class="section-eyebrow">Contact</span>
       <h1 class="contact-hero__title">Parlons de votre<br><em>projet digital</em></h1>
       <p class="contact-hero__sub">Une question, un devis ou simplement envie d'echanger&nbsp;?

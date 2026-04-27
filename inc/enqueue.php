@@ -1,8 +1,6 @@
 <?php
 /**
  * BUUR Digital — Chargement des assets CSS et JS.
- * Les vidéos ont été supprimées — plus de video-manager.js.
- * three.min.js + hero-tunnel.js supprimés (hero canvas retiré — scripts orphelins).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -45,6 +43,32 @@ function buur_enqueue_assets() {
         wp_enqueue_script( 'buur-scroll-frames',   BUUR_URI . '/assets/js/scroll-frames.js',   array( 'gsap-scrolltrigger' ),                   BUUR_VERSION, true );
         wp_enqueue_script( 'buur-svc-swiper',      BUUR_URI . '/assets/js/svc-swiper.js',      array( 'buur-scroll-frames' ),                   BUUR_VERSION, true );
         wp_enqueue_script( 'buur-interactions',    BUUR_URI . '/assets/js/interactions.js',    array( 'buur-gsap-animations' ),                 BUUR_VERSION, true );
+
+        // Données chapitres depuis le customizer
+        $chapters_data = array();
+        $chapter_defaults = array(
+            1 => array( 'stat' => '87%',   'label' => 'des acheteurs cherchent en ligne avant tout achat',      'title' => "L'Afrique <em>en ligne.</em>",              'sub' => 'Votre business mérite une présence digitale de classe mondiale.' ),
+            2 => array( 'stat' => '3 sec', 'label' => 'pour convaincre un visiteur ou le perdre',               'title' => 'Un site qui <em>vous ressemble.</em>',      'sub' => 'Design premium, conçu pour les entrepreneurs africains.' ),
+            3 => array( 'stat' => '100%',  'label' => 'sur mesure — aucun template, aucun compromis',           'title' => 'Construit <em>pour durer.</em>',            'sub' => 'Code propre, rapide, évolutif. Zéro compromis.' ),
+            4 => array( 'stat' => '×3',    'label' => 'de trafic organique en moyenne après optimisation',      'title' => 'Premier sur <em>Google.</em>',             'sub' => 'SEO local maîtrisé. Vos clients vous trouvent avant la concurrence.' ),
+            5 => array( 'stat' => '24h',   'label' => 'votre boutique ouverte, même quand vous dormez',         'title' => 'Vendez <em>sans limite.</em>',             'sub' => 'E-commerce, Wave, Orange Money. Votre boutique ouverte 24h/24.' ),
+            6 => array( 'stat' => '7j',    'label' => 'délai moyen de livraison, chrono en main',               'title' => 'Une équipe <em>à vos côtés.</em>',        'sub' => "Support dédié, formation incluse. Vous n'êtes jamais seul." ),
+            7 => array( 'stat' => '+50',   'label' => 'entrepreneurs accompagnés avec succès',                  'title' => 'Des résultats <em>mesurables.</em>',       'sub' => 'Chaque action optimisée. Chaque chiffre suivi.' ),
+        );
+        for ( $i = 1; $i <= 7; $i++ ) :
+            $d = $chapter_defaults[ $i ];
+            $chapters_data[] = array(
+                'stat'  => get_theme_mod( 'buur_ch' . $i . '_stat',  $d['stat'] ),
+                'label' => get_theme_mod( 'buur_ch' . $i . '_label', $d['label'] ),
+                'title' => get_theme_mod( 'buur_ch' . $i . '_title', $d['title'] ),
+                'sub'   => get_theme_mod( 'buur_ch' . $i . '_sub',   $d['sub'] ),
+            );
+        endfor;
+
+        wp_localize_script( 'buur-scroll-frames', 'buurTheme', array(
+            'url'      => BUUR_URI,
+            'chapters' => $chapters_data,
+        ) );
     }
 
     // --- JS principal (toutes les pages) ---
@@ -57,11 +81,6 @@ function buur_enqueue_assets() {
         'themeUri'   => BUUR_URI,
         'whatsappSN' => buur_whatsapp_url( 'sn' ),
         'whatsappFR' => buur_whatsapp_url( 'fr' ),
-    ) );
-
-    // Variable JS pour scroll-frames.js
-    wp_localize_script( 'buur-scroll-frames', 'buurTheme', array(
-        'url' => BUUR_URI,
     ) );
 }
 add_action( 'wp_enqueue_scripts', 'buur_enqueue_assets' );

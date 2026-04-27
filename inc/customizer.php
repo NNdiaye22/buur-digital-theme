@@ -1,7 +1,6 @@
 <?php
 /**
  * BUUR Digital — Customizer WordPress.
- * Un seul numéro WhatsApp (France). Fonds = images uniquement.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -147,5 +146,42 @@ function buur_customizer_register( $wp_customize ) {
     $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'buur_color_orange', array( 'label' => __( 'Orange BUUR', 'buur-digital' ), 'section' => 'buur_colors' ) ) );
     $wp_customize->add_setting( 'buur_color_blue', array( 'default' => '#243a85', 'sanitize_callback' => 'sanitize_hex_color', 'transport' => 'postMessage' ) );
     $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'buur_color_blue', array( 'label' => __( 'Bleu BUUR', 'buur-digital' ), 'section' => 'buur_colors' ) ) );
+
+    // ============================================================
+    // SECTION 9 — Chapitres scroll (stats centrales)
+    // ============================================================
+    $wp_customize->add_section( 'buur_chapters', array(
+        'title'       => __( 'Chapitres — Stats centrales', 'buur-digital' ),
+        'description' => __( 'Modifiez le chiffre et le texte affichés au centre de chaque chapitre du scroll.', 'buur-digital' ),
+        'priority'    => 38,
+    ) );
+
+    $chapter_defaults = array(
+        1 => array( 'stat' => '87%',   'label' => 'des acheteurs cherchent en ligne avant tout achat',      'title' => "L'Afrique en ligne",          'sub' => 'Votre business mérite une présence digitale de classe mondiale.' ),
+        2 => array( 'stat' => '3 sec', 'label' => 'pour convaincre un visiteur ou le perdre',               'title' => 'Un site qui vous ressemble',   'sub' => 'Design premium, conçu pour les entrepreneurs africains.' ),
+        3 => array( 'stat' => '100%',  'label' => 'sur mesure — aucun template, aucun compromis',           'title' => 'Construit pour durer',         'sub' => 'Code propre, rapide, évolutif. Zéro compromis.' ),
+        4 => array( 'stat' => '×3',    'label' => 'de trafic organique en moyenne après optimisation',      'title' => 'Premier sur Google',           'sub' => 'SEO local maîtrisé. Vos clients vous trouvent avant la concurrence.' ),
+        5 => array( 'stat' => '24h',   'label' => 'votre boutique ouverte, même quand vous dormez',         'title' => 'Vendez sans limite',           'sub' => 'E-commerce, Wave, Orange Money. Votre boutique ouverte 24h/24.' ),
+        6 => array( 'stat' => '7j',    'label' => 'délai moyen de livraison, chrono en main',               'title' => 'Une équipe à vos côtés',      'sub' => "Support dédié, formation incluse. Vous n'êtes jamais seul." ),
+        7 => array( 'stat' => '+50',   'label' => 'entrepreneurs accompagnés avec succès',                  'title' => 'Des résultats mesurables',     'sub' => 'Chaque action optimisée. Chaque chiffre suivi.' ),
+    );
+
+    for ( $i = 1; $i <= 7; $i++ ) :
+        $d  = $chapter_defaults[ $i ];
+        $p  = 'buur_ch' . $i;
+        $lp = 'Chapitre ' . $i . ' — ';
+
+        $wp_customize->add_setting( "{$p}_stat",  array( 'default' => $d['stat'],  'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+        $wp_customize->add_control( "{$p}_stat",  array( 'label' => __( $lp . 'Chiffre clé',  'buur-digital' ), 'section' => 'buur_chapters', 'type' => 'text' ) );
+
+        $wp_customize->add_setting( "{$p}_label", array( 'default' => $d['label'], 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+        $wp_customize->add_control( "{$p}_label", array( 'label' => __( $lp . 'Label stat',   'buur-digital' ), 'section' => 'buur_chapters', 'type' => 'text' ) );
+
+        $wp_customize->add_setting( "{$p}_title", array( 'default' => $d['title'], 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+        $wp_customize->add_control( "{$p}_title", array( 'label' => __( $lp . 'Titre',        'buur-digital' ), 'section' => 'buur_chapters', 'type' => 'text' ) );
+
+        $wp_customize->add_setting( "{$p}_sub",   array( 'default' => $d['sub'],   'sanitize_callback' => 'sanitize_textarea_field', 'transport' => 'refresh' ) );
+        $wp_customize->add_control( "{$p}_sub",   array( 'label' => __( $lp . 'Sous-titre',   'buur-digital' ), 'section' => 'buur_chapters', 'type' => 'textarea' ) );
+    endfor;
 }
 add_action( 'customize_register', 'buur_customizer_register' );

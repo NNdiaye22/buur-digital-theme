@@ -36,17 +36,31 @@
             <?php buur_the_logo(); ?>
         </a>
 
-        <ul class="nav-links" role="list">
-            <li><a href="#services">Services</a></li>
-            <li><a href="#pourquoi">Pourquoi BUUR</a></li>
-            <li><a href="#temoignages">Clients</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
+        <?php if ( has_nav_menu( 'primary' ) ) : ?>
+            <?php
+            wp_nav_menu( array(
+                'theme_location' => 'primary',
+                'container'      => false,
+                'menu_class'     => 'nav-links',
+                'items_wrap'     => '<ul id="%1$s" class="%2$s" role="list">%3$s</ul>',
+                'depth'          => 1,
+                'fallback_cb'    => false,
+            ) );
+            ?>
+        <?php else : ?>
+            <!-- Fallback ancres home page tant qu'aucun menu n'est assigné -->
+            <ul class="nav-links" role="list">
+                <li><a href="<?php echo esc_url( home_url('/#services') ); ?>">Services</a></li>
+                <li><a href="<?php echo esc_url( home_url('/#pourquoi') ); ?>">Pourquoi BUUR</a></li>
+                <li><a href="<?php echo esc_url( home_url('/#temoignages') ); ?>">Clients</a></li>
+                <li><a href="<?php echo esc_url( get_permalink( get_page_by_path('contact') ) ); ?>">Contact</a></li>
+            </ul>
+        <?php endif; ?>
 
         <div class="nav-cta">
             <a
-                href="<?php echo esc_url( buur_whatsapp_url( 'sn' ) ); ?>"
-                class="btn-primary btn-whatsapp"
+                href="<?php echo esc_url( buur_whatsapp_url( 'fr' ) ); ?>"
+                class="btn-primary"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Contacter BUUR Digital sur WhatsApp"
@@ -68,16 +82,29 @@
 
     </div>
 
+    <!-- MENU MOBILE -->
     <div class="nav-mobile" id="nav-mobile" aria-hidden="true">
-        <ul>
-            <li><a href="#services">Services</a></li>
-            <li><a href="#pourquoi">Pourquoi BUUR</a></li>
-            <li><a href="#temoignages">Clients</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
+        <?php if ( has_nav_menu( 'primary' ) ) : ?>
+            <?php
+            wp_nav_menu( array(
+                'theme_location' => 'primary',
+                'container'      => false,
+                'menu_class'     => '',
+                'items_wrap'     => '<ul>%3$s</ul>',
+                'depth'          => 1,
+                'fallback_cb'    => false,
+            ) );
+            ?>
+        <?php else : ?>
+            <ul>
+                <li><a href="<?php echo esc_url( home_url('/#services') ); ?>">Services</a></li>
+                <li><a href="<?php echo esc_url( home_url('/#pourquoi') ); ?>">Pourquoi BUUR</a></li>
+                <li><a href="<?php echo esc_url( home_url('/#temoignages') ); ?>">Clients</a></li>
+                <li><a href="<?php echo esc_url( get_permalink( get_page_by_path('contact') ) ); ?>">Contact</a></li>
+            </ul>
+        <?php endif; ?>
         <div class="mobile-cta">
-            <a href="<?php echo esc_url( buur_whatsapp_url( 'sn' ) ); ?>" class="btn-primary btn-whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp Sénégal</a>
-            <a href="<?php echo esc_url( buur_whatsapp_url( 'fr' ) ); ?>" class="btn-outline btn-whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp France</a>
+            <a href="<?php echo esc_url( buur_whatsapp_url( 'fr' ) ); ?>" class="btn-primary" target="_blank" rel="noopener noreferrer">WhatsApp France</a>
         </div>
     </div>
 </nav>

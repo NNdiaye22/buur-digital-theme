@@ -1,7 +1,8 @@
 <?php
 /**
- * BUUR Digital — Scroll Frames v9.1
+ * BUUR Digital — Scroll Frames v9.2
  * Overlay Notre ADN + Overlay Nos Services + Overlay CTA ch07 + Stat centrale
+ * v9.2 : ordre des cartes + badge dynamique via Customizer
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -13,7 +14,9 @@ $svc_defaults = array(
         'title'    => 'Site Vitrine',
         'desc'     => 'Une présence professionnelle en ligne qui inspire confiance et convertit vos visiteurs en clients.',
         'price'    => '150 000 FCFA',
-        'featured' => false,
+        'badge'    => '',
+        'badge_on' => false,
+        'order'    => 1,
         'features' => array( 'Design premium sur mesure', 'Optimisé mobile & desktop', 'SEO local inclus', 'Livraison en 7 jours' ),
         'icon'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
     ),
@@ -21,7 +24,9 @@ $svc_defaults = array(
         'title'    => 'Site E-commerce',
         'desc'     => 'Vendez vos produits partout au Sénégal et en Afrique. Paiement mobile money, livraison, gestion de stock.',
         'price'    => '250 000 FCFA',
-        'featured' => true,
+        'badge'    => 'Populaire',
+        'badge_on' => true,
+        'order'    => 2,
         'features' => array( 'Boutique WooCommerce', 'Wave & Orange Money', 'Gestion des commandes', 'Formation incluse' ),
         'icon'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>',
     ),
@@ -29,7 +34,9 @@ $svc_defaults = array(
         'title'    => 'Campagnes Meta',
         'desc'     => 'Publicités Facebook & Instagram ciblées. Plus de clients garantis en 2 semaines ou on continue gratuitement.',
         'price'    => 'Sur devis',
-        'featured' => false,
+        'badge'    => '',
+        'badge_on' => false,
+        'order'    => 3,
         'features' => array( 'Ciblage hyper-local', 'Création des visuels', 'Suivi en temps réel', 'Rapport mensuel' ),
         'icon'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
     ),
@@ -37,7 +44,9 @@ $svc_defaults = array(
         'title'    => 'BUUR Site',
         'desc'     => 'La solution tout-en-un pour les entrepreneurs pressés. Hébergement, maintenance et support inclus.',
         'price'    => 'Sur devis',
-        'featured' => false,
+        'badge'    => 'Nouveau',
+        'badge_on' => false,
+        'order'    => 4,
         'features' => array( 'Solution tout-en-un', 'Hébergement inclus', 'Maintenance mensuelle', 'Support dédié' ),
         'icon'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
     ),
@@ -58,16 +67,27 @@ for ( $i = 1; $i <= 4; $i++ ) :
         if ( $feat ) $features[] = $feat;
     endfor;
     if ( empty( $features ) ) $features = $d['features'];
-    $sf_services[ $i ] = array(
-        'title'    => get_theme_mod( "buur_service{$i}_title",    $d['title'] ),
-        'desc'     => get_theme_mod( "buur_service{$i}_desc",     $d['desc'] ),
-        'price'    => get_theme_mod( "buur_service{$i}_price",    $d['price'] ),
-        'featured' => $d['featured'],
-        'features' => $features,
-        'icon'     => $d['icon'],
-        'img_url'  => $img_url,
+
+    $badge_on  = (bool) get_theme_mod( "buur_service{$i}_badge_on", $d['badge_on'] );
+    $badge_txt = get_theme_mod( "buur_service{$i}_badge", $d['badge'] );
+    $order     = (int) get_theme_mod( "buur_service{$i}_order", $d['order'] );
+
+    $sf_services[] = array(
+        'title'     => get_theme_mod( "buur_service{$i}_title",  $d['title'] ),
+        'desc'      => get_theme_mod( "buur_service{$i}_desc",   $d['desc'] ),
+        'price'     => get_theme_mod( "buur_service{$i}_price",  $d['price'] ),
+        'badge_on'  => $badge_on,
+        'badge_txt' => $badge_txt,
+        'featured'  => $d['badge_on'], /* conservé pour CSS service-card--featured */
+        'features'  => $features,
+        'icon'      => $d['icon'],
+        'img_url'   => $img_url,
+        'order'     => $order,
     );
 endfor;
+
+/* Trier par ordre croissant */
+usort( $sf_services, function( $a, $b ) { return $a['order'] - $b['order']; } );
 ?>
 
 <div class="scroll-frames-wrapper" id="scroll-frames" aria-label="Nos expertises">
@@ -127,7 +147,7 @@ endfor;
           <h2 class="section-title"><?php echo esc_html( $svc_title ); ?></h2>
         </div>
         <div class="services-grid">
-          <?php foreach ( $sf_services as $i => $svc ) : ?>
+          <?php foreach ( $sf_services as $svc ) : ?>
           <article
             class="service-card <?php echo $svc['featured'] ? 'service-card--featured' : ''; ?>"
             aria-label="Service : <?php echo esc_attr( $svc['title'] ); ?>"
@@ -135,7 +155,9 @@ endfor;
           >
             <?php if ( $svc['img_url'] ) : ?><div class="card-bg" aria-hidden="true"></div><?php endif; ?>
             <div class="card-icon"><?php echo $svc['icon']; ?></div>
-            <?php if ( $svc['featured'] ) : ?><div class="service-card__badge">Populaire</div><?php endif; ?>
+            <?php if ( $svc['badge_on'] && $svc['badge_txt'] ) : ?>
+              <div class="service-card__badge"><?php echo esc_html( $svc['badge_txt'] ); ?></div>
+            <?php endif; ?>
             <h3 class="card-title"><?php echo esc_html( $svc['title'] ); ?></h3>
             <p class="card-desc"><?php echo esc_html( $svc['desc'] ); ?></p>
             <ul class="card-features" role="list">

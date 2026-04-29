@@ -21,7 +21,10 @@ $default_descs  = array(
     3 => 'Publicités Facebook & Instagram ciblées. Plus de clients garantis en 2 semaines ou on continue gratuitement.',
     4 => 'Votre site pro sans effort. Vous envoyez vos infos, on crée et héberge votre site. Aucune connaissance requise.',
 );
-$default_prices = array( 1 => '150 000 FCFA', 2 => '250 000 FCFA', 3 => 'Sur devis', 4 => '15 000 FCFA/mois' );
+$default_prices = array( 1 => '150 000 FCFA', 2 => '250 000 FCFA', 3 => 'Sur devis', 4 => '17 000 FCFA/mois' );
+$default_badges  = array( 1 => '', 2 => 'Populaire', 3 => '', 4 => 'Nouveau' );
+$default_badge_on = array( 1 => false, 2 => true, 3 => false, 4 => false );
+$default_orders  = array( 1 => 1, 2 => 2, 3 => 3, 4 => 4 );
 
 $icons = array(
     1 => '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
@@ -31,6 +34,40 @@ $icons = array(
 );
 
 $wa_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.836L.057 23.882a.75.75 0 00.92.92l6.046-1.466A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 01-5.073-1.389l-.363-.214-3.761.913.928-3.762-.232-.376A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>';
+
+// ── Construire le tableau des cartes et trier par ordre Customizer ──
+$cards = array();
+for ( $i = 1; $i <= 4; $i++ ) :
+    $s_order    = (int) get_theme_mod( "buur_service{$i}_order",    $default_orders[ $i ] );
+    $s_title    = get_theme_mod( "buur_service{$i}_title",    $default_titles[ $i ] );
+    $s_desc     = get_theme_mod( "buur_service{$i}_desc",     $default_descs[ $i ] );
+    $s_price    = get_theme_mod( "buur_service{$i}_price",    $default_prices[ $i ] );
+    $s_badge_on = (bool) get_theme_mod( "buur_service{$i}_badge_on", $default_badge_on[ $i ] );
+    $s_badge    = get_theme_mod( "buur_service{$i}_badge",    $default_badges[ $i ] );
+
+    $features = array();
+    for ( $f = 1; $f <= 4; $f++ ) :
+        $feat = get_theme_mod( "buur_service{$i}_feat{$f}", '' );
+        if ( $feat ) $features[] = $feat;
+    endfor;
+    if ( empty( $features ) ) $features = $default_features[ $i ];
+
+    $cards[] = array(
+        'index'    => $i,
+        'order'    => $s_order,
+        'title'    => $s_title,
+        'desc'     => $s_desc,
+        'price'    => $s_price,
+        'badge_on' => $s_badge_on,
+        'badge'    => $s_badge,
+        'features' => $features,
+    );
+endfor;
+
+// Tri stable par ordre croissant
+usort( $cards, function( $a, $b ) {
+    return $a['order'] <=> $b['order'];
+} );
 ?>
 
 <section class="services-section" id="services" aria-label="Nos services">
@@ -40,25 +77,28 @@ $wa_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
     </div>
 
     <div class="services-grid" id="services-grid" role="list">
-        <?php for ( $i = 1; $i <= 4; $i++ ) :
-            $s_title    = get_theme_mod( "buur_service{$i}_title",    $default_titles[ $i ] );
-            $s_desc     = get_theme_mod( "buur_service{$i}_desc",     $default_descs[ $i ] );
-            $s_price    = get_theme_mod( "buur_service{$i}_price",    $default_prices[ $i ] );
-            $s_featured = get_theme_mod( "buur_service{$i}_featured", $i === 4 );
-
-            $features = array();
-            for ( $f = 1; $f <= 4; $f++ ) :
-                $feat = get_theme_mod( "buur_service{$i}_feat{$f}", '' );
-                if ( $feat ) $features[] = $feat;
-            endfor;
-            if ( empty( $features ) ) $features = $default_features[ $i ];
+        <?php foreach ( $cards as $card ) :
+            $i         = $card['index'];
+            $s_title   = $card['title'];
+            $s_desc    = $card['desc'];
+            $s_price   = $card['price'];
+            $s_badge_on = $card['badge_on'];
+            $s_badge   = $card['badge'];
+            $features  = $card['features'];
+            $has_badge = $s_badge_on && ! empty( $s_badge );
         ?>
         <article
-            class="service-card <?php echo $s_featured ? 'service-card--featured' : ''; ?>"
+            class="service-card<?php echo $has_badge ? ' service-card--has-badge' : ''; ?>"
             role="listitem"
-            aria-label="Service : <?php echo esc_attr( $s_title ); ?>"
+            aria-label="Service : <?php echo esc_attr( $s_title ); ?>"
             data-index="<?php echo $i - 1; ?>"
         >
+            <?php if ( $has_badge ) : ?>
+            <div class="service-card__badge" aria-label="<?php echo esc_attr( $s_badge ); ?>">
+                <?php echo esc_html( $s_badge ); ?>
+            </div>
+            <?php endif; ?>
+
             <div class="card-service-icon" aria-hidden="true"><?php echo $icons[ $i ]; ?></div>
 
             <div class="card-body">
@@ -86,7 +126,7 @@ $wa_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" 
                 </div>
             </div>
         </article>
-        <?php endfor; ?>
+        <?php endforeach; ?>
     </div>
 
     <!-- Contrôles swiper mobile -->

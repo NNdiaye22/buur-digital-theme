@@ -59,13 +59,24 @@ function buur_the_logo( $return = false ) {
     echo $output;
 }
 
-function buur_whatsapp_url( $country = 'sn' ) {
-    $sn = get_theme_mod( 'buur_whatsapp_sn', '+221000000000' );
-    $fr = get_theme_mod( 'buur_whatsapp_fr', '+33000000000' );
+/**
+ * Génère une URL WhatsApp avec un message pré-rempli.
+ *
+ * @param string $country     'fr' ou 'sn' — détermine le numéro utilisé.
+ * @param string $msg_override Message personnalisé. Si vide, utilise le message
+ *                             global défini dans le Customizer.
+ */
+function buur_whatsapp_url( $country = 'sn', $msg_override = '' ) {
+    $sn     = get_theme_mod( 'buur_whatsapp_sn', '+221000000000' );
+    $fr     = get_theme_mod( 'buur_whatsapp_fr', '+33000000000' );
     $number = ( $country === 'fr' ) ? $fr : $sn;
     $number = preg_replace( '/[^0-9]/', '', $number );
-    $msg    = rawurlencode( get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhaite demarrer un projet web avec BUUR Digital.' ) );
-    return 'https://wa.me/' . $number . '?text=' . $msg;
+
+    $msg = ( $msg_override !== '' )
+        ? $msg_override
+        : get_theme_mod( 'buur_whatsapp_msg', 'Bonjour, je souhaite démarrer un projet web avec BUUR Digital.' );
+
+    return 'https://wa.me/' . $number . '?text=' . rawurlencode( $msg );
 }
 
 function buur_option( $key, $default = '' ) {

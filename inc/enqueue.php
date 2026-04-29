@@ -29,6 +29,11 @@ function buur_enqueue_assets() {
         wp_enqueue_style( 'buur-contact', BUUR_URI . '/assets/css/contact.css', array( 'buur-main' ), BUUR_VERSION );
     }
 
+    // --- CSS page Tarifs ---
+    if ( is_page_template( 'page-tarifs.php' ) ) {
+        wp_enqueue_style( 'buur-tarifs', BUUR_URI . '/assets/css/tarifs.css', array( 'buur-main' ), BUUR_VERSION );
+    }
+
     // --- JS homepage ---
     if ( is_front_page() ) {
 

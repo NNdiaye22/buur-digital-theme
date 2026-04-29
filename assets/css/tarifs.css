@@ -1,0 +1,422 @@
+/* ================================================================
+   BUUR Digital — Page Tarifs
+   ================================================================ */
+
+/* ─ Variables locales (hors conflit avec main.css) ─ */
+.tarifs-page {
+  --t-orange:  #ea5b13;
+  --t-blue:    #243a85;
+  --t-black:   #0a0a0a;
+  --t-surface: #111111;
+  --t-surface2:#181818;
+  --t-border:  rgba(255,255,255,0.08);
+  --t-white:   #f5f4f0;
+  --t-grey:    rgba(245,244,240,0.5);
+  --t-radius:  14px;
+  --t-max:     1280px;
+  --t-pad:     clamp(1.25rem, 5vw, 3rem);
+  background: var(--t-black);
+  color: var(--t-white);
+}
+
+/* ─ Conteneur global ─ */
+.tarifs-container {
+  max-width: var(--t-max);
+  margin-inline: auto;
+  padding-inline: var(--t-pad);
+}
+
+/* ================================================================
+   BOUTONS
+   ================================================================ */
+.tarifs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 200ms, transform 150ms, background 200ms;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+}
+.tarifs-btn:hover  { opacity: 0.88; transform: translateY(-1px); }
+.tarifs-btn:active { transform: translateY(0); }
+
+.tarifs-btn--primary {
+  background: var(--t-orange);
+  color: #fff;
+}
+.tarifs-btn--secondary {
+  background: transparent;
+  color: var(--t-white);
+  border: 1.5px solid rgba(245,244,240,0.25);
+}
+.tarifs-btn--secondary:hover { border-color: var(--t-orange); color: var(--t-orange); opacity: 1; }
+
+.tarifs-btn--featured {
+  background: var(--t-orange);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(234,91,19,0.35);
+}
+.tarifs-btn--full { width: 100%; justify-content: center; }
+.tarifs-btn--lg   { padding: 1rem 2.25rem; font-size: 1rem; }
+
+/* ================================================================
+   HERO
+   ================================================================ */
+.tarifs-hero {
+  padding: clamp(7rem, 14vh, 10rem) 0 clamp(4rem, 8vh, 6rem);
+  background: var(--t-black);
+  border-bottom: 1px solid var(--t-border);
+}
+.tarifs-hero__inner {
+  max-width: 780px;
+}
+.tarifs-hero__eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--t-orange);
+  margin-bottom: 1.25rem;
+}
+.tarifs-hero__title {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--t-white);
+  margin: 0 0 1.25rem;
+}
+.tarifs-hero__text {
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  line-height: 1.7;
+  color: var(--t-grey);
+  max-width: 620px;
+  margin-bottom: 2rem;
+}
+.tarifs-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+.tarifs-hero__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+.tarifs-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--t-grey);
+}
+.tarifs-trust-item svg { color: var(--t-orange); flex-shrink: 0; }
+
+/* ================================================================
+   GRILLE DES OFFRES
+   ================================================================ */
+.tarifs-grid-section {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+}
+.tarifs-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .tarifs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1100px) {
+  .tarifs-grid { grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+}
+
+/* ─ Carte ─ */
+.tarif-card {
+  background: var(--t-surface);
+  border: 1.5px solid var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  transition: border-color 250ms, box-shadow 250ms;
+}
+.tarif-card:hover {
+  border-color: rgba(234,91,19,0.3);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+}
+.tarif-card--featured {
+  border-color: var(--t-orange);
+  box-shadow: 0 0 0 1px var(--t-orange), 0 8px 50px rgba(234,91,19,0.18);
+  background: var(--t-surface2);
+}
+.tarif-card--featured:hover {
+  box-shadow: 0 0 0 1px var(--t-orange), 0 12px 60px rgba(234,91,19,0.28);
+}
+
+/* Badge */
+.tarif-badge {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.tarif-badge--subtle {
+  background: rgba(245,244,240,0.07);
+  color: rgba(245,244,240,0.5);
+  border: 1px solid rgba(245,244,240,0.1);
+}
+.tarif-badge--featured {
+  background: var(--t-orange);
+  color: #fff;
+}
+
+/* Titre */
+.tarif-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--t-white);
+  margin: 0;
+}
+
+/* Prix */
+.tarif-price {
+  font-size: 0.95rem;
+  color: var(--t-grey);
+  line-height: 1.4;
+}
+.tarif-price strong {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--t-white);
+  display: block;
+  margin-top: 0.1rem;
+}
+.tarif-price-sub {
+  font-size: 0.72rem;
+  color: rgba(245,244,240,0.35);
+  font-style: italic;
+  margin-top: -0.5rem;
+}
+
+/* Description */
+.tarif-desc {
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--t-grey);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--t-border);
+}
+
+/* Titres de liste */
+.tarif-list-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--t-orange);
+  margin-top: 0.25rem;
+}
+.tarif-list-title--cond {
+  color: rgba(245,244,240,0.35);
+}
+
+/* Liste inclus */
+.tarif-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+}
+.tarif-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: rgba(245,244,240,0.75);
+  line-height: 1.5;
+}
+.tarif-list li svg {
+  color: var(--t-orange);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.tarif-list--formules li {
+  font-size: 0.83rem;
+  color: rgba(245,244,240,0.85);
+}
+.tarif-list--formules li span { line-height: 1.5; }
+
+/* Conditions */
+.tarif-conditions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.tarif-conditions li {
+  font-size: 0.75rem;
+  color: rgba(245,244,240,0.35);
+  padding-left: 0.75rem;
+  position: relative;
+  line-height: 1.5;
+}
+.tarif-conditions li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: rgba(245,244,240,0.2);
+}
+
+/* CTA carte */
+.tarif-cta {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--t-border);
+}
+
+/* ================================================================
+   COMPARAISON RAPIDE
+   ================================================================ */
+.tarifs-compare {
+  padding: clamp(3.5rem, 7vh, 5rem) 0;
+  border-top: 1px solid var(--t-border);
+  border-bottom: 1px solid var(--t-border);
+  background: var(--t-surface);
+}
+.tarifs-compare__title {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--t-white);
+  margin: 0 0 2.5rem;
+  text-align: center;
+}
+.tarifs-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .tarifs-compare-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1100px) {
+  .tarifs-compare-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.tarifs-compare-item {
+  background: var(--t-surface2);
+  border: 1.5px solid var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 200ms;
+}
+.tarifs-compare-item:hover { border-color: rgba(234,91,19,0.3); }
+.tarifs-compare-item__need {
+  font-size: 0.88rem;
+  color: var(--t-grey);
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+.tarifs-compare-item__answer {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--t-orange);
+}
+
+/* ================================================================
+   FAQ
+   ================================================================ */
+.tarifs-faq {
+  padding: clamp(4rem, 8vh, 6rem) 0;
+  background: var(--t-black);
+}
+.tarifs-faq__title {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--t-white);
+  margin: 0 0 2.5rem;
+}
+.tarifs-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 820px;
+}
+.tarifs-faq-item {
+  border-bottom: 1px solid var(--t-border);
+  padding: 1.5rem 0;
+}
+.tarifs-faq-item:first-child { border-top: 1px solid var(--t-border); }
+.tarifs-faq-item__q {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--t-white);
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+}
+.tarifs-faq-item__a {
+  font-size: 0.87rem;
+  line-height: 1.7;
+  color: var(--t-grey);
+  margin: 0;
+}
+
+/* ================================================================
+   CTA FINAL
+   ================================================================ */
+.tarifs-final-cta {
+  padding: clamp(5rem, 10vh, 7rem) 0;
+  background: var(--t-surface);
+  border-top: 1px solid var(--t-border);
+}
+.tarifs-final-cta__inner {
+  max-width: 600px;
+  text-align: center;
+  margin-inline: auto;
+}
+.tarifs-final-cta__title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--t-white);
+  margin: 0 0 1rem;
+}
+.tarifs-final-cta__text {
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
+  line-height: 1.7;
+  color: var(--t-grey);
+  margin-bottom: 2rem;
+}
+
+/* ================================================================
+   RESPONSIVE MOBILE (ajustements)
+   ================================================================ */
+@media (max-width: 639px) {
+  .tarifs-hero__actions { flex-direction: column; }
+  .tarifs-hero__actions .tarifs-btn { justify-content: center; }
+  .tarifs-btn--lg { width: 100%; justify-content: center; }
+}

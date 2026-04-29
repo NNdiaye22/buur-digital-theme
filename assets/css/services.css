@@ -11,21 +11,39 @@
   margin-bottom: clamp(3rem, 6vh, 5rem);
 }
 
-/* ── Desktop : grille 3 colonnes ── */
-.services-grid {
-  max-width: var(--container-max);
-  margin-inline: auto;
-  padding-inline: var(--container-pad);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5px;
-  background: var(--border);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+/* ── Desktop large (≥ 1200px) : 4 colonnes ── */
+@media (min-width: 1200px) {
+  .services-grid {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-pad);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
 }
 
-/* ── Mobile : swiper horizontal scroll-snap ── */
+/* ── Desktop standard (768px – 1199px) : grille 2x2 ── */
+@media (min-width: 901px) and (max-width: 1199px) {
+  .services-grid {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-pad);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+}
+
+/* ── Mobile (≤ 900px) : swiper horizontal scroll-snap ── */
 @media (max-width: 900px) {
   .services-grid {
     display: flex;

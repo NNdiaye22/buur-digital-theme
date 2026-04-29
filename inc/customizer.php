@@ -53,16 +53,16 @@ function buur_customizer_register( $wp_customize ) {
     $wp_customize->add_control( 'buur_services_title', array( 'label' => __( 'Titre', 'buur-digital' ), 'section' => 'buur_services', 'type' => 'text' ) );
 
     $sdefs = array(
-        1 => array( 'title' => 'Site Vitrine',    'desc' => 'Une présence professionnelle en ligne qui inspire confiance.', 'price' => '150 000 FCFA', 'badge' => '', 'badge_on' => '0', 'order' => 1, 'f1' => 'Design premium sur mesure',  'f2' => 'Optimisé mobile & desktop', 'f3' => 'SEO local inclus',       'f4' => 'Livraison en 7 jours' ),
-        2 => array( 'title' => 'Site E-commerce', 'desc' => 'Vendez vos produits partout au Sénégal et en Afrique.',        'price' => '250 000 FCFA', 'badge' => 'Populaire', 'badge_on' => '1', 'order' => 2, 'f1' => 'Boutique WooCommerce',      'f2' => 'Wave & Orange Money',      'f3' => 'Gestion des commandes', 'f4' => 'Formation incluse' ),
-        3 => array( 'title' => 'Campagnes Meta',  'desc' => 'Publicités Facebook & Instagram ciblées, garanties.',         'price' => 'Sur devis',    'badge' => '', 'badge_on' => '0', 'order' => 3, 'f1' => 'Ciblage hyper-local',      'f2' => 'Création des visuels',     'f3' => 'Suivi en temps réel',   'f4' => 'Rapport mensuel' ),
-        4 => array( 'title' => 'BUUR Site',       'desc' => 'Votre site pro sans effort. On crée, on héberge, vous grandissez.', 'price' => '15 000 FCFA/mois', 'badge' => 'Nouveau', 'badge_on' => '0', 'order' => 4, 'f1' => 'Zéro compétence requise', 'f2' => 'Hébergement inclus', 'f3' => 'Modifications sur demande', 'f4' => 'Support WhatsApp' ),
+        1 => array( 'title' => 'Site Vitrine',    'desc' => 'Une présence professionnelle en ligne qui inspire confiance.', 'price' => '150 000 FCFA', 'badge' => '', 'badge_on' => '0', 'order' => 1, 'f1' => 'Design premium sur mesure',  'f2' => 'Optimisé mobile & desktop', 'f3' => 'SEO local inclus',       'f4' => 'Livraison en 7 jours',  'btn_type' => 'whatsapp', 'btn_url' => '' ),
+        2 => array( 'title' => 'Site E-commerce', 'desc' => 'Vendez vos produits partout au Sénégal et en Afrique.',        'price' => '250 000 FCFA', 'badge' => 'Populaire', 'badge_on' => '1', 'order' => 2, 'f1' => 'Boutique WooCommerce',      'f2' => 'Wave & Orange Money',      'f3' => 'Gestion des commandes', 'f4' => 'Formation incluse',     'btn_type' => 'whatsapp', 'btn_url' => '' ),
+        3 => array( 'title' => 'Campagnes Meta',  'desc' => 'Publicités Facebook & Instagram ciblées, garanties.',         'price' => 'Sur devis',    'badge' => '', 'badge_on' => '0', 'order' => 3, 'f1' => 'Ciblage hyper-local',      'f2' => 'Création des visuels',     'f3' => 'Suivi en temps réel',   'f4' => 'Rapport mensuel',       'btn_type' => 'whatsapp', 'btn_url' => '' ),
+        4 => array( 'title' => 'BUUR Site',       'desc' => 'Votre site pro sans effort. On crée, on héberge, vous grandissez.', 'price' => '17 000 FCFA/mois', 'badge' => 'Nouveau', 'badge_on' => '0', 'order' => 4, 'f1' => 'Zéro compétence requise', 'f2' => 'Hébergement inclus', 'f3' => 'Modifications sur demande', 'f4' => 'Support WhatsApp', 'btn_type' => 'whatsapp', 'btn_url' => '' ),
     );
 
     for ( $i = 1; $i <= 4; $i++ ) :
         $d = $sdefs[ $i ]; $p = 'buur_service' . $i; $lp = 'Carte ' . $i . ' — ';
 
-        // Ordre d'affichage
+        // Ordre d’affichage
         $wp_customize->add_setting( "{$p}_order", array( 'default' => $d['order'], 'sanitize_callback' => 'absint', 'transport' => 'refresh' ) );
         $wp_customize->add_control( "{$p}_order", array(
             'label'   => __( $lp . 'Position (1–4)', 'buur-digital' ),
@@ -87,7 +87,7 @@ function buur_customizer_register( $wp_customize ) {
             'type'    => 'text',
         ) );
 
-        // Champs existants
+        // Champs textes
         $wp_customize->add_setting( "{$p}_title", array( 'default' => $d['title'], 'sanitize_callback' => 'sanitize_text_field',     'transport' => 'postMessage' ) );
         $wp_customize->add_control( "{$p}_title", array( 'label' => __( $lp . 'Titre',       'buur-digital' ), 'section' => 'buur_services', 'type' => 'text' ) );
         $wp_customize->add_setting( "{$p}_desc",  array( 'default' => $d['desc'],  'sanitize_callback' => 'sanitize_textarea_field', 'transport' => 'postMessage' ) );
@@ -98,6 +98,29 @@ function buur_customizer_register( $wp_customize ) {
             $wp_customize->add_setting( "{$p}_feat{$f}", array( 'default' => $d[ 'f' . $f ], 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'postMessage' ) );
             $wp_customize->add_control( "{$p}_feat{$f}", array( 'label' => __( $lp . 'Feature ' . $f, 'buur-digital' ), 'section' => 'buur_services', 'type' => 'text' ) );
         endfor;
+
+        // Bouton — type de lien
+        $wp_customize->add_setting( "{$p}_btn_type", array( 'default' => 'whatsapp', 'sanitize_callback' => 'sanitize_text_field', 'transport' => 'refresh' ) );
+        $wp_customize->add_control( "{$p}_btn_type", array(
+            'label'   => __( $lp . 'Bouton — Type de lien', 'buur-digital' ),
+            'section' => 'buur_services',
+            'type'    => 'select',
+            'choices' => array(
+                'whatsapp' => __( 'WhatsApp (numéro global)', 'buur-digital' ),
+                'custom'   => __( 'URL personnalisée', 'buur-digital' ),
+            ),
+        ) );
+
+        // Bouton — URL custom
+        $wp_customize->add_setting( "{$p}_btn_url", array( 'default' => '', 'sanitize_callback' => 'esc_url_raw', 'transport' => 'refresh' ) );
+        $wp_customize->add_control( "{$p}_btn_url", array(
+            'label'       => __( $lp . 'Bouton — URL (si URL personnalisée)', 'buur-digital' ),
+            'description' => __( 'Ignoré si le type est WhatsApp.', 'buur-digital' ),
+            'section'     => 'buur_services',
+            'type'        => 'url',
+        ) );
+
+        // Photo de fond
         $wp_customize->add_setting( "{$p}_bg_image", array( 'default' => '', 'sanitize_callback' => 'absint', 'transport' => 'refresh' ) );
         $wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, "{$p}_bg_image", array(
             'label' => __( $lp . 'Photo de fond', 'buur-digital' ), 'section' => 'buur_services', 'mime_type' => 'image',
@@ -115,7 +138,7 @@ function buur_customizer_register( $wp_customize ) {
     foreach ( array(
         1 => array( 'Excellence',     'Des sites qui rivalisent avec les meilleures agences internationales.' ),
         2 => array( 'Accessibilité',  'Prix transparents et honnêtes. Le luxe web pour tous les budgets.' ),
-        3 => array( 'Innovation',     'Technologies de pointe : IA, animations 3D, visuels génératifs.' ),
+        3 => array( 'Innovation',     'Technologies de pointe : IA, animations 3D, visuels génératifs.' ),
     ) as $n => $c ) :
         $wp_customize->add_setting( "buur_adn_card{$n}_title", array( 'default' => $c[0], 'sanitize_callback' => 'sanitize_text_field',     'transport' => 'postMessage' ) );
         $wp_customize->add_control( "buur_adn_card{$n}_title", array( 'label' => __( 'Carte ' . $n . ' — Titre', 'buur-digital' ), 'section' => 'buur_adn', 'type' => 'text' ) );

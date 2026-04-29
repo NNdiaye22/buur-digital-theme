@@ -21,7 +21,7 @@ $default_descs  = array(
     3 => 'Publicités Facebook & Instagram ciblées. Plus de clients garantis en 2 semaines ou on continue gratuitement.',
     4 => 'Votre site pro sans effort. Vous envoyez vos infos, on crée et héberge votre site. Aucune connaissance requise.',
 );
-$default_prices = array( 1 => '150 000 FCFA', 2 => '250 000 FCFA', 3 => 'Sur devis', 4 => '17 000 FCFA/mois' );
+$default_prices  = array( 1 => '150 000 FCFA', 2 => '250 000 FCFA', 3 => 'Sur devis', 4 => '17 000 FCFA/mois' );
 $default_badges  = array( 1 => '', 2 => 'Populaire', 3 => '', 4 => 'Nouveau' );
 $default_badge_on = array( 1 => false, 2 => true, 3 => false, 4 => false );
 $default_orders  = array( 1 => 1, 2 => 2, 3 => 3, 4 => 4 );
@@ -35,6 +35,8 @@ $icons = array(
 
 $wa_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.836L.057 23.882a.75.75 0 00.92.92l6.046-1.466A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 01-5.073-1.389l-.363-.214-3.761.913.928-3.762-.232-.376A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>';
 
+$link_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
 // ── Construire le tableau des cartes et trier par ordre Customizer ──
 $cards = array();
 for ( $i = 1; $i <= 4; $i++ ) :
@@ -44,6 +46,19 @@ for ( $i = 1; $i <= 4; $i++ ) :
     $s_price    = get_theme_mod( "buur_service{$i}_price",    $default_prices[ $i ] );
     $s_badge_on = (bool) get_theme_mod( "buur_service{$i}_badge_on", $default_badge_on[ $i ] );
     $s_badge    = get_theme_mod( "buur_service{$i}_badge",    $default_badges[ $i ] );
+    $s_btn_type = get_theme_mod( "buur_service{$i}_btn_type", 'whatsapp' );
+    $s_btn_url  = get_theme_mod( "buur_service{$i}_btn_url",  '' );
+
+    // Résolution du lien final
+    if ( $s_btn_type === 'custom' && ! empty( $s_btn_url ) ) {
+        $s_btn_href   = esc_url( $s_btn_url );
+        $s_btn_icon   = $link_icon;
+        $s_btn_target = '_blank';
+    } else {
+        $s_btn_href   = esc_url( buur_whatsapp_url( 'fr' ) );
+        $s_btn_icon   = $wa_icon;
+        $s_btn_target = '_blank';
+    }
 
     $features = array();
     for ( $f = 1; $f <= 4; $f++ ) :
@@ -53,14 +68,17 @@ for ( $i = 1; $i <= 4; $i++ ) :
     if ( empty( $features ) ) $features = $default_features[ $i ];
 
     $cards[] = array(
-        'index'    => $i,
-        'order'    => $s_order,
-        'title'    => $s_title,
-        'desc'     => $s_desc,
-        'price'    => $s_price,
-        'badge_on' => $s_badge_on,
-        'badge'    => $s_badge,
-        'features' => $features,
+        'index'      => $i,
+        'order'      => $s_order,
+        'title'      => $s_title,
+        'desc'       => $s_desc,
+        'price'      => $s_price,
+        'badge_on'   => $s_badge_on,
+        'badge'      => $s_badge,
+        'features'   => $features,
+        'btn_href'   => $s_btn_href,
+        'btn_icon'   => $s_btn_icon,
+        'btn_target' => $s_btn_target,
     );
 endfor;
 
@@ -78,19 +96,22 @@ usort( $cards, function( $a, $b ) {
 
     <div class="services-grid" id="services-grid" role="list">
         <?php foreach ( $cards as $card ) :
-            $i         = $card['index'];
-            $s_title   = $card['title'];
-            $s_desc    = $card['desc'];
-            $s_price   = $card['price'];
+            $i          = $card['index'];
+            $s_title    = $card['title'];
+            $s_desc     = $card['desc'];
+            $s_price    = $card['price'];
             $s_badge_on = $card['badge_on'];
-            $s_badge   = $card['badge'];
-            $features  = $card['features'];
-            $has_badge = $s_badge_on && ! empty( $s_badge );
+            $s_badge    = $card['badge'];
+            $features   = $card['features'];
+            $btn_href   = $card['btn_href'];
+            $btn_icon   = $card['btn_icon'];
+            $btn_target = $card['btn_target'];
+            $has_badge  = $s_badge_on && ! empty( $s_badge );
         ?>
         <article
             class="service-card<?php echo $has_badge ? ' service-card--has-badge' : ''; ?>"
             role="listitem"
-            aria-label="Service : <?php echo esc_attr( $s_title ); ?>"
+            aria-label="Service : <?php echo esc_attr( $s_title ); ?>"
             data-index="<?php echo $i - 1; ?>"
         >
             <?php if ( $has_badge ) : ?>
@@ -119,8 +140,8 @@ usort( $cards, function( $a, $b ) {
                         <?php endif; ?>
                         <span class="price-amount"><?php echo esc_html( $s_price ); ?></span>
                     </div>
-                    <a href="<?php echo esc_url( buur_whatsapp_url( 'fr' ) ); ?>" class="btn-card" target="_blank" rel="noopener noreferrer">
-                        <?php echo $wa_icon; ?>
+                    <a href="<?php echo $btn_href; ?>" class="btn-card" target="<?php echo esc_attr( $btn_target ); ?>" rel="noopener noreferrer">
+                        <?php echo $btn_icon; ?>
                         <?php echo $i === 4 ? 'Choisir cette formule' : 'Nous contacter'; ?>
                     </a>
                 </div>

@@ -83,7 +83,7 @@ get_header();
 
         <!-- CARTE 2 : Site E-commerce -->
         <article class="tarif-card">
-          <div class="tarif-badge tarif-badge--subtle">ONE SHOT</div>
+          <div class="tarif-badge tarif-badge--featured">Populaire</div>
           <h2 class="tarif-title">Site e-commerce</h2>
           <div class="tarif-price">À partir de <strong>250 000 FCFA</strong></div>
           <div class="tarif-price-sub">Paiement unique</div>
@@ -91,7 +91,7 @@ get_header();
 
           <div class="tarif-list-title">Inclus</div>
           <ul class="tarif-list">
-            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Jusqu'à 20 produits</li>
+            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Jusqu'à 10 produits</li>
             <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Design standard BUUR personnalisé</li>
             <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Responsive mobile et desktop</li>
             <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Paiement Wave / Orange Money</li>
@@ -103,7 +103,7 @@ get_header();
           <div class="tarif-list-title tarif-list-title--cond">Conditions</div>
           <ul class="tarif-conditions">
             <li>Nom de domaine à la charge du client</li>
-            <li>Au-delà de 20 produits : sur devis</li>
+            <li>Au-delà de 10 produits : sur devis</li>
             <li>Fonctionnalités avancées : sur devis</li>
             <li>Livraison après réception des contenus et fiches produits</li>
             <li>Délai moyen : 10 à 14 jours ouvrés</li>

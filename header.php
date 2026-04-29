@@ -55,6 +55,7 @@
                 <li><a href="<?php echo esc_url( home_url('/#services') ); ?>">Services</a></li>
                 <li><a href="<?php echo esc_url( home_url('/#pourquoi') ); ?>">Pourquoi BUUR</a></li>
                 <li><a href="<?php echo esc_url( home_url('/#temoignages') ); ?>">Clients</a></li>
+                <li><a href="<?php echo esc_url( get_permalink( get_page_by_path('tarifs') ) ); ?>">Tarifs</a></li>
                 <li><a href="<?php echo esc_url( get_permalink( get_page_by_path('contact') ) ); ?>">Contact</a></li>
             </ul>
         <?php endif; ?>
@@ -102,6 +103,7 @@
                 <li><a href="<?php echo esc_url( home_url('/#services') ); ?>">Services</a></li>
                 <li><a href="<?php echo esc_url( home_url('/#pourquoi') ); ?>">Pourquoi BUUR</a></li>
                 <li><a href="<?php echo esc_url( home_url('/#temoignages') ); ?>">Clients</a></li>
+                <li><a href="<?php echo esc_url( get_permalink( get_page_by_path('tarifs') ) ); ?>">Tarifs</a></li>
                 <li><a href="<?php echo esc_url( get_permalink( get_page_by_path('contact') ) ); ?>">Contact</a></li>
             </ul>
         <?php endif; ?>

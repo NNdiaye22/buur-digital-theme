@@ -155,7 +155,7 @@ get_header();
           <div class="tarif-badge tarif-badge--featured">NOUVEAU</div>
           <h2 class="tarif-title">BUUR Site</h2>
           <div class="tarif-price">Dès <strong>17 000 FCFA / mois</strong></div>
-          <div class="tarif-price-sub">Site par abonnement</div>
+          <div class="tarif-price-sub">Site par abonnement &mdash; <strong>sans engagement</strong></div>
           <p class="tarif-desc">Vous envoyez vos informations et vos visuels, BUUR crée votre site, l'héberge et s'occupe des ajustements. Vous payez chaque mois, sans engagement.</p>
 
           <div class="tarif-list-title">Formules</div>
@@ -186,15 +186,16 @@ get_header();
 
           <div class="tarif-list-title tarif-list-title--cond">Conditions</div>
           <ul class="tarif-conditions">
+            <li>Sans engagement — résiliable à tout moment</li>
+            <li>Des frais de mise en place peuvent s'appliquer selon la formule</li>
             <li>Le site reste propriété de BUUR</li>
-            <li>Sans engagement</li>
             <li>En cas d'arrêt, le site est désactivé</li>
             <li>Toute demande hors formule peut être re-quotée</li>
           </ul>
 
           <div class="tarif-cta">
             <a href="<?php echo esc_url( buur_whatsapp_url( 'fr' ) ); ?>" class="tarifs-btn tarifs-btn--featured tarifs-btn--full" target="_blank" rel="noopener">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.836L.057 23.882a.75.75 0 00.92.92l6.046-1.466A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 01-5.073-1.389l-.363-.214-3.761.913.928-3.762-.232-.376A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.112 1.523 5.836L.057 23.882a.75.75 0 00.92.92l6.046-1.466A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 01-5.073-1.389l-.363-.214-3.761.913.928-3.762-.232-.376A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
               Choisir cette formule
             </a>
           </div>
@@ -252,7 +253,12 @@ get_header();
 
         <div class="tarifs-faq-item">
           <dt class="tarifs-faq-item__q">Que se passe-t-il si j'arrête BUUR Site ?</dt>
-          <dd class="tarifs-faq-item__a">Le site étant proposé sous forme d'abonnement, il est désactivé à l'arrêt du service.</dd>
+          <dd class="tarifs-faq-item__a">Le site étant proposé sous forme d'abonnement, il est désactivé à l'arrêt du service. L'offre est sans engagement et résiliable à tout moment.</dd>
+        </div>
+
+        <div class="tarifs-faq-item">
+          <dt class="tarifs-faq-item__q">Y a-t-il des frais à l'entrée pour BUUR Site ?</dt>
+          <dd class="tarifs-faq-item__a">Des frais de mise en place peuvent s'appliquer selon la formule choisie. Ce point est discuté lors de votre premier échange avec notre équipe.</dd>
         </div>
 
         <div class="tarifs-faq-item">

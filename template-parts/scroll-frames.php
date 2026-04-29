@@ -33,10 +33,18 @@ $svc_defaults = array(
         'features' => array( 'Ciblage hyper-local', 'Création des visuels', 'Suivi en temps réel', 'Rapport mensuel' ),
         'icon'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
     ),
+    4 => array(
+        'title'    => 'BUUR Site',
+        'desc'     => 'La solution tout-en-un pour les entrepreneurs pressés. Hébergement, maintenance et support inclus.',
+        'price'    => 'Sur devis',
+        'featured' => false,
+        'features' => array( 'Solution tout-en-un', 'Hébergement inclus', 'Maintenance mensuelle', 'Support dédié' ),
+        'icon'     => '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    ),
 );
 
 $sf_services = array();
-for ( $i = 1; $i <= 3; $i++ ) :
+for ( $i = 1; $i <= 4; $i++ ) :
     $d = $svc_defaults[ $i ];
     $img_id  = (int) get_theme_mod( "buur_service{$i}_bg_image", 0 );
     $img_url = '';
@@ -94,7 +102,7 @@ endfor;
           $adn_defaults = array(
               1 => array( 'Excellence',    'Des sites qui rivalisent avec les meilleures agences internationales.' ),
               2 => array( 'Accessibilité', 'Prix transparents et honnêtes. Le luxe web pour tous les budgets.' ),
-              3 => array( 'Innovation',    'Technologies de pointe : IA, animations 3D, vidéos génératives.' ),
+              3 => array( 'Innovation',    'Technologies de pointe : IA, animations 3D, vidéos génératives.' ),
           );
           for ( $n = 1; $n <= 3; $n++ ) :
               $c_title = get_theme_mod( "buur_adn_card{$n}_title", $adn_defaults[ $n ][0] );
@@ -122,7 +130,7 @@ endfor;
           <?php foreach ( $sf_services as $i => $svc ) : ?>
           <article
             class="service-card <?php echo $svc['featured'] ? 'service-card--featured' : ''; ?>"
-            aria-label="Service : <?php echo esc_attr( $svc['title'] ); ?>"
+            aria-label="Service : <?php echo esc_attr( $svc['title'] ); ?>"
             <?php if ( $svc['img_url'] ) : ?>style="--card-bg: url('<?php echo esc_url( $svc['img_url'] ); ?>');"<?php endif; ?>
           >
             <?php if ( $svc['img_url'] ) : ?><div class="card-bg" aria-hidden="true"></div><?php endif; ?>
@@ -155,7 +163,7 @@ endfor;
     <div id="sf-cta-overlay" class="sf-cta-overlay" aria-hidden="true">
       <div class="sf-cta-inner">
         <div class="sf-cta-content">
-          <span class="sf-cta-eyebrow">PASSEZ À L’ACTION</span>
+          <span class="sf-cta-eyebrow">PASSEZ À L'ACTION</span>
           <h2 class="sf-cta-title">Démarrons votre<br><em>projet ensemble.</em></h2>
           <p class="sf-cta-sub">Une équipe prête à vous accompagner. Premier échange offert, sans engagement.</p>
           <div class="sf-cta-buttons">

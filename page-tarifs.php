@@ -154,7 +154,7 @@ get_header();
         <article class="tarif-card tarif-card--featured">
           <div class="tarif-badge tarif-badge--featured">NOUVEAU</div>
           <h2 class="tarif-title">BUUR Site</h2>
-          <div class="tarif-price">Dès <strong>15 000 FCFA / mois</strong></div>
+          <div class="tarif-price">Dès <strong>17 000 FCFA / mois</strong></div>
           <div class="tarif-price-sub">Site par abonnement</div>
           <p class="tarif-desc">Vous envoyez vos informations et vos visuels, BUUR crée votre site, l'héberge et s'occupe des ajustements. Vous payez chaque mois, sans engagement.</p>
 
@@ -162,7 +162,7 @@ get_header();
           <ul class="tarif-list tarif-list--formules">
             <li>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              <span><strong>Starter</strong> — 15 000 FCFA / mois — 1 à 2 pages</span>
+              <span><strong>Starter</strong> — 17 000 FCFA / mois — 1 à 2 pages</span>
             </li>
             <li>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>

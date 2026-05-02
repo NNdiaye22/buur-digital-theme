@@ -3,6 +3,8 @@
  * BUUR Digital — contact-handler.php
  * Handler AJAX pour le formulaire de contact natif.
  * L'adresse de réception est configurable via Apparence → Personnaliser → Contact.
+ *
+ * v1.1 FIX : lecture de $_POST['sujet'] (was 'service') — alignement HTML réel.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -70,10 +72,10 @@ function buur_handle_contact_form() {
     }
 
     // 2. Sanitization des champs
-    $nom     = isset( $_POST['nom'] )     ? sanitize_text_field( wp_unslash( $_POST['nom'] ) )     : '';
-    $email   = isset( $_POST['email'] )   ? sanitize_email( wp_unslash( $_POST['email'] ) )         : '';
-    $service = isset( $_POST['service'] ) ? sanitize_text_field( wp_unslash( $_POST['service'] ) ) : '';
-    $message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+    $nom     = isset( $_POST['nom'] )      ? sanitize_text_field( wp_unslash( $_POST['nom'] ) )      : '';
+    $email   = isset( $_POST['email'] )    ? sanitize_email( wp_unslash( $_POST['email'] ) )          : '';
+    $sujet   = isset( $_POST['sujet'] )    ? sanitize_text_field( wp_unslash( $_POST['sujet'] ) )    : '';
+    $message = isset( $_POST['message'] )  ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 
     // 3. Validation minimale
     if ( empty( $nom ) || empty( $email ) || empty( $message ) ) {
@@ -90,8 +92,8 @@ function buur_handle_contact_form() {
     $body  = "Nouvelle demande reçue via le formulaire de contact BUUR Digital.\n\n";
     $body .= "Nom     : {$nom}\n";
     $body .= "Email   : {$email}\n";
-    if ( $service ) {
-        $body .= "Service : {$service}\n";
+    if ( $sujet ) {
+        $body .= "Sujet   : {$sujet}\n";
     }
     $body .= "\nMessage :\n{$message}\n";
     $body .= "\n---\nEnvoyé depuis " . get_site_url();
@@ -105,7 +107,7 @@ function buur_handle_contact_form() {
     $sent = wp_mail( $to, $subject, $body, $headers );
 
     if ( $sent ) {
-        wp_send_json_success( 'Message envoyé ! On vous répond sous 48h.' );
+        wp_send_json_success( 'Message envoyé ! On vous répond sous 48h.' );
     } else {
         wp_send_json_error( 'L\'envoi a échoué. Veuillez nous contacter directement sur WhatsApp.' );
     }

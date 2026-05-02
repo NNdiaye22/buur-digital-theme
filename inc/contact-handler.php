@@ -4,6 +4,7 @@
  * Handler AJAX pour le formulaire de contact natif.
  * L'adresse de réception est configurable via Apparence → Personnaliser → Contact.
  *
+ * v1.2 : email de réception mis à jour → contact@buurdigital.com
  * v1.1 FIX : lecture de $_POST['sujet'] (was 'service') — alignement HTML réel.
  */
 
@@ -22,7 +23,7 @@ add_action( 'customize_register', function ( $wp_customize ) {
 
     // Email de réception
     $wp_customize->add_setting( 'buur_contact_email', array(
-        'default'           => 'ndiogou94@live.fr',
+        'default'           => 'contact@buurdigital.com',
         'sanitize_callback' => 'sanitize_email',
         'transport'         => 'refresh',
     ) );
@@ -86,7 +87,7 @@ function buur_handle_contact_form() {
     }
 
     // 4. Construction de l'email
-    $to      = get_theme_mod( 'buur_contact_email', 'ndiogou94@live.fr' );
+    $to      = get_theme_mod( 'buur_contact_email', 'contact@buurdigital.com' );
     $subject = get_theme_mod( 'buur_contact_subject', '[BUUR Digital] Nouvelle demande de contact' );
 
     $body  = "Nouvelle demande reçue via le formulaire de contact BUUR Digital.\n\n";

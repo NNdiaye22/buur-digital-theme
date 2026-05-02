@@ -5,7 +5,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'BUUR_VERSION', '1.3.2' );
+define( 'BUUR_VERSION', '1.3.3' );
 define( 'BUUR_DIR',     get_template_directory() );
 define( 'BUUR_URI',     get_template_directory_uri() );
 
@@ -16,6 +16,7 @@ require_once BUUR_DIR . '/inc/enqueue.php';
 require_once BUUR_DIR . '/inc/customizer.php';
 require_once BUUR_DIR . '/inc/setup-pages.php';
 require_once BUUR_DIR . '/inc/cpt-temoignages.php';
+require_once BUUR_DIR . '/inc/contact-handler.php';
 
 // -------------------------------------------------------
 // Support du theme

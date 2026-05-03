@@ -76,6 +76,17 @@ function buur_enqueue_assets() {
         ) );
     }
 
+    // --- JS page Contact ---
+    if ( is_page_template( 'page-contact.php' ) ) {
+        wp_enqueue_script(
+            'buur-contact-form',
+            BUUR_URI . '/assets/js/contact-form.js',
+            array(),
+            BUUR_VERSION,
+            true
+        );
+    }
+
     // --- JS principal (toutes les pages) ---
     wp_enqueue_script( 'buur-main', BUUR_URI . '/assets/js/main.js', array(), BUUR_VERSION, true );
 
